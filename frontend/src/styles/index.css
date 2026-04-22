@@ -1,0 +1,222 @@
+/* 全局样式 */
+
+/* 重置样式 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+  background-color: #f5f5f5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* 支持 iOS 安全区域 */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* 主题变量 */
+:root {
+  --primary-color: #ff9800;
+  --primary-light: #ffb74d;
+  --primary-dark: #f57c00;
+
+  --success-color: #4caf50;
+  --warning-color: #ff9800;
+  --danger-color: #f44336;
+  --info-color: #2196f3;
+
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-placeholder: #999999;
+
+  --bg-color: #f5f5f5;
+  --white: #ffffff;
+
+  --border-color: #e8e8e8;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 通用类 */
+.page {
+  min-height: 100vh;
+  background-color: var(--bg-color);
+}
+
+.page-content {
+  padding: 16px;
+}
+
+/* 卡片样式 */
+.card {
+  background-color: var(--white);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+
+/* 按钮样式 */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  border: none;
+  color: white;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+}
+
+/* 状态标签 */
+.status-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.status-tag.success {
+  background-color: #e8f5e9;
+  color: var(--success-color);
+}
+
+.status-tag.warning {
+  background-color: #fff3e0;
+  color: var(--warning-color);
+}
+
+.status-tag.danger {
+  background-color: #ffebee;
+  color: var(--danger-color);
+}
+
+.status-tag.info {
+  background-color: #e3f2fd;
+  color: var(--info-color);
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: var(--text-placeholder);
+}
+
+.empty-state svg {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 16px;
+}
+
+/* 响应式设计 */
+@media (max-width: 767px) {
+  .page-content {
+    padding: 12px;
+  }
+
+  .card {
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .page-content {
+    padding: 24px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-content {
+    padding: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+/* 动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease;
+}
+
+/* 隐藏滚动条 */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Toast 样式覆盖 - 修复白色背景+白色文字问题 */
+.van-toast {
+  color: #333 !important;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.van-toast .van-toast__text {
+  color: #333 !important;
+}
+
+.van-toast .van-toast__icon {
+  color: inherit;
+}
+
+/* 成功类型 Toast */
+.van-toast--success {
+  color: #fff !important;
+  background-color: #4caf50 !important;
+  border-color: #43a047;
+}
+
+.van-toast--success .van-toast__text {
+  color: #fff !important;
+}
+
+/* 失败类型 Toast */
+.van-toast--fail {
+  color: #fff !important;
+  background-color: #f44336 !important;
+  border-color: #e53935;
+}
+
+.van-toast--fail .van-toast__text {
+  color: #fff !important;
+}
+
+/* 加载类型 Toast */
+.van-toast--loading {
+  color: #333 !important;
+}
+
+.van-toast--loading .van-toast__text {
+  color: #333 !important;
+}

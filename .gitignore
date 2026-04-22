@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Database files
+*.db
+*.db-wal
+*.db-shm
+database/
+
+# Logs
+logs/
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+
+# Screenshots (not for repo)
+screenshots/
+
+# Deploy scripts (server-specific)
+deploy.sh
+sync-to-server.sh
+
+# Import utility scripts
+import-questions.js
+query_debug.js
+
+# Claude config (local only)
+.claude/

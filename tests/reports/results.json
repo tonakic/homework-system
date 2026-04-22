@@ -1,0 +1,2204 @@
+{
+  "config": {
+    "configFile": "/workspace/projects/homework-system/tests/playwright.config.ts",
+    "rootDir": "/workspace/projects/homework-system/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 3
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/workspace/projects/homework-system/tests/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 3
+        },
+        "id": "setup",
+        "name": "setup",
+        "testDir": "/workspace/projects/homework-system/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/auth\\.setup\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/workspace/projects/homework-system/tests/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 3
+        },
+        "id": "student",
+        "name": "student",
+        "testDir": "/workspace/projects/homework-system/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/specs\\/student\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/workspace/projects/homework-system/tests/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 3
+        },
+        "id": "teacher",
+        "name": "teacher",
+        "testDir": "/workspace/projects/homework-system/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/specs\\/teacher\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/workspace/projects/homework-system/tests/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 3
+        },
+        "id": "admin",
+        "name": "admin",
+        "testDir": "/workspace/projects/homework-system/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/specs\\/admin\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/workspace/projects/homework-system/tests/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 3
+        },
+        "id": "api",
+        "name": "api",
+        "testDir": "/workspace/projects/homework-system/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/specs\\/api\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "reports/html"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "reports/results.json"
+        }
+      ],
+      [
+        "list",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 4,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "auth.setup.ts",
+      "file": "auth.setup.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "认证学生账号",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "setup",
+              "projectName": "setup",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7930,
+                  "errors": [],
+                  "stdout": [
+                    {
+                      "text": "[认证设置] 开始认证 student 账号...\n"
+                    },
+                    {
+                      "text": "[认证设置] student 尝试用原始密码登录...\n"
+                    },
+                    {
+                      "text": "[认证设置] student 尝试用新密码登录...\n"
+                    },
+                    {
+                      "text": "[认证设置] student 新密码登录成功\n"
+                    },
+                    {
+                      "text": "[认证保存] student 认证数据验证通过\n"
+                    },
+                    {
+                      "text": "[认证保存] student 认证状态已保存到 .auth/student.json\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-04-22T07:44:16.268Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "17e3fe6f4d9d8bd79c6b-f83de82a65803ea423f7",
+          "file": "auth.setup.ts",
+          "line": 246,
+          "column": 6
+        },
+        {
+          "title": "认证教师账号",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "setup",
+              "projectName": "setup",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7779,
+                  "errors": [],
+                  "stdout": [
+                    {
+                      "text": "[认证设置] 开始认证 teacher 账号...\n"
+                    },
+                    {
+                      "text": "[认证设置] teacher 尝试用原始密码登录...\n"
+                    },
+                    {
+                      "text": "[认证设置] teacher 尝试用新密码登录...\n"
+                    },
+                    {
+                      "text": "[认证设置] teacher 新密码登录成功\n"
+                    },
+                    {
+                      "text": "[认证保存] teacher 认证数据验证通过\n"
+                    },
+                    {
+                      "text": "[认证保存] teacher 认证状态已保存到 .auth/teacher.json\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-04-22T07:44:24.364Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "17e3fe6f4d9d8bd79c6b-47cd2fa87c45ac81a54a",
+          "file": "auth.setup.ts",
+          "line": 251,
+          "column": 6
+        },
+        {
+          "title": "认证管理员账号",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "setup",
+              "projectName": "setup",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4591,
+                  "errors": [],
+                  "stdout": [
+                    {
+                      "text": "[认证设置] 开始认证 admin 账号...\n"
+                    },
+                    {
+                      "text": "[认证设置] admin 尝试用原始密码登录...\n"
+                    },
+                    {
+                      "text": "[认证设置] admin 原始密码登录成功\n"
+                    },
+                    {
+                      "text": "[认证保存] admin 认证数据验证通过\n"
+                    },
+                    {
+                      "text": "[认证保存] admin 认证状态已保存到 .auth/admin.json\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-04-22T07:44:32.169Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "17e3fe6f4d9d8bd79c6b-f6bc96754e5565d32642",
+          "file": "auth.setup.ts",
+          "line": 256,
+          "column": 6
+        }
+      ]
+    },
+    {
+      "title": "specs/student.spec.ts",
+      "file": "specs/student.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "学生端功能测试",
+          "file": "specs/student.spec.ts",
+          "line": 12,
+          "column": 6,
+          "specs": [
+            {
+              "title": "登录成功后应跳转到首页",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "student",
+                  "projectName": "student",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2011,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:37.889Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a6fcb185e561d21b864f-bbc7cb3b256827dc3385",
+              "file": "specs/student.spec.ts",
+              "line": 35,
+              "column": 7
+            },
+            {
+              "title": "首页显示待完成作业列表",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "student",
+                  "projectName": "student",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1925,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:40.116Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a6fcb185e561d21b864f-aea15c6adfa790aee8e2",
+              "file": "specs/student.spec.ts",
+              "line": 39,
+              "column": 7
+            },
+            {
+              "title": "导航栏功能测试",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "student",
+                  "projectName": "student",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 32833,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "[稳定点击] 点击 .van-tabbar-item:has-text(\"待完成\") 失败: TimeoutError: locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.van-tabbar-item:has-text(\"待完成\")').first() to be visible\u001b[22m\n\n"
+                        },
+                        {
+                          "text": "[稳定点击] 点击 [data-testid=\"tab-pending\"] 失败: TimeoutError: locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"tab-pending\"]').first() to be visible\u001b[22m\n\n"
+                        },
+                        {
+                          "text": "[稳定点击] 点击 button:has-text(\"待完成\") 失败: TimeoutError: locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"待完成\")').first() to be visible\u001b[22m\n\n"
+                        },
+                        {
+                          "text": "[稳定点击] 点击 [role=\"tab\"]:has-text(\"待完成\") 失败: Error: locator.waitFor: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"tab\"]:has-text(\"待完成\")').first() to be visible\u001b[22m\n\n"
+                        },
+                        {
+                          "text": "[稳定点击] 点击 .van-tabbar-item:has-text(\"首页\") 失败: Error: locator.waitFor: Target page, context or browser has been closed\n"
+                        },
+                        {
+                          "text": "[稳定点击] 点击 [data-testid=\"tab-home\"] 失败: Error: locator.waitFor: Target page, context or browser has been closed\n"
+                        },
+                        {
+                          "text": "[稳定点击] 点击 button:has-text(\"首页\") 失败: Error: locator.waitFor: Target page, context or browser has been closed\n"
+                        },
+                        {
+                          "text": "[稳定点击] 点击 [role=\"tab\"]:has-text(\"首页\") 失败: Error: locator.waitFor: Target page, context or browser has been closed\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:42.101Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/workspace/projects/homework-system/tests/test-results/specs-student-学生端功能测试-导航栏功能测试-student/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/workspace/projects/homework-system/tests/test-results/specs-student-学生端功能测试-导航栏功能测试-student/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/workspace/projects/homework-system/tests/test-results/specs-student-学生端功能测试-导航栏功能测试-student/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "a6fcb185e561d21b864f-6e00e7aa79a1a3bc4609",
+              "file": "specs/student.spec.ts",
+              "line": 74,
+              "column": 7
+            },
+            {
+              "title": "个人中心页面测试",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "student",
+                  "projectName": "student",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2153,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:45:15.833Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a6fcb185e561d21b864f-fced4b623eabe6a71be6",
+              "file": "specs/student.spec.ts",
+              "line": 122,
+              "column": 7
+            },
+            {
+              "title": "修改密码功能测试",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "student",
+                  "projectName": "student",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4741,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:45:18.126Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a6fcb185e561d21b864f-12d15160e038eff517bc",
+              "file": "specs/student.spec.ts",
+              "line": 179,
+              "column": 7
+            },
+            {
+              "title": "退出登录功能",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "student",
+                  "projectName": "student",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 13636,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[元素等待] 第 1 次等待 .van-dialog 失败，重试中...\n"
+                        },
+                        {
+                          "text": "[元素等待] 第 2 次等待 .van-dialog 失败，重试中...\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:45:22.897Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a6fcb185e561d21b864f-e872458d86f6db3d133d",
+              "file": "specs/student.spec.ts",
+              "line": 247,
+              "column": 7
+            },
+            {
+              "title": "答题记录页面显示",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "student",
+                  "projectName": "student",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2254,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:45:36.557Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a6fcb185e561d21b864f-c5e2efa743a784ab2e01",
+              "file": "specs/student.spec.ts",
+              "line": 297,
+              "column": 7
+            },
+            {
+              "title": "错题本页面显示",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "student",
+                  "projectName": "student",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2266,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:45:38.834Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a6fcb185e561d21b864f-cf75f8e591615294eb92",
+              "file": "specs/student.spec.ts",
+              "line": 335,
+              "column": 7
+            },
+            {
+              "title": "排行榜页面显示",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "student",
+                  "projectName": "student",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2251,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:45:41.123Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a6fcb185e561d21b864f-e6d798349752c1dae3c3",
+              "file": "specs/student.spec.ts",
+              "line": 373,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "specs/teacher.spec.ts",
+      "file": "specs/teacher.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "教师端功能测试",
+          "file": "specs/teacher.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "登录成功后应跳转到首页",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "teacher",
+                  "projectName": "teacher",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 1722,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:37.907Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf12b79e8ced69cb2c19-dc477b17e4efe2066464",
+              "file": "specs/teacher.spec.ts",
+              "line": 11,
+              "column": 7
+            },
+            {
+              "title": "首页统计数据展示",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "teacher",
+                  "projectName": "teacher",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 1507,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:39.926Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf12b79e8ced69cb2c19-de698d775a48ff8247fe",
+              "file": "specs/teacher.spec.ts",
+              "line": 15,
+              "column": 7
+            },
+            {
+              "title": "学生管理功能测试",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "teacher",
+                  "projectName": "teacher",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 2432,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:41.481Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf12b79e8ced69cb2c19-2723a2774516aa3983bb",
+              "file": "specs/teacher.spec.ts",
+              "line": 23,
+              "column": 7
+            },
+            {
+              "title": "题库管理功能测试",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "teacher",
+                  "projectName": "teacher",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 2309,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:43.942Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf12b79e8ced69cb2c19-3d10f6739a78f5868c71",
+              "file": "specs/teacher.spec.ts",
+              "line": 32,
+              "column": 7
+            },
+            {
+              "title": "作业管理功能测试",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "teacher",
+                  "projectName": "teacher",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 2361,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:46.275Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf12b79e8ced69cb2c19-d7f5cdfef4c92b06865c",
+              "file": "specs/teacher.spec.ts",
+              "line": 41,
+              "column": 7
+            },
+            {
+              "title": "创建新作业测试",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "teacher",
+                  "projectName": "teacher",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 2315,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:48.657Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf12b79e8ced69cb2c19-0afc2c8b67582b72b116",
+              "file": "specs/teacher.spec.ts",
+              "line": 50,
+              "column": 7
+            },
+            {
+              "title": "批改作业功能测试",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "teacher",
+                  "projectName": "teacher",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 2453,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:50.994Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf12b79e8ced69cb2c19-de2fd4fa95bf62fad3d2",
+              "file": "specs/teacher.spec.ts",
+              "line": 64,
+              "column": 7
+            },
+            {
+              "title": "班级管理功能测试",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "teacher",
+                  "projectName": "teacher",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 2180,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:53.470Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf12b79e8ced69cb2c19-6a0f5ff657cad9e0ee34",
+              "file": "specs/teacher.spec.ts",
+              "line": 73,
+              "column": 7
+            },
+            {
+              "title": "统计分析功能测试",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "teacher",
+                  "projectName": "teacher",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 2145,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:55.679Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf12b79e8ced69cb2c19-a49d95d0f4eeb2f53bf4",
+              "file": "specs/teacher.spec.ts",
+              "line": 82,
+              "column": 7
+            },
+            {
+              "title": "个人中心页面测试",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "teacher",
+                  "projectName": "teacher",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 2270,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:57.847Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf12b79e8ced69cb2c19-2edfed1e7dfb8aeda15d",
+              "file": "specs/teacher.spec.ts",
+              "line": 91,
+              "column": 7
+            },
+            {
+              "title": "退出登录功能",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "teacher",
+                  "projectName": "teacher",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 2535,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:45:00.140Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf12b79e8ced69cb2c19-18cf1207cc2111c33518",
+              "file": "specs/teacher.spec.ts",
+              "line": 100,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "specs/admin.spec.ts",
+      "file": "specs/admin.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "管理员端功能测试",
+          "file": "specs/admin.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "登录成功后应跳转到首页",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 2138,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:37.876Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3056374cd0aca0ab26f6-af16f19b592c6b071cdb",
+              "file": "specs/admin.spec.ts",
+              "line": 11,
+              "column": 7
+            },
+            {
+              "title": "首页仪表盘数据展示",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 1842,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:40.270Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3056374cd0aca0ab26f6-67f386a00ce6ac2d6bea",
+              "file": "specs/admin.spec.ts",
+              "line": 15,
+              "column": 7
+            },
+            {
+              "title": "教师管理功能测试",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 2428,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:42.180Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3056374cd0aca0ab26f6-d7edf52fc3455120557a",
+              "file": "specs/admin.spec.ts",
+              "line": 23,
+              "column": 7
+            },
+            {
+              "title": "学生管理功能测试",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 2397,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:44.641Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3056374cd0aca0ab26f6-8411de5fab440efb8931",
+              "file": "specs/admin.spec.ts",
+              "line": 32,
+              "column": 7
+            },
+            {
+              "title": "班级管理功能测试",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 2271,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:47.061Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3056374cd0aca0ab26f6-9df828f775865b53af01",
+              "file": "specs/admin.spec.ts",
+              "line": 41,
+              "column": 7
+            },
+            {
+              "title": "系统设置页面测试",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 2320,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:49.354Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3056374cd0aca0ab26f6-e4089bd461bf6cfc93a0",
+              "file": "specs/admin.spec.ts",
+              "line": 50,
+              "column": 7
+            },
+            {
+              "title": "操作日志查看测试",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 3274,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:51.694Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3056374cd0aca0ab26f6-506136eaa308ca14e024",
+              "file": "specs/admin.spec.ts",
+              "line": 59,
+              "column": 7
+            },
+            {
+              "title": "添加新教师测试",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 2321,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:54.990Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3056374cd0aca0ab26f6-103112ab35f58c6c3e66",
+              "file": "specs/admin.spec.ts",
+              "line": 68,
+              "column": 7
+            },
+            {
+              "title": "添加新学生测试",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 2321,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:57.334Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3056374cd0aca0ab26f6-f4a8f22e0175ec466d69",
+              "file": "specs/admin.spec.ts",
+              "line": 95,
+              "column": 7
+            },
+            {
+              "title": "退出登录功能",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 2610,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-22T07:44:59.677Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3056374cd0aca0ab26f6-a35a90cb9417b18c9ba5",
+              "file": "specs/admin.spec.ts",
+              "line": 122,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "specs/api.spec.ts",
+      "file": "specs/api.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "API 接口测试",
+          "file": "specs/api.spec.ts",
+          "line": 27,
+          "column": 6,
+          "specs": [],
+          "suites": [
+            {
+              "title": "认证 API",
+              "file": "specs/api.spec.ts",
+              "line": 44,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "POST /api/auth/login - 学生登录成功",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 151,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:16.304Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-6803aa6d938f71d4ea80",
+                  "file": "specs/api.spec.ts",
+                  "line": 45,
+                  "column": 9
+                },
+                {
+                  "title": "POST /api/auth/login - 教师登录成功",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 124,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.018Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-a8519e33b0e1b85b53e9",
+                  "file": "specs/api.spec.ts",
+                  "line": 60,
+                  "column": 9
+                },
+                {
+                  "title": "POST /api/auth/login - 管理员登录成功",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 124,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.172Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-05d595533eaea0c819b2",
+                  "file": "specs/api.spec.ts",
+                  "line": 75,
+                  "column": 9
+                },
+                {
+                  "title": "POST /api/auth/login - 错误密码登录失败",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 113,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.318Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-3b372020732ef5fa1e3c",
+                  "file": "specs/api.spec.ts",
+                  "line": 90,
+                  "column": 9
+                },
+                {
+                  "title": "POST /api/auth/login - 不存在的用户登录失败",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 19,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.450Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-29aaefafd197e6cfaa55",
+                  "file": "specs/api.spec.ts",
+                  "line": 103,
+                  "column": 9
+                },
+                {
+                  "title": "GET /api/auth/profile - 获取用户信息",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 17,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.486Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-0465ea238d9335f59f14",
+                  "file": "specs/api.spec.ts",
+                  "line": 116,
+                  "column": 9
+                },
+                {
+                  "title": "POST /api/auth/logout - 登出成功",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 15,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.519Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-4c4ac186e3468fc31e0c",
+                  "file": "specs/api.spec.ts",
+                  "line": 128,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "学生 API",
+              "file": "specs/api.spec.ts",
+              "line": 140,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "GET /api/student/exams - 获取作业列表",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 16,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.549Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-db32e8840c78bf0db630",
+                  "file": "specs/api.spec.ts",
+                  "line": 141,
+                  "column": 9
+                },
+                {
+                  "title": "GET /api/student/exams/records - 获取答题记录",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 14,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.581Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-0e4c710bff5e20085ced",
+                  "file": "specs/api.spec.ts",
+                  "line": 153,
+                  "column": 9
+                },
+                {
+                  "title": "GET /api/student/mistakes - 获取错题本",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 16,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.611Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-eaaaa9ae83772163dacf",
+                  "file": "specs/api.spec.ts",
+                  "line": 164,
+                  "column": 9
+                },
+                {
+                  "title": "GET /api/student/ranking - 获取排行榜",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 13,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.644Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-e5911fa37de7bde73a4a",
+                  "file": "specs/api.spec.ts",
+                  "line": 175,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "教师 API",
+              "file": "specs/api.spec.ts",
+              "line": 187,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "GET /api/teacher/students - 获取学生列表",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 16,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.674Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-2fc4518871fb5c93377e",
+                  "file": "specs/api.spec.ts",
+                  "line": 188,
+                  "column": 9
+                },
+                {
+                  "title": "GET /api/teacher/exams - 获取作业列表",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 13,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.706Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-49a3054bbc53a3e8ba6a",
+                  "file": "specs/api.spec.ts",
+                  "line": 199,
+                  "column": 9
+                },
+                {
+                  "title": "GET /api/teacher/questions - 获取题库",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 15,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.734Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-02227156fc140677af26",
+                  "file": "specs/api.spec.ts",
+                  "line": 210,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "管理员 API",
+              "file": "specs/api.spec.ts",
+              "line": 222,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "GET /api/admin/teachers - 获取教师列表",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 14,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.765Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-7f3f116ed89fec73bfe5",
+                  "file": "specs/api.spec.ts",
+                  "line": 223,
+                  "column": 9
+                },
+                {
+                  "title": "GET /api/admin/students - 获取学生列表",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 16,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.794Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-f8e69aa5d4ad2028df4b",
+                  "file": "specs/api.spec.ts",
+                  "line": 234,
+                  "column": 9
+                },
+                {
+                  "title": "GET /api/admin/classes - 获取班级列表",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 18,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.827Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-d939683d60543f496f5a",
+                  "file": "specs/api.spec.ts",
+                  "line": 245,
+                  "column": 9
+                },
+                {
+                  "title": "GET /api/admin/logs - 获取操作日志",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 16,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.864Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-5a7640590c0f1f05a744",
+                  "file": "specs/api.spec.ts",
+                  "line": 256,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "权限验证",
+              "file": "specs/api.spec.ts",
+              "line": 268,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "学生无法访问教师接口",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 13,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.898Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-0a6a912fe36b8cd0b88f",
+                  "file": "specs/api.spec.ts",
+                  "line": 269,
+                  "column": 9
+                },
+                {
+                  "title": "教师无法访问管理员接口",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 12,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.926Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-8bd9994ad90ea2326434",
+                  "file": "specs/api.spec.ts",
+                  "line": 279,
+                  "column": 9
+                },
+                {
+                  "title": "无 Token 访问受保护接口返回 401",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 14,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2026-04-22T07:44:17.953Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "30178f07450e99c68f47-3d304e061e59c4b0eb5b",
+                  "file": "specs/api.spec.ts",
+                  "line": 289,
+                  "column": 9
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-22T07:44:14.909Z",
+    "duration": 88537.084,
+    "expected": 53,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

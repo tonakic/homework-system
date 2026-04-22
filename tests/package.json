@@ -1,0 +1,28 @@
+{
+  "name": "homework-system-tests",
+  "version": "1.0.0",
+  "description": "创新小学作业管理系统 - Playwright E2E 测试",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:student": "npx playwright test --project=student",
+    "test:teacher": "npx playwright test --project=teacher",
+    "test:admin": "npx playwright test --project=admin",
+    "test:api": "npx playwright test --project=api",
+    "test:ui": "npx playwright test --ui",
+    "test:headed": "npx playwright test --headed",
+    "report": "npx playwright show-report reports/html"
+  },
+  "keywords": [
+    "playwright",
+    "e2e",
+    "testing"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "playwright": "^1.59.1",
+    "typescript": "^5.9.3"
+  }
+}

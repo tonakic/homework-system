@@ -1,0 +1,18 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://192.168.3.74",
+      "localStorage": [
+        {
+          "name": "token",
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlclR5cGUiOiJ0ZWFjaGVyIiwiYWNjb3VudCI6IlQyMDI2MDAxIiwibmFtZSI6IueOi-iAgeW4iCIsIm1hbmFnZV9jbGFzc2VzIjpbIuS4gOW5tOe6pzHnj60iLCLkuIDlubTnuqcy54-tIl0sImlhdCI6MTc3Njg0Mzg2OSwiZXhwIjoxNzc2OTMwMjY5fQ.mm5vKWnpBR2Ec1OVHgoW2mGgO5ecm6etG90VNWKg6y4"
+        },
+        {
+          "name": "userInfo",
+          "value": "{\"id\":1,\"userType\":\"teacher\",\"account\":\"T2026001\",\"name\":\"王老师\",\"firstLogin\":false}"
+        }
+      ]
+    }
+  ]
+}

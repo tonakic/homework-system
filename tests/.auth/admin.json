@@ -1,0 +1,18 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://192.168.3.74",
+      "localStorage": [
+        {
+          "name": "token",
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlclR5cGUiOiJhZG1pbiIsImFjY291bnQiOiJhZG1pbiIsIm5hbWUiOiLns7vnu5_nrqHnkIblkZgiLCJpYXQiOjE3NzY4NDM4NzQsImV4cCI6MTc3NjkzMDI3NH0.govufMQlZ1C1tAzdrFPHj1ajrFlWDCt8L1YbmWYG2Ck"
+        },
+        {
+          "name": "userInfo",
+          "value": "{\"id\":1,\"userType\":\"admin\",\"account\":\"admin\",\"name\":\"系统管理员\",\"firstLogin\":false}"
+        }
+      ]
+    }
+  ]
+}
