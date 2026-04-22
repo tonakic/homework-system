@@ -232,26 +232,34 @@ const showExamDetail = ref(false);
 const currentExam = ref(null);
 const examStudents = ref([]);
 
-// 年级选项
-const gradeOptions = [
-  { text: '一年级', value: '一年级' },
-  { text: '二年级', value: '二年级' },
-  { text: '三年级', value: '三年级' },
-  { text: '四年级', value: '四年级' },
-  { text: '五年级', value: '五年级' },
-  { text: '六年级', value: '六年级' }
-];
+// 年级选项（动态加载）
+const gradeList = ref([]);
+const gradeOptions = computed(() =>
+  gradeList.value.map(g => ({ text: g, value: g }))
+);
 
 // 班级选项
 const classOptions = computed(() => {
   return classList.value.map(c => ({ text: c, value: c }));
 });
 
+// 加载年级列表
+async function loadGrades() {
+  try {
+    const res = await api.get('/students/grades');
+    if (res.code === 0) {
+      gradeList.value = res.data || [];
+    }
+  } catch (err) {
+    console.error('加载年级列表失败:', err);
+  }
+}
+
 // 加载班级列表
 async function loadClasses() {
   if (!selectedGrade.value) return;
   try {
-    const res = await api.get('/teacher/classes', {
+    const res = await api.get('/students/classes', {
       params: { grade: selectedGrade.value }
     });
     if (res.code === 0) {
@@ -349,7 +357,7 @@ function getRankClass(idx) {
 }
 
 onMounted(() => {
-  // 可选：自动加载教师管理的班级数据
+  loadGrades();
 });
 </script>
 

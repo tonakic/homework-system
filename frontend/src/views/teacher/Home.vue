@@ -29,6 +29,10 @@
           <van-icon name="medal-o" size="24" />
           <span>排行榜</span>
         </div>
+        <div class="menu-item" @click="$router.push('/teacher/statistics')">
+          <van-icon name="chart-trending-o" size="24" />
+          <span>数据统计</span>
+        </div>
         <div class="menu-item" @click="$router.push('/teacher/profile')">
           <van-icon name="setting-o" size="24" />
           <span>个人设置</span>

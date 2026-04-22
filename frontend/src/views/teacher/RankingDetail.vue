@@ -133,8 +133,8 @@ const loadExams = async () => {
     // 收集所有班级
     const classSet = new Set();
     exams.value.forEach(exam => {
-      if (exam.classes) {
-        exam.classes.forEach(c => classSet.add(c));
+      if (exam.targetClasses) {
+        exam.targetClasses.forEach(c => classSet.add(c));
       }
     });
     availableClasses.value = Array.from(classSet);

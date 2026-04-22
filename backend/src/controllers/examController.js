@@ -651,12 +651,24 @@ function getRankingExams(req, res) {
   // 获取已发布的考试任务
   let tasks;
   if (userType === 'teacher') {
+    // 教师可以看到自己创建的考试 + 包含自己管理班级的考试
     tasks = db.prepare(`
-      SELECT id, title, subject, grade, target_classes, total_score, end_time, status
-      FROM exam_tasks
-      WHERE creator_id = ? AND status = 'published'
-      ORDER BY end_time DESC
+      SELECT DISTINCT et.id, et.title, et.subject, et.grade, et.target_classes, et.total_score, et.end_time, et.status
+      FROM exam_tasks et
+      WHERE et.status = 'published' AND (
+        et.creator_id = ?
+        OR et.target_classes IS NOT NULL
+      )
+      ORDER BY et.end_time DESC
     `).all(id);
+
+    // 过滤：只保留教师创建的或目标班级包含教师管理班级的考试
+    tasks = tasks.filter(task => {
+      if (task.creator_id === id) return true;
+      if (!task.target_classes) return false;
+      const targetClasses = JSON.parse(task.target_classes);
+      return targetClasses.some(tc => managedClasses.includes(tc));
+    });
   } else {
     tasks = db.prepare(`
       SELECT id, title, subject, grade, target_classes, total_score, end_time, status
