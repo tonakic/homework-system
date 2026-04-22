@@ -5,41 +5,6 @@
     <div class="page-content">
       <!-- 标签页切换 -->
       <van-tabs v-model:active="activeTab" sticky shrink>
-        <van-tab title="配置列表" name="list">
-          <!-- 配置列表 -->
-          <div class="config-list-section">
-            <van-pull-refresh v-model="configListRefreshing" @refresh="onConfigListRefresh">
-              <van-list
-                v-model:loading="configListLoading"
-                :finished="configListFinished"
-                finished-text=""
-                @load="loadConfigList"
-              >
-                <div v-for="config in configList" :key="config.id" class="config-list-item">
-                  <div class="config-item-header">
-                    <div class="config-item-name">
-                      {{ config.config_name }}
-                      <van-tag v-if="config.is_default" type="primary" size="small">默认</van-tag>
-                    </div>
-                    <div class="config-item-actions">
-                      <van-icon name="edit" @click="editConfigFromList(config)" />
-                      <van-icon v-if="!config.is_default" name="delete-o" @click="deleteConfig(config)" />
-                    </div>
-                  </div>
-                  <div class="config-item-info">
-                    <span class="config-mode">{{ getGradingModeText(config.grading_mode) }}</span>
-                    <span v-if="config.ai_provider" class="config-provider">{{ getProviderText(config.ai_provider) }}</span>
-                  </div>
-                  <div class="config-item-time">{{ formatTime(config.updated_at || config.created_at) }}</div>
-                </div>
-                <div v-if="configList.length === 0 && !configListLoading" class="empty-tip">
-                  暂无配置
-                </div>
-              </van-list>
-            </van-pull-refresh>
-          </div>
-        </van-tab>
-
         <van-tab title="批改配置" name="config">
           <!-- 批改模式 -->
           <div class="config-section">
@@ -323,101 +288,6 @@ import api from '@/api/index';
 
 // 标签页
 const activeTab = ref('config');
-
-// ========== 配置列表相关 ==========
-const configList = ref([]);
-const configListLoading = ref(false);
-const configListFinished = ref(true); // 一次性加载，不分页
-const configListRefreshing = ref(false);
-
-// 加载配置列表
-async function loadConfigList() {
-  if (configListLoading.value) return;
-  configListLoading.value = true;
-
-  try {
-    const res = await api.get('/grading-config');
-    if (res.code === 0) {
-      configList.value = res.data || [];
-    } else {
-      showFailToast(res.message || '加载配置列表失败');
-    }
-  } catch (err) {
-    console.error('加载配置列表失败:', err);
-    showFailToast(err.message || '加载配置列表失败');
-  } finally {
-    configListLoading.value = false;
-    configListRefreshing.value = false;
-  }
-}
-
-// 刷新配置列表
-function onConfigListRefresh() {
-  configListRefreshing.value = true;
-  loadConfigList();
-}
-
-// 从列表编辑配置
-async function editConfigFromList(config) {
-  configId.value = config.id;
-  form.grading_mode = config.grading_mode || 'ai';
-  form.ai_provider = config.ai_provider || 'deepseek';
-  form.ai_model = config.ai_model || '';
-  form.ai_endpoint = config.ai_endpoint || '';
-  form.ai_api_key = ''; // API密钥不返回，保持空
-  form.ai_temperature = config.ai_temperature || 0.3;
-  form.ai_timeout = config.ai_timeout || 30000;
-  form.prompt_strictness = config.prompt_strictness || 'medium';
-  form.prompt_style = config.prompt_style || 'encouraging';
-  form.prompt_comment_length = config.prompt_comment_length || 'medium';
-  form.prompt_encourage_ratio = config.prompt_encourage_ratio || 30;
-  form.prompt_analysis_detail = config.prompt_analysis_detail || 'medium';
-  if (config.mixed_config) {
-    form.mixed_config = { ...form.mixed_config, ...config.mixed_config };
-  }
-  activeTab.value = 'config';
-}
-
-// 删除配置
-async function deleteConfig(config) {
-  try {
-    await showConfirmDialog({
-      title: '确认删除',
-      message: `确定要删除配置"${config.config_name}"吗？`
-    });
-
-    const res = await api.delete(`/grading-config/${config.id}`);
-    if (res.code === 0) {
-      showSuccessToast('删除成功');
-      loadConfigList();
-    } else {
-      showFailToast(res.message || '删除失败');
-    }
-  } catch (err) {
-    if (err !== 'cancel') {
-      showFailToast(err.message || '删除失败');
-    }
-  }
-}
-
-// 获取批改模式文本
-function getGradingModeText(mode) {
-  const modeMap = {
-    'ai': 'AI批改',
-    'mixed': '混合模式',
-    'manual': '手动批改'
-  };
-  return modeMap[mode] || mode;
-}
-
-// 获取提供商文本
-function getProviderText(provider) {
-  const providerMap = {
-    'deepseek': 'DeepSeek',
-    'ollama': 'Ollama'
-  };
-  return providerMap[provider] || provider;
-}
 
 // 表单
 const form = reactive({
@@ -752,8 +622,6 @@ watch(activeTab, (newVal) => {
     if (tasks.value.length === 0) {
       loadTasks();
     }
-  } else if (newVal === 'list') {
-    loadConfigList();
   }
 });
 
@@ -1149,69 +1017,5 @@ onMounted(() => {
 /* 队列配置 */
 .config-actions {
   padding: 16px;
-}
-
-/* ========== 配置列表样式 ========== */
-
-.config-list-section {
-  padding: 12px;
-}
-
-.config-list-item {
-  background: #fff;
-  border-radius: 12px;
-  padding: 14px 16px;
-  margin-bottom: 10px;
-}
-
-.config-item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.config-item-name {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 500;
-  color: #323233;
-}
-
-.config-item-actions {
-  display: flex;
-  gap: 16px;
-}
-
-.config-item-actions .van-icon {
-  font-size: 18px;
-  color: #1989fa;
-  cursor: pointer;
-}
-
-.config-item-actions .van-icon[name="delete-o"] {
-  color: #ee0a24;
-}
-
-.config-item-info {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 4px;
-  font-size: 13px;
-  color: #646566;
-}
-
-.config-item-time {
-  font-size: 12px;
-  color: #969799;
-}
-
-.empty-tip {
-  text-align: center;
-  padding: 40px 0;
-  color: #969799;
-  font-size: 14px;
 }
 </style>
