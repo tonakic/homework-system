@@ -1,304 +1,488 @@
 <template>
   <div class="page">
-    <van-nav-bar title="学生管理" left-arrow @click-left="$router.back()">
-      <template #right>
-        <van-icon name="description" size="20" style="margin-right: 12px;" @click="openImportPopup" />
-        <van-icon name="plus" size="20" @click="openAddPopup" />
-      </template>
-    </van-nav-bar>
-
-    <div class="page-content">
-      <!-- 筛选条件 -->
-      <div class="filter-section">
-        <!-- 第一行：筛选按钮 -->
-        <div class="filter-row">
-          <div class="filter-buttons">
-            <van-button
-              size="small"
-              :type="filterGrade ? 'primary' : 'default'"
-              @click="showGradePicker = true"
-            >
-              {{ filterGrade || '全部年级' }}
-              <van-icon name="arrow-down" />
-            </van-button>
-            <van-button
-              size="small"
-              :type="filterClass ? 'primary' : 'default'"
-              @click="showClassPickerFilter = true"
-            >
-              {{ filterClass || '全部班级' }}
-              <van-icon name="arrow-down" />
-            </van-button>
-            <van-button
-              size="small"
-              :type="filterStatus ? 'primary' : 'default'"
-              @click="showStatusPicker = true"
-            >
-              {{ getStatusName(filterStatus) }}
-              <van-icon name="arrow-down" />
-            </van-button>
-          </div>
+    <!-- PC 版本 -->
+    <div v-if="isPC" class="student-page-pc">
+      <div class="pc-header">
+        <h2 class="pc-title">学生管理</h2>
+        <div class="pc-header-actions">
+          <el-button @click="openImportPopup">批量导入</el-button>
+          <el-button type="primary" @click="openAddPopup">新增学生</el-button>
         </div>
-        <!-- 第二行：搜索框 -->
-        <div class="search-row">
-          <van-search
-            v-model="searchKeyword"
-            placeholder="搜索学号或姓名"
-            shape="round"
-            :clearable="true"
-            @search="onRefresh"
-            @clear="onRefresh"
+      </div>
+
+      <!-- 搜索筛选栏 -->
+      <div class="pc-filter-bar">
+        <el-input
+          v-model="searchKeyword"
+          placeholder="搜索学号或姓名"
+          clearable
+          style="width: 220px;"
+          @keyup.enter="onRefresh"
+          @clear="onRefresh"
+        />
+        <el-select
+          v-model="filterGrade"
+          placeholder="全部年级"
+          clearable
+          style="width: 140px;"
+          @change="onPcGradeChange"
+        >
+          <el-option
+            v-for="g in gradeList"
+            :key="g"
+            :label="g"
+            :value="g"
           />
-        </div>
+        </el-select>
+        <el-select
+          v-model="filterClass"
+          placeholder="全部班级"
+          clearable
+          style="width: 140px;"
+          @change="onRefresh"
+        >
+          <el-option
+            v-for="c in classOptions"
+            :key="c"
+            :label="c"
+            :value="c"
+          />
+        </el-select>
+        <el-select
+          v-model="filterStatus"
+          placeholder="全部状态"
+          clearable
+          style="width: 120px;"
+          @change="onRefresh"
+        >
+          <el-option label="正常" value="active" />
+          <el-option label="停用" value="inactive" />
+        </el-select>
       </div>
 
-      <!-- 年级筛选弹出层 -->
-      <van-popup v-model:show="showGradePicker" position="bottom" round>
-        <van-picker
-          :columns="gradeOptions"
-          @confirm="onGradeFilterConfirm"
-          @cancel="showGradePicker = false"
+      <!-- 学生表格 -->
+      <el-table :data="students" stripe style="width: 100%" v-loading="loading">
+        <el-table-column prop="name" label="姓名" width="120" />
+        <el-table-column label="班级" min-width="160">
+          <template #default="{ row }">
+            {{ row.grade }}{{ row.class_name }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="student_no" label="学号" width="140" />
+        <el-table-column label="状态" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag :type="row.status === 'active' ? 'success' : 'danger'" size="small">
+              {{ row.status === 'active' ? '正常' : '停用' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="200" align="center">
+          <template #default="{ row }">
+            <el-button type="primary" link size="small" @click="editStudent(row)">编辑</el-button>
+            <el-button type="warning" link size="small" @click="resetPassword(row)">重置密码</el-button>
+            <el-button type="danger" link size="small" @click="deleteStudent(row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- 分页 -->
+      <div class="pc-pagination">
+        <el-pagination
+          v-model:current-page="pcCurrentPage"
+          :page-size="pageSize"
+          :total="pcTotal"
+          layout="total, prev, pager, next"
+          @current-change="onPcPageChange"
         />
-      </van-popup>
-
-      <!-- 班级筛选弹出层 -->
-      <van-popup v-model:show="showClassPickerFilter" position="bottom" round>
-        <van-picker
-          :columns="classFilterOptions"
-          @confirm="onClassFilterConfirm"
-          @cancel="showClassPickerFilter = false"
-        />
-      </van-popup>
-
-      <!-- 状态筛选弹出层 -->
-      <van-popup v-model:show="showStatusPicker" position="bottom" round>
-        <van-picker
-          :columns="statusOptions"
-          @confirm="onStatusFilterConfirm"
-          @cancel="showStatusPicker = false"
-        />
-      </van-popup>
-
-      <!-- 学生列表 -->
-      <div class="student-list">
-        <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
-          <van-list v-model:loading="loading" :finished="finished" finished-text="没有更多了" @load="loadStudents">
-            <van-cell
-              v-for="student in students"
-              :key="student.id"
-              is-link
-              @click="showStudentDetail(student)"
-            >
-              <template #title>
-                <div class="student-info">
-                  <span class="student-name">{{ student.name }}</span>
-                  <van-tag v-if="student.status === 'active'" type="success" size="small">正常</van-tag>
-                  <van-tag v-else type="danger" size="small">停用</van-tag>
-                </div>
-              </template>
-              <template #label>
-                <div class="student-meta">
-                  <span>{{ student.student_no }}</span>
-                  <span>{{ student.grade }}{{ student.class_name }}</span>
-                </div>
-              </template>
-              <template #right-icon>
-                <div class="action-icons" @click.stop>
-                  <van-icon name="edit" @click="editStudent(student)" />
-                  <van-icon name="replay" @click="resetPassword(student)" />
-                </div>
-              </template>
-            </van-cell>
-          </van-list>
-        </van-pull-refresh>
       </div>
-    </div>
 
-    <!-- 新增/编辑学生弹窗 -->
-    <van-popup
-      v-model:show="showAddPopup"
-      position="bottom"
-      round
-      style="height: 80%"
-    >
-      <div class="add-popup">
-        <div class="popup-header">
-          <span class="cancel-btn" @click="closeAddPopup">取消</span>
-          <span class="popup-title">{{ editingStudent ? '编辑学生' : '新增学生' }}</span>
-          <van-button type="primary" size="small" :loading="saving" @click="saveStudent">保存</van-button>
-        </div>
+      <!-- 新增/编辑学生弹窗 (PC) -->
+      <el-dialog
+        v-model="showAddPopup"
+        :title="editingStudent ? '编辑学生' : '新增学生'"
+        width="520px"
+        destroy-on-close
+      >
+        <el-form :model="studentForm" label-width="90px">
+          <el-form-item label="学号" required>
+            <el-input v-model="studentForm.student_no" :disabled="!!editingStudent" placeholder="请输入学号" />
+          </el-form-item>
+          <el-form-item label="姓名" required>
+            <el-input v-model="studentForm.name" placeholder="请输入姓名" />
+          </el-form-item>
+          <el-form-item label="性别">
+            <el-radio-group v-model="studentForm.gender">
+              <el-radio value="男">男</el-radio>
+              <el-radio value="女">女</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="年级" required>
+            <el-select v-model="studentForm.grade" placeholder="请选择年级" style="width: 100%;" @change="onPcFormGradeChange">
+              <el-option v-for="g in gradeList" :key="g" :label="g" :value="g" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="班级" required>
+            <el-select v-model="studentForm.class_name" placeholder="请选择班级" style="width: 100%;">
+              <el-option v-for="c in classOptions" :key="c" :label="c" :value="c" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="家长姓名">
+            <el-input v-model="studentForm.parent_name" placeholder="请输入家长姓名" />
+          </el-form-item>
+          <el-form-item label="联系电话">
+            <el-input v-model="studentForm.phone" placeholder="请输入联系电话" />
+          </el-form-item>
+          <el-form-item label="备注">
+            <el-input v-model="studentForm.remark" type="textarea" :rows="2" placeholder="请输入备注" />
+          </el-form-item>
+          <el-form-item label="状态" v-if="editingStudent">
+            <el-radio-group v-model="studentForm.status">
+              <el-radio value="active">正常</el-radio>
+              <el-radio value="inactive">停用</el-radio>
+            </el-radio-group>
+          </el-form-item>
+        </el-form>
+        <div v-if="!editingStudent" class="pc-form-tip">新增学生默认密码为123456</div>
+        <template #footer>
+          <el-button @click="closeAddPopup">取消</el-button>
+          <el-button type="primary" :loading="saving" @click="saveStudent">保存</el-button>
+        </template>
+      </el-dialog>
 
-        <div class="form-scroll">
-          <div class="form-section">
-            <van-field
-              v-model="studentForm.student_no"
-              label="学号"
-              placeholder="请输入学号"
-              :rules="[{ required: true, message: '请输入学号' }]"
-              :disabled="!!editingStudent"
-            />
-            <van-field
-              v-model="studentForm.name"
-              label="姓名"
-              placeholder="请输入姓名"
-              :rules="[{ required: true, message: '请输入姓名' }]"
-            />
-            <van-field name="gender" label="性别">
-              <template #input>
-                <van-radio-group v-model="studentForm.gender" direction="horizontal">
-                  <van-radio name="男">男</van-radio>
-                  <van-radio name="女">女</van-radio>
-                </van-radio-group>
-              </template>
-            </van-field>
-            <van-field
-              v-model="studentForm.grade"
-              is-link
-              readonly
-              label="年级"
-              placeholder="请选择"
-              @click="showGradeFormPicker = true"
-            />
-            <van-field
-              v-model="studentForm.class_name"
-              is-link
-              readonly
-              label="班级"
-              placeholder="请选择班级"
-              @click="openClassFormPicker"
-            />
-            <van-field
-              v-model="studentForm.parent_name"
-              label="家长姓名"
-              placeholder="请输入家长姓名"
-            />
-            <van-field
-              v-model="studentForm.phone"
-              label="联系电话"
-              placeholder="请输入联系电话"
-              type="tel"
-            />
-            <van-field
-              v-model="studentForm.remark"
-              label="备注"
-              placeholder="请输入备注"
-              type="textarea"
-              rows="2"
-              autosize
-            />
-            <van-field name="status" label="状态" v-if="editingStudent">
-              <template #input>
-                <van-radio-group v-model="studentForm.status" direction="horizontal">
-                  <van-radio name="active">正常</van-radio>
-                  <van-radio name="inactive">停用</van-radio>
-                </van-radio-group>
-              </template>
-            </van-field>
-          </div>
-
-          <div v-if="!editingStudent" class="form-tip">
-            <van-notice-bar>新增学生默认密码为123456</van-notice-bar>
-          </div>
-        </div>
-      </div>
-    </van-popup>
-
-    <!-- 年级选择(表单) -->
-    <van-popup v-model:show="showGradeFormPicker" position="bottom" round>
-      <van-picker
-        :columns="gradeFormColumns"
-        @confirm="onGradeFormConfirm"
-        @cancel="showGradeFormPicker = false"
-      />
-    </van-popup>
-
-    <!-- 班级选择(表单) -->
-    <van-popup v-model:show="showClassFormPicker" position="bottom" round>
-      <van-picker
-        :columns="classFormColumns"
-        @confirm="onClassFormConfirm"
-        @cancel="showClassFormPicker = false"
-      />
-    </van-popup>
-
-    <!-- 学生详情弹窗 -->
-    <van-popup v-model:show="showDetailPopup" position="bottom" round style="height: 60%">
-      <div class="detail-popup" v-if="currentStudent">
-        <div class="popup-header">
-          <span class="cancel-btn" @click="showDetailPopup = false">关闭</span>
-          <span class="popup-title">学生详情</span>
-          <van-button type="primary" size="small" @click="editStudent(currentStudent)">编辑</van-button>
-        </div>
-        <div class="detail-content">
-          <van-cell-group>
-            <van-cell title="学号" :value="currentStudent.student_no" />
-            <van-cell title="姓名" :value="currentStudent.name" />
-            <van-cell title="性别" :value="currentStudent.gender || '未设置'" />
-            <van-cell title="年级" :value="currentStudent.grade" />
-            <van-cell title="班级" :value="currentStudent.class_name" />
-            <van-cell title="家长姓名" :value="currentStudent.parent_name || '未设置'" />
-            <van-cell title="联系电话" :value="currentStudent.phone || '未设置'" />
-            <van-cell title="备注" :value="currentStudent.remark || '无'" />
-            <van-cell title="状态" :value="currentStudent.status === 'active' ? '正常' : '停用'" />
-            <van-cell title="创建时间" :value="currentStudent.created_at" />
-          </van-cell-group>
-          <div class="detail-actions">
-            <van-button type="warning" block @click="resetPassword(currentStudent)">重置密码</van-button>
-            <van-button type="danger" block @click="deleteStudent(currentStudent)">删除学生</van-button>
-          </div>
-        </div>
-      </div>
-    </van-popup>
-
-    <!-- 批量导入弹窗 -->
-    <van-popup
-      v-model:show="showImportPopup"
-      position="bottom"
-      round
-      style="height: 50%"
-      :lock-scroll="true"
-    >
-      <div class="import-popup">
-        <div class="popup-header">
-          <span class="cancel-btn" @click="showImportPopup = false">关闭</span>
-          <span class="popup-title">批量导入</span>
-          <span></span>
-        </div>
-        <div class="import-content">
+      <!-- 批量导入弹窗 (PC) -->
+      <el-dialog v-model="showImportPopup" title="批量导入" width="480px" destroy-on-close>
+        <div class="pc-import-content">
           <div class="import-desc">
             <p>支持导入 Excel 格式的学生信息文件（.xlsx）</p>
             <p>默认密码为 123456，示例行不会导入</p>
           </div>
           <div class="import-buttons">
-            <van-uploader :after-read="handleFileUpload" accept=".xlsx,.xls" :max-count="1" class="import-uploader">
-              <van-button size="large" :loading="importing" class="import-btn">
-                <van-icon name="upgrade" />
-                上传学生
-              </van-button>
-            </van-uploader>
-            <van-button size="large" class="import-btn" @click="downloadTemplate">
-              <van-icon name="down" />
-              模板下载
-            </van-button>
+            <el-upload
+              :auto-upload="false"
+              :show-file-list="false"
+              accept=".xlsx,.xls"
+              :on-change="handlePcFileUpload"
+            >
+              <el-button :loading="importing">上传学生</el-button>
+            </el-upload>
+            <el-button @click="downloadTemplate">模板下载</el-button>
           </div>
           <div v-if="importResult" class="import-result">
-            <van-notice-bar :color="importResult.success ? '#07c160' : '#ee0a24'" background="#f7f8fa">
-              {{ importResult.message }}
-            </van-notice-bar>
+            <p :style="{ color: importResult.success ? '#67c23a' : '#f56c6c' }">{{ importResult.message }}</p>
             <div v-if="importResult.details && importResult.details.length > 0" class="result-details">
               <p v-for="(detail, idx) in importResult.details" :key="idx">第{{ detail.row }}行: {{ detail.reason }}</p>
             </div>
           </div>
         </div>
+      </el-dialog>
+    </div>
+
+    <!-- 移动端版本 -->
+    <div v-else>
+      <van-nav-bar title="学生管理" left-arrow @click-left="$router.back()">
+        <template #right>
+          <van-icon name="description" size="20" style="margin-right: 12px;" @click="openImportPopup" />
+          <van-icon name="plus" size="20" @click="openAddPopup" />
+        </template>
+      </van-nav-bar>
+
+      <div class="page-content">
+        <!-- 筛选条件 -->
+        <div class="filter-section">
+          <!-- 第一行：筛选按钮 -->
+          <div class="filter-row">
+            <div class="filter-buttons">
+              <van-button
+                size="small"
+                :type="filterGrade ? 'primary' : 'default'"
+                @click="showGradePicker = true"
+              >
+                {{ filterGrade || '全部年级' }}
+                <van-icon name="arrow-down" />
+              </van-button>
+              <van-button
+                size="small"
+                :type="filterClass ? 'primary' : 'default'"
+                @click="showClassPickerFilter = true"
+              >
+                {{ filterClass || '全部班级' }}
+                <van-icon name="arrow-down" />
+              </van-button>
+              <van-button
+                size="small"
+                :type="filterStatus ? 'primary' : 'default'"
+                @click="showStatusPicker = true"
+              >
+                {{ getStatusName(filterStatus) }}
+                <van-icon name="arrow-down" />
+              </van-button>
+            </div>
+          </div>
+          <!-- 第二行：搜索框 -->
+          <div class="search-row">
+            <van-search
+              v-model="searchKeyword"
+              placeholder="搜索学号或姓名"
+              shape="round"
+              :clearable="true"
+              @search="onRefresh"
+              @clear="onRefresh"
+            />
+          </div>
+        </div>
+
+        <!-- 年级筛选弹出层 -->
+        <van-popup v-model:show="showGradePicker" position="bottom" round>
+          <van-picker
+            :columns="gradeOptions"
+            @confirm="onGradeFilterConfirm"
+            @cancel="showGradePicker = false"
+          />
+        </van-popup>
+
+        <!-- 班级筛选弹出层 -->
+        <van-popup v-model:show="showClassPickerFilter" position="bottom" round>
+          <van-picker
+            :columns="classFilterOptions"
+            @confirm="onClassFilterConfirm"
+            @cancel="showClassPickerFilter = false"
+          />
+        </van-popup>
+
+        <!-- 状态筛选弹出层 -->
+        <van-popup v-model:show="showStatusPicker" position="bottom" round>
+          <van-picker
+            :columns="statusOptions"
+            @confirm="onStatusFilterConfirm"
+            @cancel="showStatusPicker = false"
+          />
+        </van-popup>
+
+        <!-- 学生列表 -->
+        <div class="student-list">
+          <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
+            <van-list v-model:loading="loading" :finished="finished" finished-text="没有更多了" @load="loadStudents">
+              <van-cell
+                v-for="student in students"
+                :key="student.id"
+                is-link
+                @click="showStudentDetail(student)"
+              >
+                <template #title>
+                  <div class="student-info">
+                    <span class="student-name">{{ student.name }}</span>
+                    <van-tag v-if="student.status === 'active'" type="success" size="small">正常</van-tag>
+                    <van-tag v-else type="danger" size="small">停用</van-tag>
+                  </div>
+                </template>
+                <template #label>
+                  <div class="student-meta">
+                    <span>{{ student.student_no }}</span>
+                    <span>{{ student.grade }}{{ student.class_name }}</span>
+                  </div>
+                </template>
+                <template #right-icon>
+                  <div class="action-icons" @click.stop>
+                    <van-icon name="edit" @click="editStudent(student)" />
+                    <van-icon name="replay" @click="resetPassword(student)" />
+                  </div>
+                </template>
+              </van-cell>
+            </van-list>
+          </van-pull-refresh>
+        </div>
       </div>
-    </van-popup>
+
+      <!-- 新增/编辑学生弹窗 -->
+      <van-popup
+        v-model:show="showAddPopup"
+        position="bottom"
+        round
+        style="height: 80%"
+      >
+        <div class="add-popup">
+          <div class="popup-header">
+            <span class="cancel-btn" @click="closeAddPopup">取消</span>
+            <span class="popup-title">{{ editingStudent ? '编辑学生' : '新增学生' }}</span>
+            <van-button type="primary" size="small" :loading="saving" @click="saveStudent">保存</van-button>
+          </div>
+
+          <div class="form-scroll">
+            <div class="form-section">
+              <van-field
+                v-model="studentForm.student_no"
+                label="学号"
+                placeholder="请输入学号"
+                :rules="[{ required: true, message: '请输入学号' }]"
+                :disabled="!!editingStudent"
+              />
+              <van-field
+                v-model="studentForm.name"
+                label="姓名"
+                placeholder="请输入姓名"
+                :rules="[{ required: true, message: '请输入姓名' }]"
+              />
+              <van-field name="gender" label="性别">
+                <template #input>
+                  <van-radio-group v-model="studentForm.gender" direction="horizontal">
+                    <van-radio name="男">男</van-radio>
+                    <van-radio name="女">女</van-radio>
+                  </van-radio-group>
+                </template>
+              </van-field>
+              <van-field
+                v-model="studentForm.grade"
+                is-link
+                readonly
+                label="年级"
+                placeholder="请选择"
+                @click="showGradeFormPicker = true"
+              />
+              <van-field
+                v-model="studentForm.class_name"
+                is-link
+                readonly
+                label="班级"
+                placeholder="请选择班级"
+                @click="openClassFormPicker"
+              />
+              <van-field
+                v-model="studentForm.parent_name"
+                label="家长姓名"
+                placeholder="请输入家长姓名"
+              />
+              <van-field
+                v-model="studentForm.phone"
+                label="联系电话"
+                placeholder="请输入联系电话"
+                type="tel"
+              />
+              <van-field
+                v-model="studentForm.remark"
+                label="备注"
+                placeholder="请输入备注"
+                type="textarea"
+                rows="2"
+                autosize
+              />
+              <van-field name="status" label="状态" v-if="editingStudent">
+                <template #input>
+                  <van-radio-group v-model="studentForm.status" direction="horizontal">
+                    <van-radio name="active">正常</van-radio>
+                    <van-radio name="inactive">停用</van-radio>
+                  </van-radio-group>
+                </template>
+              </van-field>
+            </div>
+
+            <div v-if="!editingStudent" class="form-tip">
+              <van-notice-bar>新增学生默认密码为123456</van-notice-bar>
+            </div>
+          </div>
+        </div>
+      </van-popup>
+
+      <!-- 年级选择(表单) -->
+      <van-popup v-model:show="showGradeFormPicker" position="bottom" round>
+        <van-picker
+          :columns="gradeFormColumns"
+          @confirm="onGradeFormConfirm"
+          @cancel="showGradeFormPicker = false"
+        />
+      </van-popup>
+
+      <!-- 班级选择(表单) -->
+      <van-popup v-model:show="showClassFormPicker" position="bottom" round>
+        <van-picker
+          :columns="classFormColumns"
+          @confirm="onClassFormConfirm"
+          @cancel="showClassFormPicker = false"
+        />
+      </van-popup>
+
+      <!-- 学生详情弹窗 -->
+      <van-popup v-model:show="showDetailPopup" position="bottom" round style="height: 60%">
+        <div class="detail-popup" v-if="currentStudent">
+          <div class="popup-header">
+            <span class="cancel-btn" @click="showDetailPopup = false">关闭</span>
+            <span class="popup-title">学生详情</span>
+            <van-button type="primary" size="small" @click="editStudent(currentStudent)">编辑</van-button>
+          </div>
+          <div class="detail-content">
+            <van-cell-group>
+              <van-cell title="学号" :value="currentStudent.student_no" />
+              <van-cell title="姓名" :value="currentStudent.name" />
+              <van-cell title="性别" :value="currentStudent.gender || '未设置'" />
+              <van-cell title="年级" :value="currentStudent.grade" />
+              <van-cell title="班级" :value="currentStudent.class_name" />
+              <van-cell title="家长姓名" :value="currentStudent.parent_name || '未设置'" />
+              <van-cell title="联系电话" :value="currentStudent.phone || '未设置'" />
+              <van-cell title="备注" :value="currentStudent.remark || '无'" />
+              <van-cell title="状态" :value="currentStudent.status === 'active' ? '正常' : '停用'" />
+              <van-cell title="创建时间" :value="currentStudent.created_at" />
+            </van-cell-group>
+            <div class="detail-actions">
+              <van-button type="warning" block @click="resetPassword(currentStudent)">重置密码</van-button>
+              <van-button type="danger" block @click="deleteStudent(currentStudent)">删除学生</van-button>
+            </div>
+          </div>
+        </div>
+      </van-popup>
+
+      <!-- 批量导入弹窗 -->
+      <van-popup
+        v-model:show="showImportPopup"
+        position="bottom"
+        round
+        style="height: 50%"
+        :lock-scroll="true"
+      >
+        <div class="import-popup">
+          <div class="popup-header">
+            <span class="cancel-btn" @click="showImportPopup = false">关闭</span>
+            <span class="popup-title">批量导入</span>
+            <span></span>
+          </div>
+          <div class="import-content">
+            <div class="import-desc">
+              <p>支持导入 Excel 格式的学生信息文件（.xlsx）</p>
+              <p>默认密码为 123456，示例行不会导入</p>
+            </div>
+            <div class="import-buttons">
+              <van-uploader :after-read="handleFileUpload" accept=".xlsx,.xls" :max-count="1" class="import-uploader">
+                <van-button size="large" :loading="importing" class="import-btn">
+                  <van-icon name="upgrade" />
+                  上传学生
+                </van-button>
+              </van-uploader>
+              <van-button size="large" class="import-btn" @click="downloadTemplate">
+                <van-icon name="down" />
+                模板下载
+              </van-button>
+            </div>
+            <div v-if="importResult" class="import-result">
+              <van-notice-bar :color="importResult.success ? '#07c160' : '#ee0a24'" background="#f7f8fa">
+                {{ importResult.message }}
+              </van-notice-bar>
+              <div v-if="importResult.details && importResult.details.length > 0" class="result-details">
+                <p v-for="(detail, idx) in importResult.details" :key="idx">第{{ detail.row }}行: {{ detail.reason }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </van-popup>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import { showSuccessToast, showFailToast, showConfirmDialog } from 'vant';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import api from '@/api/index';
+import { useDevice } from '@/composables/useDevice';
+
+const { isPC } = useDevice();
 
 // 筛选条件
 const filterGrade = ref('');
@@ -318,6 +502,10 @@ const finished = ref(false);
 const refreshing = ref(false);
 const currentPage = ref(0);
 const pageSize = 20;
+
+// PC 分页
+const pcCurrentPage = ref(1);
+const pcTotal = ref(0);
 
 // 新增/编辑
 const showAddPopup = ref(false);
@@ -390,6 +578,23 @@ function getStatusName(status) {
   return status === 'active' ? '正常' : '停用';
 }
 
+// 提示方法适配
+function showSuccess(msg) {
+  if (isPC.value) {
+    ElMessage.success(msg);
+  } else {
+    showSuccessToast(msg);
+  }
+}
+
+function showError(msg) {
+  if (isPC.value) {
+    ElMessage.error(msg);
+  } else {
+    showFailToast(msg);
+  }
+}
+
 // 加载年级列表
 async function loadGradeList() {
   try {
@@ -404,13 +609,13 @@ async function loadGradeList() {
 }
 
 // 加载班级选项列表（根据选中年级）
-async function loadClassOptions() {
+async function loadClassOptions(grade) {
   try {
-    if (!studentForm.grade) {
+    if (!grade) {
       classOptions.value = [];
       return;
     }
-    const res = await api.get('/students/classes', { params: { grade: studentForm.grade } });
+    const res = await api.get('/students/classes', { params: { grade } });
     if (res.code === 0) {
       classOptions.value = res.data;
     }
@@ -420,24 +625,25 @@ async function loadClassOptions() {
   }
 }
 
-// 加载筛选班级列表（根据筛选年级）
+// 加载筛选班级列表（根据筛选年级）- 移动端用
 async function loadFilterClassOptions() {
-  try {
-    if (!filterGrade.value) {
-      classOptions.value = [];
-      return;
-    }
-    const res = await api.get('/students/classes', { params: { grade: filterGrade.value } });
-    if (res.code === 0) {
-      classOptions.value = res.data;
-    }
-  } catch (err) {
-    console.error('加载班级列表失败:', err);
-    classOptions.value = [];
-  }
+  await loadClassOptions(filterGrade.value);
 }
 
-// 加载学生列表
+// PC 端年级筛选变化
+function onPcGradeChange(val) {
+  filterClass.value = '';
+  loadClassOptions(val);
+  onRefresh();
+}
+
+// PC 端表单年级变化
+function onPcFormGradeChange(val) {
+  studentForm.class_name = '';
+  loadClassOptions(val);
+}
+
+// 加载学生列表（移动端：无限滚动）
 async function loadStudents() {
   if (loading.value) return;
   loading.value = true;
@@ -458,7 +664,7 @@ async function loadStudents() {
       finished.value = res.data.list.length < pageSize;
     }
   } catch (err) {
-    showFailToast(err.message || '加载学生列表失败，请稍后重试');
+    showError(err.message || '加载学生列表失败，请稍后重试');
     finished.value = true;
   } finally {
     loading.value = false;
@@ -466,11 +672,45 @@ async function loadStudents() {
   }
 }
 
+// PC 端分页加载
+async function loadStudentsPc() {
+  loading.value = true;
+  try {
+    const params = {
+      page: pcCurrentPage.value,
+      pageSize,
+      grade: filterGrade.value,
+      class_name: filterClass.value,
+      status: filterStatus.value,
+      keyword: searchKeyword.value
+    };
+    const res = await api.get('/students', { params });
+    if (res.code === 0) {
+      students.value = res.data.list;
+      pcTotal.value = res.data.total || 0;
+    }
+  } catch (err) {
+    showError(err.message || '加载学生列表失败');
+  } finally {
+    loading.value = false;
+  }
+}
+
+function onPcPageChange(page) {
+  pcCurrentPage.value = page;
+  loadStudentsPc();
+}
+
 function onRefresh() {
-  currentPage.value = 0;
-  students.value = [];
-  finished.value = false;
-  loadStudents();
+  if (isPC.value) {
+    pcCurrentPage.value = 1;
+    loadStudentsPc();
+  } else {
+    currentPage.value = 0;
+    students.value = [];
+    finished.value = false;
+    loadStudents();
+  }
 }
 
 // 筛选回调
@@ -533,7 +773,7 @@ async function editStudent(student) {
   showDetailPopup.value = false;
   showAddPopup.value = true;
   // 加载该年级的班级列表
-  await loadClassOptions();
+  await loadClassOptions(student.grade);
 }
 
 function openClassFormPicker() {
@@ -542,19 +782,19 @@ function openClassFormPicker() {
 
 async function saveStudent() {
   if (!studentForm.student_no) {
-    showFailToast('请输入学号');
+    showError('请输入学号');
     return;
   }
   if (!studentForm.name) {
-    showFailToast('请输入姓名');
+    showError('请输入姓名');
     return;
   }
   if (!studentForm.grade) {
-    showFailToast('请选择年级');
+    showError('请选择年级');
     return;
   }
   if (!studentForm.class_name) {
-    showFailToast('请选择班级');
+    showError('请选择班级');
     return;
   }
 
@@ -580,14 +820,14 @@ async function saveStudent() {
     }
 
     if (res.code === 0) {
-      showSuccessToast(editingStudent.value ? '修改成功' : '添加成功');
+      showSuccess(editingStudent.value ? '修改成功' : '添加成功');
       closeAddPopup();
       onRefresh();
     } else {
-      showFailToast(res.message || '操作失败');
+      showError(res.message || '操作失败');
     }
   } catch (err) {
-    showFailToast(err.message || '操作失败');
+    showError(err.message || '操作失败');
   } finally {
     saving.value = false;
   }
@@ -596,17 +836,25 @@ async function saveStudent() {
 // 删除学生
 async function deleteStudent(student) {
   try {
-    await showConfirmDialog({
-      title: '确认删除',
-      message: `确定要删除学生"${student.name}"吗？`
-    });
+    if (isPC.value) {
+      await ElMessageBox.confirm(
+        `确定要删除学生"${student.name}"吗？`,
+        '确认删除',
+        { type: 'warning' }
+      );
+    } else {
+      await showConfirmDialog({
+        title: '确认删除',
+        message: `确定要删除学生"${student.name}"吗？`
+      });
+    }
     const res = await api.delete(`/students/${student.id}`);
     if (res.code === 0) {
-      showSuccessToast('删除成功');
+      showSuccess('删除成功');
       showDetailPopup.value = false;
       onRefresh();
     } else {
-      showFailToast(res.message || '删除失败');
+      showError(res.message || '删除失败');
     }
   } catch (err) {
     // 取消删除
@@ -616,15 +864,23 @@ async function deleteStudent(student) {
 // 重置密码
 async function resetPassword(student) {
   try {
-    await showConfirmDialog({
-      title: '确认重置',
-      message: `确定要重置学生"${student.name}"的密码为123456吗？`
-    });
+    if (isPC.value) {
+      await ElMessageBox.confirm(
+        `确定要重置学生"${student.name}"的密码为123456吗？`,
+        '确认重置',
+        { type: 'warning' }
+      );
+    } else {
+      await showConfirmDialog({
+        title: '确认重置',
+        message: `确定要重置学生"${student.name}"的密码为123456吗？`
+      });
+    }
     const res = await api.post(`/students/${student.id}/reset-password`);
     if (res.code === 0) {
-      showSuccessToast('密码已重置为123456');
+      showSuccess('密码已重置为123456');
     } else {
-      showFailToast(res.message || '重置失败');
+      showError(res.message || '重置失败');
     }
   } catch (err) {
     // 取消重置
@@ -642,7 +898,7 @@ function onGradeFormConfirm({ selectedOptions }) {
   studentForm.grade = selectedOptions[0]?.value || '';
   studentForm.class_name = '';
   showGradeFormPicker.value = false;
-  loadClassOptions();
+  loadClassOptions(studentForm.grade);
 }
 
 function onClassFormConfirm({ selectedOptions }) {
@@ -662,7 +918,6 @@ async function handleFileUpload(file) {
   try {
     const formData = new FormData();
     formData.append('file', file.file);
-    // 不手动设置 Content-Type，让 axios 自动处理 multipart/form-data
     const res = await api.post('/import/students', formData);
     if (res.code === 0) {
       importResult.value = {
@@ -670,7 +925,7 @@ async function handleFileUpload(file) {
         message: `导入完成！成功 ${res.data.success} 条，失败 ${res.data.failed} 条`,
         details: res.data.errors
       };
-      showSuccessToast('导入成功');
+      showSuccess('导入成功');
       onRefresh();
     } else {
       importResult.value = {
@@ -678,14 +933,49 @@ async function handleFileUpload(file) {
         message: res.message || '导入失败',
         details: res.data?.errors
       };
-      showFailToast(res.message || '导入失败');
+      showError(res.message || '导入失败');
     }
   } catch (err) {
     importResult.value = {
       success: false,
       message: err.message || '导入失败，请检查文件格式'
     };
-    showFailToast(err.message || '导入失败');
+    showError(err.message || '导入失败');
+  } finally {
+    importing.value = false;
+  }
+}
+
+// PC 端上传回调（el-upload on-change）
+async function handlePcFileUpload(uploadFile) {
+  importing.value = true;
+  importResult.value = null;
+  try {
+    const formData = new FormData();
+    formData.append('file', uploadFile.raw);
+    const res = await api.post('/import/students', formData);
+    if (res.code === 0) {
+      importResult.value = {
+        success: true,
+        message: `导入完成！成功 ${res.data.success} 条，失败 ${res.data.failed} 条`,
+        details: res.data.errors
+      };
+      showSuccess('导入成功');
+      onRefresh();
+    } else {
+      importResult.value = {
+        success: false,
+        message: res.message || '导入失败',
+        details: res.data?.errors
+      };
+      showError(res.message || '导入失败');
+    }
+  } catch (err) {
+    importResult.value = {
+      success: false,
+      message: err.message || '导入失败，请检查文件格式'
+    };
+    showError(err.message || '导入失败');
   } finally {
     importing.value = false;
   }
@@ -695,7 +985,7 @@ async function downloadTemplate() {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
-      showFailToast('请先登录');
+      showError('请先登录');
       return;
     }
 
@@ -722,16 +1012,20 @@ async function downloadTemplate() {
     link.click();
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
-    showSuccessToast('模板下载成功');
+    showSuccess('模板下载成功');
   } catch (err) {
     console.error('下载模板失败:', err);
-    showFailToast('模板下载失败: ' + (err.message || '未知错误'));
+    showError('模板下载失败: ' + (err.message || '未知错误'));
   }
 }
 
 onMounted(() => {
   loadGradeList();
-  loadStudents();
+  if (isPC.value) {
+    loadStudentsPc();
+  } else {
+    loadStudents();
+  }
 });
 </script>
 
@@ -944,6 +1238,88 @@ onMounted(() => {
 }
 
 .result-details p {
+  margin: 4px 0;
+}
+
+/* PC 端样式 */
+.student-page-pc {
+  padding: 24px;
+}
+
+.pc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.pc-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  color: #303133;
+}
+
+.pc-header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.pc-filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.pc-pagination {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.pc-form-tip {
+  color: #e6a23c;
+  font-size: 13px;
+  margin-top: -8px;
+  margin-bottom: 12px;
+  padding-left: 90px;
+}
+
+.pc-import-content .import-desc {
+  background: #f5f7fa;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.pc-import-content .import-desc p {
+  font-size: 14px;
+  color: #606266;
+  margin: 4px 0;
+}
+
+.pc-import-content .import-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.pc-import-content .import-result {
+  margin-top: 16px;
+}
+
+.pc-import-content .result-details {
+  background: #f5f7fa;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #606266;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.pc-import-content .result-details p {
   margin: 4px 0;
 }
 </style>

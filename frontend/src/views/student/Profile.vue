@@ -1,77 +1,212 @@
 <template>
   <div class="profile-page page">
-    <van-nav-bar title="个人中心" left-arrow @click-left="$router.push('/student/home')" />
-
-    <div class="page-content">
-      <div class="user-card card">
-        <div class="avatar">
-          {{ userStore.userName.charAt(0) }}
+    <!-- PC 端布局 -->
+    <div v-if="isPC" class="profile-pc">
+      <div class="profile-pc-container">
+        <div class="profile-pc-header">
+          <h1>个人中心</h1>
+          <el-button text @click="$router.push('/student/home')">
+            <el-icon><ArrowLeft /></el-icon>
+            返回首页
+          </el-button>
         </div>
-        <div class="user-info">
-          <h2>{{ userStore.userName }}</h2>
-          <p>学号：{{ userStore.userInfo?.account }}</p>
+
+        <div class="profile-pc-body">
+          <!-- 左侧：用户信息卡片 -->
+          <div class="profile-pc-left">
+            <el-card shadow="hover" class="user-info-card">
+              <div class="pc-avatar">
+                {{ userStore.userName.charAt(0) }}
+              </div>
+              <h2 class="pc-username">{{ userStore.userName }}</h2>
+              <p class="pc-account">学号：{{ userStore.userInfo?.account }}</p>
+
+              <el-divider />
+
+              <div class="pc-info-list">
+                <div class="pc-info-item">
+                  <span class="pc-info-label">姓名</span>
+                  <span class="pc-info-value">{{ profile.name || userStore.userName }}</span>
+                </div>
+                <div class="pc-info-item">
+                  <span class="pc-info-label">学号</span>
+                  <span class="pc-info-value">{{ profile.student_no || userStore.userInfo?.account }}</span>
+                </div>
+                <div class="pc-info-item">
+                  <span class="pc-info-label">性别</span>
+                  <span class="pc-info-value">{{ profile.gender || '未设置' }}</span>
+                </div>
+                <div class="pc-info-item">
+                  <span class="pc-info-label">年级</span>
+                  <span class="pc-info-value">{{ profile.grade || '未设置' }}</span>
+                </div>
+                <div class="pc-info-item">
+                  <span class="pc-info-label">班级</span>
+                  <span class="pc-info-value">{{ fullClassName }}</span>
+                </div>
+                <div class="pc-info-item">
+                  <span class="pc-info-label">家长姓名</span>
+                  <span class="pc-info-value">{{ profile.parent_name || '未设置' }}</span>
+                </div>
+                <div class="pc-info-item">
+                  <span class="pc-info-label">联系电话</span>
+                  <span class="pc-info-value">{{ profile.phone || '未设置' }}</span>
+                </div>
+                <div class="pc-info-item">
+                  <span class="pc-info-label">备注</span>
+                  <span class="pc-info-value">{{ profile.remark || '无' }}</span>
+                </div>
+              </div>
+            </el-card>
+          </div>
+
+          <!-- 右侧：操作区域 -->
+          <div class="profile-pc-right">
+            <el-card shadow="hover" class="edit-card">
+              <template #header>
+                <div class="card-header">
+                  <span>修改密码</span>
+                </div>
+              </template>
+              <el-form
+                :model="passwordForm"
+                label-width="100px"
+                label-position="right"
+                @submit.prevent="handleChangePassword"
+              >
+                <el-form-item label="原密码">
+                  <el-input
+                    v-model="passwordForm.oldPassword"
+                    type="password"
+                    placeholder="请输入原密码"
+                    show-password
+                  />
+                </el-form-item>
+                <el-form-item label="新密码">
+                  <el-input
+                    v-model="passwordForm.newPassword"
+                    type="password"
+                    placeholder="请输入新密码（至少6位）"
+                    show-password
+                  />
+                </el-form-item>
+                <el-form-item label="确认密码">
+                  <el-input
+                    v-model="passwordForm.confirmPassword"
+                    type="password"
+                    placeholder="请确认新密码"
+                    show-password
+                  />
+                </el-form-item>
+                <el-form-item>
+                  <el-button type="primary" :loading="loading" @click="handleChangePassword">
+                    确认修改
+                  </el-button>
+                </el-form-item>
+              </el-form>
+            </el-card>
+
+            <el-card shadow="hover" class="actions-card">
+              <template #header>
+                <div class="card-header">
+                  <span>快捷操作</span>
+                </div>
+              </template>
+              <div class="pc-actions">
+                <el-button @click="$router.push('/about')">
+                  <el-icon><InfoFilled /></el-icon>
+                  关于系统
+                </el-button>
+                <el-button>
+                  <el-icon><QuestionFilled /></el-icon>
+                  帮助中心
+                </el-button>
+                <el-button type="danger" @click="handleLogout">
+                  <el-icon><SwitchButton /></el-icon>
+                  退出登录
+                </el-button>
+              </div>
+            </el-card>
+          </div>
         </div>
-      </div>
-
-      <!-- 个人信息卡片 -->
-      <van-cell-group inset title="个人信息">
-        <van-cell title="姓名" :value="profile.name || userStore.userName" />
-        <van-cell title="学号" :value="profile.student_no || userStore.userInfo?.account" />
-        <van-cell title="性别" :value="profile.gender || '未设置'" />
-        <van-cell title="年级" :value="profile.grade || '未设置'" />
-        <van-cell title="班级" :value="fullClassName" />
-        <van-cell title="家长姓名" :value="profile.parent_name || '未设置'" />
-        <van-cell title="联系电话" :value="profile.phone || '未设置'" />
-        <van-cell title="备注" :value="profile.remark || '无'" />
-      </van-cell-group>
-
-      <van-cell-group inset>
-        <van-cell title="修改密码" is-link @click="showChangePassword = true" />
-        <van-cell title="关于系统" is-link to="/about" />
-        <van-cell title="帮助中心" is-link />
-      </van-cell-group>
-
-      <div class="logout">
-        <van-button type="danger" block round @click="handleLogout">
-          退出登录
-        </van-button>
       </div>
     </div>
 
-    <!-- 修改密码弹窗 -->
-    <van-popup v-model:show="showChangePassword" round position="bottom" :close-on-click-overlay="!isFirstLogin">
-      <div class="password-popup">
-        <h3>{{ isFirstLogin ? '首次登录请修改密码' : '修改密码' }}</h3>
-        <van-form @submit="handleChangePassword">
-          <van-field
-            v-model="passwordForm.oldPassword"
-            type="password"
-            label="原密码"
-            placeholder="请输入原密码"
-            :rules="[{ required: true, message: '请输入原密码' }]"
-          />
-          <van-field
-            v-model="passwordForm.newPassword"
-            type="password"
-            label="新密码"
-            placeholder="请输入新密码"
-            :rules="[{ required: true, message: '请输入新密码' }, { min: 6, message: '密码至少6位' }]"
-          />
-          <van-field
-            v-model="passwordForm.confirmPassword"
-            type="password"
-            label="确认密码"
-            placeholder="请确认新密码"
-            :rules="[{ required: true, message: '请确认新密码' }]"
-          />
-          <div class="form-actions">
-            <van-button block type="primary" native-type="submit" :loading="loading">
-              确认修改
-            </van-button>
+    <!-- 移动端布局 -->
+    <div v-else>
+      <van-nav-bar title="个人中心" left-arrow @click-left="$router.push('/student/home')" />
+
+      <div class="page-content">
+        <div class="user-card card">
+          <div class="avatar">
+            {{ userStore.userName.charAt(0) }}
           </div>
-        </van-form>
+          <div class="user-info">
+            <h2>{{ userStore.userName }}</h2>
+            <p>学号：{{ userStore.userInfo?.account }}</p>
+          </div>
+        </div>
+
+        <!-- 个人信息卡片 -->
+        <van-cell-group inset title="个人信息">
+          <van-cell title="姓名" :value="profile.name || userStore.userName" />
+          <van-cell title="学号" :value="profile.student_no || userStore.userInfo?.account" />
+          <van-cell title="性别" :value="profile.gender || '未设置'" />
+          <van-cell title="年级" :value="profile.grade || '未设置'" />
+          <van-cell title="班级" :value="fullClassName" />
+          <van-cell title="家长姓名" :value="profile.parent_name || '未设置'" />
+          <van-cell title="联系电话" :value="profile.phone || '未设置'" />
+          <van-cell title="备注" :value="profile.remark || '无'" />
+        </van-cell-group>
+
+        <van-cell-group inset>
+          <van-cell title="修改密码" is-link @click="showChangePassword = true" />
+          <van-cell title="关于系统" is-link to="/about" />
+          <van-cell title="帮助中心" is-link />
+        </van-cell-group>
+
+        <div class="logout">
+          <van-button type="danger" block round @click="handleLogout">
+            退出登录
+          </van-button>
+        </div>
       </div>
-    </van-popup>
+
+      <!-- 修改密码弹窗 -->
+      <van-popup v-model:show="showChangePassword" round position="bottom" :close-on-click-overlay="!isFirstLogin">
+        <div class="password-popup">
+          <h3>{{ isFirstLogin ? '首次登录请修改密码' : '修改密码' }}</h3>
+          <van-form @submit="handleChangePassword">
+            <van-field
+              v-model="passwordForm.oldPassword"
+              type="password"
+              label="原密码"
+              placeholder="请输入原密码"
+              :rules="[{ required: true, message: '请输入原密码' }]"
+            />
+            <van-field
+              v-model="passwordForm.newPassword"
+              type="password"
+              label="新密码"
+              placeholder="请输入新密码"
+              :rules="[{ required: true, message: '请输入新密码' }, { min: 6, message: '密码至少6位' }]"
+            />
+            <van-field
+              v-model="passwordForm.confirmPassword"
+              type="password"
+              label="确认密码"
+              placeholder="请确认新密码"
+              :rules="[{ required: true, message: '请确认新密码' }]"
+            />
+            <div class="form-actions">
+              <van-button block type="primary" native-type="submit" :loading="loading">
+                确认修改
+              </van-button>
+            </div>
+          </van-form>
+        </div>
+      </van-popup>
+    </div>
   </div>
 </template>
 
@@ -81,10 +216,14 @@ import { useRouter, useRoute } from 'vue-router';
 import { showSuccessToast, showFailToast, showDialog } from 'vant';
 import { useUserStore } from '@/store/user';
 import { changePassword, getProfile } from '@/api/auth';
+import { useDevice } from '@/composables/useDevice';
+import { ArrowLeft, InfoFilled, QuestionFilled, SwitchButton } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
 
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
+const { isPC } = useDevice();
 
 const showChangePassword = ref(false);
 const loading = ref(false);
@@ -120,17 +259,25 @@ onMounted(() => {
   loadProfile();
   if (userStore.isFirstLogin()) {
     showChangePassword.value = true;
-    showDialog({
-      title: '首次登录',
-      message: '检测到您是首次登录，请先修改密码后再继续使用。',
-      confirmButtonText: '去修改密码'
-    });
+    if (isPC.value) {
+      ElMessage.warning('检测到您是首次登录，请先修改密码后再继续使用。');
+    } else {
+      showDialog({
+        title: '首次登录',
+        message: '检测到您是首次登录，请先修改密码后再继续使用。',
+        confirmButtonText: '去修改密码'
+      });
+    }
   }
 });
 
 async function handleChangePassword() {
   if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-    showFailToast('两次输入的密码不一致');
+    if (isPC.value) {
+      ElMessage.error('两次输入的密码不一致');
+    } else {
+      showFailToast('两次输入的密码不一致');
+    }
     return;
   }
 
@@ -140,7 +287,11 @@ async function handleChangePassword() {
     const res = await changePassword(passwordForm.oldPassword, passwordForm.newPassword);
 
     if (res.code === 0) {
-      showSuccessToast('密码修改成功');
+      if (isPC.value) {
+        ElMessage.success('密码修改成功');
+      } else {
+        showSuccessToast('密码修改成功');
+      }
       showChangePassword.value = false;
       passwordForm.oldPassword = '';
       passwordForm.newPassword = '';
@@ -152,10 +303,18 @@ async function handleChangePassword() {
         router.push('/student/home');
       }
     } else {
-      showFailToast(res.message || '修改失败');
+      if (isPC.value) {
+        ElMessage.error(res.message || '修改失败');
+      } else {
+        showFailToast(res.message || '修改失败');
+      }
     }
   } catch (err) {
-    showFailToast(err.message || '修改失败');
+    if (isPC.value) {
+      ElMessage.error(err.message || '修改失败');
+    } else {
+      showFailToast(err.message || '修改失败');
+    }
   } finally {
     loading.value = false;
   }
@@ -168,6 +327,7 @@ async function handleLogout() {
 </script>
 
 <style scoped>
+/* ==================== 移动端样式 ==================== */
 .profile-page {
   min-height: 100%;
   background: #f5f5f5;
@@ -260,5 +420,139 @@ async function handleLogout() {
     font-size: 16px;
     margin-bottom: 16px;
   }
+}
+
+/* ==================== PC 端样式 ==================== */
+.profile-pc {
+  min-height: 100%;
+  background: #f0f2f5;
+  padding: 24px 32px;
+}
+
+.profile-pc-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.profile-pc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.profile-pc-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #303133;
+  margin: 0;
+}
+
+.profile-pc-body {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+/* 左侧用户信息 */
+.profile-pc-left {
+  flex: 0 0 360px;
+}
+
+.user-info-card {
+  text-align: center;
+}
+
+.pc-avatar {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #ff9800, #ffb74d);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 36px;
+  font-weight: bold;
+  margin: 0 auto 12px;
+}
+
+.pc-username {
+  font-size: 20px;
+  font-weight: 600;
+  color: #303133;
+  margin: 0 0 4px;
+}
+
+.pc-account {
+  font-size: 14px;
+  color: #909399;
+  margin: 0;
+}
+
+.pc-info-list {
+  text-align: left;
+}
+
+.pc-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f2f3f5;
+}
+
+.pc-info-item:last-child {
+  border-bottom: none;
+}
+
+.pc-info-label {
+  font-size: 14px;
+  color: #909399;
+  flex-shrink: 0;
+  width: 80px;
+}
+
+.pc-info-value {
+  font-size: 14px;
+  color: #303133;
+  text-align: right;
+  word-break: break-all;
+}
+
+/* 右侧操作区域 */
+.profile-pc-right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-header span {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.edit-card :deep(.el-form-item) {
+  margin-bottom: 18px;
+}
+
+.pc-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pc-actions .el-button {
+  flex: 1;
+  min-width: 120px;
 }
 </style>

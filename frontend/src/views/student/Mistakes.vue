@@ -1,33 +1,103 @@
 <template>
   <div class="mistakes-page page">
-    <van-nav-bar title="错题库" left-arrow @click-left="$router.push('/student/home')" />
-
-    <div class="page-content">
-      <div class="mistake-list">
-        <div
-          v-for="mistake in mistakes"
-          :key="mistake.id"
-          class="mistake-card card"
-        >
-          <div class="mistake-header">
-            <span class="subject-tag">{{ mistake.subject }}</span>
-            <span class="chapter">{{ mistake.chapter }}</span>
-          </div>
-          <div class="mistake-content">
-            {{ mistake.content }}
-          </div>
-          <div class="mistake-info">
-            <span class="wrong-count">错误 {{ mistake.wrongCount }} 次</span>
-          </div>
-          <div class="mistake-actions">
-            <van-button size="small" type="primary" @click="practice(mistake.id)">
-              重新练习
-            </van-button>
-          </div>
-        </div>
+    <!-- PC端布局 -->
+    <div v-if="isPC" class="mistakes-pc">
+      <div class="pc-header">
+        <h1>错题库</h1>
       </div>
 
-      <van-empty v-if="mistakes.length === 0" description="暂无错题" />
+      <div class="pc-content">
+        <!-- 筛选区域 -->
+        <div class="filter-section">
+          <el-select v-model="subjectFilter" placeholder="选择科目" clearable style="width: 200px;">
+            <el-option
+              v-for="subject in subjectOptions"
+              :key="subject"
+              :label="subject"
+              :value="subject"
+            />
+          </el-select>
+        </div>
+
+        <!-- 错题表格 -->
+        <el-table :data="filteredMistakes" style="width: 100%" stripe>
+          <el-table-column prop="content" label="题目" min-width="300">
+            <template #default="{ row }">
+              <div class="question-cell">
+                <div class="question-text">{{ row.content }}</div>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="subject" label="科目" width="120">
+            <template #default="{ row }">
+              <el-tag type="warning">{{ row.subject }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="wrongCount" label="错误次数" width="100" align="center">
+            <template #default="{ row }">
+              <span class="wrong-count-pc">{{ row.wrongCount }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="lastWrongTime" label="最近错误时间" width="160">
+            <template #default="{ row }">
+              {{ formatLastWrongTime(row.lastWrongTime) }}
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="120" align="center">
+            <template #default="{ row }">
+              <el-button type="primary" size="small" @click="practice(row.id)">
+                重新练习
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <!-- 分页 -->
+        <div class="pagination-wrapper">
+          <el-pagination
+            v-model:current-page="currentPage"
+            v-model:page-size="pageSize"
+            :page-sizes="[10, 20, 50]"
+            :total="filteredMistakes.length"
+            layout="total, sizes, prev, pager, next, jumper"
+          />
+        </div>
+
+        <el-empty v-if="filteredMistakes.length === 0" description="暂无错题" />
+      </div>
+    </div>
+
+    <!-- 移动端布局 -->
+    <div v-else>
+      <van-nav-bar title="错题库" left-arrow @click-left="$router.push('/student/home')" />
+
+      <div class="page-content">
+        <div class="mistake-list">
+          <div
+            v-for="mistake in mistakes"
+            :key="mistake.id"
+            class="mistake-card card"
+          >
+            <div class="mistake-header">
+              <span class="subject-tag">{{ mistake.subject }}</span>
+              <span class="chapter">{{ mistake.chapter }}</span>
+            </div>
+            <div class="mistake-content">
+              {{ mistake.content }}
+            </div>
+            <div class="mistake-info">
+              <span class="wrong-count">错误 {{ mistake.wrongCount }} 次</span>
+            </div>
+            <div class="mistake-actions">
+              <van-button size="small" type="primary" @click="practice(mistake.id)">
+                重新练习
+              </van-button>
+            </div>
+          </div>
+        </div>
+
+        <van-empty v-if="mistakes.length === 0" description="暂无错题" />
+      </div>
     </div>
 
     <!-- 练习弹窗 -->
@@ -35,7 +105,7 @@
       v-model:show="showPracticePopup"
       round
       closeable
-      :style="{ width: '90%', maxHeight: '80vh' }"
+      :style="{ width: isPC ? '600px' : '90%', maxHeight: '80vh' }"
     >
       <div class="practice-popup" v-if="currentMistake">
         <h3 class="practice-title">{{ currentMistake.subject }} - {{ currentMistake.chapter }}</h3>
@@ -140,9 +210,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { getMistakes, getMistakeDetail } from '@/api/auth';
 import { showFailToast, showSuccessToast } from 'vant';
+import { useDevice } from '@/composables/useDevice';
+
+const { isPC } = useDevice();
 
 const mistakes = ref([]);
 const showPracticePopup = ref(false);
@@ -152,6 +225,39 @@ const practiceMultipleAnswer = ref([]);
 const practiceFillAnswers = ref([]);
 const showAnswer = ref(false);
 const isCorrect = ref(false);
+
+// PC端分页
+const currentPage = ref(1);
+const pageSize = ref(10);
+
+// PC端筛选
+const subjectFilter = ref('');
+
+// 科目选项
+const subjectOptions = computed(() => {
+  const subjects = new Set(mistakes.value.map(m => m.subject).filter(Boolean));
+  return Array.from(subjects);
+});
+
+// 筛选后的错题
+const filteredMistakes = computed(() => {
+  if (!subjectFilter.value) {
+    return mistakes.value;
+  }
+  return mistakes.value.filter(m => m.subject === subjectFilter.value);
+});
+
+// 格式化最近错误时间
+function formatLastWrongTime(time) {
+  if (!time) return '--';
+  const date = new Date(time);
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  const hour = date.getHours().toString().padStart(2, '0');
+  const min = date.getMinutes().toString().padStart(2, '0');
+  return `${year}-${month}-${day} ${hour}:${min}`;
+}
 
 onMounted(() => {
   loadMistakes();
@@ -280,6 +386,59 @@ function closePractice() {
   background: #f5f5f5;
 }
 
+/* PC端样式 */
+.mistakes-pc {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pc-header {
+  margin-bottom: 24px;
+}
+
+.pc-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #303133;
+  margin: 0;
+}
+
+.pc-content {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.filter-section {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.question-cell {
+  padding: 8px 0;
+}
+
+.question-text {
+  line-height: 1.6;
+  color: #303133;
+}
+
+.wrong-count-pc {
+  color: #f44336;
+  font-weight: 600;
+}
+
+.pagination-wrapper {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 移动端样式 */
 .page-content {
   padding: 12px;
 }

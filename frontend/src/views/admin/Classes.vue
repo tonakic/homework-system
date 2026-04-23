@@ -1,5 +1,150 @@
 <template>
-  <div class="page">
+  <!-- PC 版本 -->
+  <div v-if="isPC" class="classes-pc">
+    <div class="pc-header">
+      <h2>班级管理</h2>
+      <el-button type="primary" @click="openAddPopup">
+        <el-icon><Plus /></el-icon>
+        新增班级
+      </el-button>
+    </div>
+
+    <div class="pc-content">
+      <!-- 统计数据 -->
+      <el-row :gutter="20" class="pc-stats-row">
+        <el-col :span="12">
+          <el-card shadow="hover" class="pc-stat-card">
+            <div class="pc-stat-item">
+              <div class="pc-stat-icon classes-icon">
+                <el-icon :size="28"><School /></el-icon>
+              </div>
+              <div class="pc-stat-detail">
+                <div class="pc-stat-value">{{ totalClasses }}</div>
+                <div class="pc-stat-label">班级总数</div>
+              </div>
+            </div>
+          </el-card>
+        </el-col>
+        <el-col :span="12">
+          <el-card shadow="hover" class="pc-stat-card">
+            <div class="pc-stat-item">
+              <div class="pc-stat-icon students-icon">
+                <el-icon :size="28"><User /></el-icon>
+              </div>
+              <div class="pc-stat-detail">
+                <div class="pc-stat-value">{{ totalStudents }}</div>
+                <div class="pc-stat-label">学生总数</div>
+              </div>
+            </div>
+          </el-card>
+        </el-col>
+      </el-row>
+
+      <!-- 筛选区域 -->
+      <el-card shadow="hover" class="pc-filter-card">
+        <el-select
+          v-model="selectedGrade"
+          placeholder="选择年级"
+          clearable
+          @change="loadClassStats"
+          style="width: 200px"
+        >
+          <el-option
+            v-for="grade in gradeList"
+            :key="grade"
+            :label="grade"
+            :value="grade"
+          />
+        </el-select>
+      </el-card>
+
+      <!-- 班级列表 -->
+      <el-card shadow="hover" class="pc-table-card">
+        <el-table :data="classStats" style="width: 100%" v-loading="loading">
+          <el-table-column prop="class_name" label="班级名称" min-width="150" />
+          <el-table-column prop="grade" label="年级" width="120" />
+          <el-table-column prop="student_count" label="学生人数" width="120" align="center">
+            <template #default="{ row }">
+              <el-tag type="primary" size="small">{{ row.student_count }}人</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="200" align="center">
+            <template #default="{ row }">
+              <el-button type="primary" link size="small" @click="showClassDetail(row)">详情</el-button>
+              <el-button type="primary" link size="small" @click="editClass(row)">编辑</el-button>
+              <el-button type="danger" link size="small" @click="deleteClass(row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <div class="pc-pagination" v-if="total > 0">
+          <el-pagination
+            v-model:current-page="currentPage"
+            :page-size="pageSize"
+            :total="total"
+            layout="total, prev, pager, next"
+            @current-change="handlePageChange"
+          />
+        </div>
+      </el-card>
+    </div>
+
+    <!-- 新增/编辑班级弹窗 -->
+    <el-dialog
+      v-model="showAddPopup"
+      :title="editingClass ? '编辑班级' : '新增班级'"
+      width="500px"
+      destroy-on-close
+    >
+      <el-form :model="classForm" label-width="80px">
+        <el-form-item label="年级" required>
+          <el-select v-model="classForm.grade" placeholder="请选择年级" style="width: 100%">
+            <el-option
+              v-for="grade in gradeList"
+              :key="grade"
+              :label="grade"
+              :value="grade"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="班级名称" required>
+          <el-input v-model="classForm.class_name" placeholder="如: 1班、2班" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="closeAddPopup">取消</el-button>
+        <el-button type="primary" :loading="saving" @click="saveClass">保存</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 班级详情弹窗 -->
+    <el-dialog
+      v-model="showDetailPopup"
+      :title="currentClass ? currentClass.class_name + ' 详情' : '班级详情'"
+      width="600px"
+      destroy-on-close
+    >
+      <div v-if="currentClass" class="pc-detail-content">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="班级名称">{{ currentClass.class_name }}</el-descriptions-item>
+          <el-descriptions-item label="年级">{{ currentClass.grade }}</el-descriptions-item>
+          <el-descriptions-item label="学生人数">{{ currentClass.student_count }}人</el-descriptions-item>
+        </el-descriptions>
+
+        <div class="pc-students-section">
+          <h4>班级学生</h4>
+          <el-table :data="currentClassStudents" style="width: 100%" max-height="300">
+            <el-table-column prop="student_no" label="学号" width="120" />
+            <el-table-column prop="name" label="姓名" />
+          </el-table>
+          <div v-if="currentClassStudents.length === 0" class="pc-empty-tip">暂无学生</div>
+        </div>
+      </div>
+    </el-dialog>
+  </div>
+
+  <!-- 移动端版本 -->
+  <div v-else class="page">
     <van-nav-bar title="班级管理" left-arrow @click-left="$router.back()">
       <template #right>
         <van-icon name="plus" size="20" @click="showAddPopup = true" />
@@ -124,12 +269,23 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import { showSuccessToast, showFailToast, showConfirmDialog } from 'vant';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { Plus, School, User } from '@element-plus/icons-vue';
 import api from '@/api/index';
+import { useDevice } from '@/composables/useDevice';
+
+const { isPC } = useDevice();
 
 // 统计数据
 const classStats = ref([]);
 const selectedGrade = ref('');
 const showGradeFilterPicker = ref(false);
+const loading = ref(false);
+
+// 分页
+const currentPage = ref(1);
+const pageSize = ref(20);
+const total = ref(0);
 
 // 年级列表
 const gradeList = ['一年级', '二年级', '三年级', '四年级', '五年级', '六年级'];
@@ -163,15 +319,28 @@ const currentClassStudents = ref([]);
 
 // 加载班级统计
 async function loadClassStats() {
+  loading.value = true;
   try {
     const params = selectedGrade.value ? { grade: selectedGrade.value } : {};
     const res = await api.get('/admin/class-stats', { params });
     if (res.code === 0) {
       classStats.value = res.data;
+      total.value = res.data.length;
     }
   } catch (e) {
     console.error('加载班级统计失败:', e);
+    if (isPC.value) {
+      ElMessage.error('加载班级统计失败');
+    }
+  } finally {
+    loading.value = false;
   }
+}
+
+// 分页变化
+function handlePageChange(page) {
+  currentPage.value = page;
+  loadClassStats();
 }
 
 // 年级筛选确认
@@ -203,11 +372,19 @@ function editClass(item) {
 
 async function saveClass() {
   if (!classForm.grade) {
-    showFailToast('请选择年级');
+    if (isPC.value) {
+      ElMessage.warning('请选择年级');
+    } else {
+      showFailToast('请选择年级');
+    }
     return;
   }
   if (!classForm.class_name) {
-    showFailToast('请输入班级名称');
+    if (isPC.value) {
+      ElMessage.warning('请输入班级名称');
+    } else {
+      showFailToast('请输入班级名称');
+    }
     return;
   }
 
@@ -222,14 +399,26 @@ async function saveClass() {
 
     const res = await api.post('/admin/class', data);
     if (res.code === 0) {
-      showSuccessToast(editingClass.value ? '修改成功' : '添加成功');
+      if (isPC.value) {
+        ElMessage.success(editingClass.value ? '修改成功' : '添加成功');
+      } else {
+        showSuccessToast(editingClass.value ? '修改成功' : '添加成功');
+      }
       closeAddPopup();
       loadClassStats();
     } else {
-      showFailToast(res.message || '操作失败');
+      if (isPC.value) {
+        ElMessage.error(res.message || '操作失败');
+      } else {
+        showFailToast(res.message || '操作失败');
+      }
     }
   } catch (e) {
-    showFailToast(e.message || '操作失败');
+    if (isPC.value) {
+      ElMessage.error(e.message || '操作失败');
+    } else {
+      showFailToast(e.message || '操作失败');
+    }
   } finally {
     saving.value = false;
   }
@@ -246,16 +435,33 @@ async function deleteClass(item) {
       confirmMessage = `班级"${item.class_name}"有进行中的考试任务：${examNames}。删除班级后学生将无法继续答题，确定要删除吗？`;
     }
 
-    await showConfirmDialog({
-      title: '确认删除',
-      message: confirmMessage
-    });
+    if (isPC.value) {
+      await ElMessageBox.confirm(confirmMessage, '确认删除', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      });
+    } else {
+      await showConfirmDialog({
+        title: '确认删除',
+        message: confirmMessage
+      });
+    }
+
     const res = await api.delete('/admin/class', { data: { class_name: item.class_name } });
     if (res.code === 0) {
-      showSuccessToast('删除成功');
+      if (isPC.value) {
+        ElMessage.success('删除成功');
+      } else {
+        showSuccessToast('删除成功');
+      }
       loadClassStats();
     } else {
-      showFailToast(res.message || '删除失败');
+      if (isPC.value) {
+        ElMessage.error(res.message || '删除失败');
+      } else {
+        showFailToast(res.message || '删除失败');
+      }
     }
   } catch (e) {
     // 取消删除
@@ -283,6 +489,117 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* ========== PC 样式 ========== */
+.classes-pc {
+  padding: 24px;
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+.pc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.pc-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #303133;
+  margin: 0;
+}
+
+.pc-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pc-stats-row {
+  margin-bottom: 20px;
+}
+
+.pc-stat-card {
+  border-radius: 12px;
+}
+
+.pc-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.pc-stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.pc-stat-icon.classes-icon {
+  background: linear-gradient(135deg, #409eff, #79bbff);
+}
+
+.pc-stat-icon.students-icon {
+  background: linear-gradient(135deg, #67c23a, #95d475);
+}
+
+.pc-stat-detail {
+  flex: 1;
+}
+
+.pc-stat-value {
+  font-size: 28px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.pc-stat-label {
+  font-size: 14px;
+  color: #909399;
+  margin-top: 4px;
+}
+
+.pc-filter-card {
+  margin-bottom: 20px;
+  border-radius: 12px;
+}
+
+.pc-table-card {
+  border-radius: 12px;
+}
+
+.pc-pagination {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.pc-detail-content {
+  padding: 10px 0;
+}
+
+.pc-students-section {
+  margin-top: 24px;
+}
+
+.pc-students-section h4 {
+  font-size: 16px;
+  font-weight: 500;
+  color: #303133;
+  margin-bottom: 12px;
+}
+
+.pc-empty-tip {
+  text-align: center;
+  color: #909399;
+  padding: 20px;
+}
+
+/* ========== 移动端样式 ========== */
 .page-content {
   padding-bottom: 20px;
 }

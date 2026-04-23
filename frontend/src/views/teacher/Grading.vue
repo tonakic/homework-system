@@ -1,149 +1,163 @@
 <template>
   <div class="page">
-    <!-- 第一层：考试任务列表 -->
-    <template v-if="currentView === 'list'">
-      <van-nav-bar title="批改任务" left-arrow @click-left="$router.back()" />
-      <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
-        <div class="page-content">
-          <van-empty v-if="taskList.length === 0 && !loading" description="暂无批改任务" />
-          <div v-else class="task-list">
-            <div
-              v-for="task in taskList"
-              :key="task.task_id"
-              class="task-card card"
-              @click="enterTask(task)"
-            >
-              <div class="task-header">
-                <span class="task-title">{{ task.title }}</span>
-                <span :class="['task-status', task.pending_count > 0 ? 'pending' : 'done']">
-                  {{ task.pending_count > 0 ? '待批改' : '已完成' }}
-                </span>
-              </div>
-              <div class="task-info">
-                <span>{{ task.subject }}</span>
-                <span class="divider">|</span>
-                <span>待批改 {{ task.pending_count }} 份</span>
-                <span class="divider">|</span>
-                <span>已批改 {{ task.graded_count }} 份</span>
-              </div>
-              <div class="task-mode">
-                批改模式：{{ getModeText(task.grading_mode) }}
-              </div>
-            </div>
-          </div>
+    <!-- PC Version -->
+    <div v-if="isPC" class="grading-pc">
+      <!-- Level 1: Exam task list -->
+      <div v-if="currentView === 'list'" class="pc-level-1">
+        <div class="pc-header">
+          <h2>批改任务</h2>
+          <el-button type="primary" :loading="loading" @click="loadTaskList">刷新</el-button>
         </div>
-      </van-pull-refresh>
-    </template>
-
-    <!-- 第二层：学生列表 -->
-    <template v-else-if="currentView === 'students'">
-      <van-nav-bar
-        :title="currentTask?.title || '学生列表'"
-        left-arrow
-        @click-left="backToList"
-      />
-      <div class="page-content">
-        <div class="task-summary card">
-          <div class="summary-row">
-            <span>科目：{{ currentTask?.subject }}</span>
-          </div>
-          <div class="summary-row">
-            <span>待批改：{{ studentList.filter(s => s.status === 'submitted').length }} 人</span>
-            <span class="divider">|</span>
-            <span>已批改：{{ studentList.filter(s => s.status === 'graded').length }} 人</span>
-          </div>
-        </div>
-
-        <van-empty v-if="studentList.length === 0" description="暂无学生答卷" />
-        <div v-else class="student-list-page">
-          <div
-            v-for="student in studentList"
-            :key="student.id"
-            class="student-card card"
-            @click="selectStudent(student)"
-          >
-            <div class="student-header">
-              <span class="student-name">{{ student.student_name }}</span>
-              <span :class="['student-status', student.status === 'graded' ? 'done' : 'pending']">
-                {{ student.status === 'graded' ? '已批改' : '待批改' }}
-              </span>
-            </div>
-            <div class="student-meta">
-              <span>{{ student.student_no }}</span>
+        <el-table :data="taskList" stripe style="width: 100%" v-loading="loading">
+          <el-table-column prop="title" label="考试名称" min-width="180" />
+          <el-table-column prop="subject" label="科目" width="100" />
+          <el-table-column label="班级" width="120">
+            <template #default="{ row }">
+              {{ row.grade }}{{ row.class_name }}
+            </template>
+          </el-table-column>
+          <el-table-column label="提交情况" width="150">
+            <template #default="{ row }">
+              <span>待批改: {{ row.pending_count }}</span>
               <span class="divider">|</span>
-              <span>{{ student.grade }}{{ student.class_name }}</span>
-            </div>
-          </div>
-        </div>
+              <span>已批改: {{ row.graded_count }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="批改模式" width="100">
+            <template #default="{ row }">
+              {{ getModeText(row.grading_mode) }}
+            </template>
+          </el-table-column>
+          <el-table-column label="状态" width="100">
+            <template #default="{ row }">
+              <el-tag :type="row.pending_count > 0 ? 'warning' : 'success'">
+                {{ row.pending_count > 0 ? '待批改' : '已完成' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="120" fixed="right">
+            <template #default="{ row }">
+              <el-button type="primary" link @click="enterTask(row)">进入批改</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-empty v-if="taskList.length === 0 && !loading" description="暂无批改任务" />
       </div>
-    </template>
 
-    <!-- 第三层：学生答卷详情/批改界面 -->
-    <template v-else-if="currentView === 'detail'">
-      <van-nav-bar
-        :title="studentDetail.student_name || '批改详情'"
-        left-arrow
-        @click-left="backToStudents"
-      />
-      <div class="page-content">
-        <!-- 学生信息卡片 -->
-        <div class="student-card card">
-          <div class="student-info">
-            <div class="info-row">
-              <span class="label">学生姓名：</span>
-              <span>{{ studentDetail.student_name }}</span>
-            </div>
-            <div class="info-row">
-              <span class="label">年级班级：</span>
-              <span>{{ studentDetail.grade }}{{ studentDetail.class_name }}</span>
-            </div>
-            <div class="info-row">
-              <span class="label">考试时间：</span>
-              <span>{{ formatTime(studentDetail.submit_time) }}</span>
-            </div>
-            <div class="info-row">
-              <span class="label">批改状态：</span>
-              <span :class="['status', studentDetail.status === 'graded' ? 'done' : 'pending']">
-                {{ studentDetail.status === 'graded' ? '已批改' : '待批改' }}
-              </span>
-            </div>
-            <div class="info-row">
-              <span class="label">题目数量：</span>
-              <span>{{ answerDetail.length }} 题</span>
-            </div>
-          </div>
-          <div v-if="studentDetail.status === 'submitted'" class="action-btn">
-            <van-button type="primary" size="small" @click="startGrading">
-              开始批改
-            </van-button>
+      <!-- Level 2: Student list -->
+      <div v-else-if="currentView === 'students'" class="pc-level-2">
+        <div class="pc-header">
+          <el-button link @click="backToList">
+            <el-icon><ArrowLeft /></el-icon>
+            返回任务列表
+          </el-button>
+          <h2>{{ currentTask?.title || '学生列表' }}</h2>
+        </div>
+        <div class="pc-summary">
+          <span>科目：{{ currentTask?.subject }}</span>
+          <span class="divider">|</span>
+          <span>待批改：{{ studentList.filter(s => s.status === 'submitted').length }} 人</span>
+          <span class="divider">|</span>
+          <span>已批改：{{ studentList.filter(s => s.status === 'graded').length }} 人</span>
+        </div>
+        <el-table :data="studentList" stripe style="width: 100%">
+          <el-table-column prop="student_name" label="学生姓名" width="120" />
+          <el-table-column prop="student_no" label="学号" width="120" />
+          <el-table-column label="班级" width="120">
+            <template #default="{ row }">
+              {{ row.grade }}{{ row.class_name }}
+            </template>
+          </el-table-column>
+          <el-table-column label="提交时间" width="180">
+            <template #default="{ row }">
+              {{ formatTime(row.submit_time) }}
+            </template>
+          </el-table-column>
+          <el-table-column label="状态" width="100">
+            <template #default="{ row }">
+              <el-tag :type="row.status === 'graded' ? 'success' : 'warning'">
+                {{ row.status === 'graded' ? '已批改' : '待批改' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="120" fixed="right">
+            <template #default="{ row }">
+              <el-button type="primary" link @click="selectStudent(row)">批改</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-empty v-if="studentList.length === 0" description="暂无学生答卷" />
+      </div>
+
+      <!-- Level 3: Grading interface -->
+      <div v-else-if="currentView === 'detail'" class="pc-level-3">
+        <div class="pc-header">
+          <el-button link @click="backToStudents">
+            <el-icon><ArrowLeft /></el-icon>
+            返回学生列表
+          </el-button>
+          <h2>{{ studentDetail.student_name || '批改详情' }}</h2>
+          <div class="pc-student-info">
+            <span>{{ studentDetail.grade }}{{ studentDetail.class_name }}</span>
+            <span class="divider">|</span>
+            <span>{{ studentDetail.student_no }}</span>
+            <span class="divider">|</span>
+            <span>提交时间：{{ formatTime(studentDetail.submit_time) }}</span>
+            <el-tag :type="studentDetail.status === 'graded' ? 'success' : 'warning'" style="margin-left: 12px;">
+              {{ studentDetail.status === 'graded' ? '已批改' : '待批改' }}
+            </el-tag>
           </div>
         </div>
 
-        <!-- 题目列表 -->
-        <div class="question-list">
-          <div
-            v-for="(item, index) in answerDetail"
-            :key="item.id"
-            class="question-card card"
-          >
-            <div class="question-header">
-              <span class="question-index">第{{ index + 1 }}题</span>
-              <span class="question-type">{{ getTypeText(item.question_type) }}</span>
-              <span class="question-score">（{{ item.max_score }}分）</span>
+        <div class="pc-grading-container">
+          <!-- Left: Question list sidebar -->
+          <div class="pc-question-sidebar">
+            <div class="sidebar-title">题目列表</div>
+            <div class="question-nav-list">
+              <div
+                v-for="(item, index) in answerDetail"
+                :key="item.id"
+                :class="['question-nav-item', { active: currentQuestionIndex === index }]"
+                @click="currentQuestionIndex = index"
+              >
+                <span class="nav-index">第{{ index + 1 }}题</span>
+                <span class="nav-type">{{ getTypeText(item.question_type) }}</span>
+                <span class="nav-score">{{ item.max_score }}分</span>
+                <el-tag
+                  v-if="item.teacher_score !== null"
+                  type="success"
+                  size="small"
+                >已批</el-tag>
+                <el-tag
+                  v-else-if="item.ai_score !== null"
+                  type="info"
+                  size="small"
+                >AI</el-tag>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Current question detail -->
+          <div class="pc-question-detail" v-if="currentQuestion">
+            <div class="question-detail-header">
+              <span class="question-index">第{{ currentQuestionIndex + 1 }}题</span>
+              <span class="question-type">{{ getTypeText(currentQuestion.question_type) }}</span>
+              <span class="question-score">（{{ currentQuestion.max_score }}分）</span>
             </div>
 
-            <!-- 题目内容 -->
-            <div class="question-content">
-              <div class="content-text">{{ item.content }}</div>
-              <!-- 选项 -->
-              <div v-if="item.options" class="options-list">
+            <!-- Question content -->
+            <div class="question-content-section">
+              <div class="section-label">题目内容</div>
+              <div class="content-text">{{ currentQuestion.content }}</div>
+              <!-- Options -->
+              <div v-if="currentQuestion.options" class="options-list">
                 <div
-                  v-for="(opt, optIndex) in item.options"
+                  v-for="(opt, optIndex) in currentQuestion.options"
                   :key="optIndex"
                   :class="[
                     'option-item',
-                    { correct: isCorrectOption(item, optIndex) },
-                    { selected: is_selected(item, optIndex) }
+                    { correct: isCorrectOption(currentQuestion, optIndex) },
+                    { selected: is_selected(currentQuestion, optIndex) }
                   ]"
                 >
                   {{ String.fromCharCode(65 + optIndex) }}. {{ formatOptionText(opt) }}
@@ -151,124 +165,399 @@
               </div>
             </div>
 
-            <!-- 学生答案 -->
+            <!-- Student answer -->
             <div class="answer-section">
-              <div class="answer-label">学生答案：</div>
+              <div class="section-label">学生答案</div>
               <div class="answer-content">
-                <template v-if="item.question_type === 'choice' || item.question_type === 'multiple'">
-                  {{ formatStudentAnswer(item) || '未作答' }}
+                <template v-if="currentQuestion.question_type === 'choice' || currentQuestion.question_type === 'multiple'">
+                  {{ formatStudentAnswer(currentQuestion) || '未作答' }}
                 </template>
                 <template v-else>
-                  {{ item.student_answer_text || '未作答' }}
+                  {{ currentQuestion.student_answer_text || '未作答' }}
                 </template>
               </div>
             </div>
 
-            <!-- 正确答案 -->
-            <div class="answer-section correct-answer">
-              <div class="answer-label">参考答案：</div>
-              <div class="answer-content">{{ item.answer }}</div>
+            <!-- Reference answer -->
+            <div class="answer-section reference">
+              <div class="section-label">参考答案</div>
+              <div class="answer-content">{{ currentQuestion.answer }}</div>
             </div>
 
-            <!-- AI批改结果（AI批改模式或混合模式中AI批改的题目） -->
-            <div v-if="item.ai_score !== null && item.ai_score !== undefined" class="ai-result">
-              <div class="ai-badge">AI批改</div>
-              <div class="ai-info">
-                <span>得分：{{ item.ai_score }}/{{ item.max_score }} 分</span>
+            <!-- AI grading result -->
+            <div v-if="currentQuestion.ai_score !== null && currentQuestion.ai_score !== undefined" class="ai-result-pc">
+              <div class="result-header">
+                <el-tag type="info">AI批改</el-tag>
+                <span class="result-score">得分：{{ currentQuestion.ai_score }}/{{ currentQuestion.max_score }} 分</span>
               </div>
-              <div v-if="item.ai_comment" class="ai-comment">
-                {{ item.ai_comment }}
+              <div v-if="currentQuestion.ai_comment" class="ai-comment">
+                {{ currentQuestion.ai_comment }}
               </div>
             </div>
 
-            <!-- 教师批改区域 -->
+            <!-- Teacher grading result -->
+            <div v-if="currentQuestion.teacher_score !== null" class="teacher-result-pc">
+              <div class="result-header">
+                <el-tag type="success">教师批改</el-tag>
+                <span class="result-score">得分：{{ currentQuestion.teacher_score }}/{{ currentQuestion.max_score }} 分</span>
+              </div>
+              <div v-if="currentQuestion.teacher_comment" class="teacher-comment">
+                {{ currentQuestion.teacher_comment }}
+              </div>
+            </div>
+
+            <!-- Auto result for objective questions -->
             <div
-              v-if="needsTeacherGrading(item) && (isGrading || item.teacher_score !== null)"
-              class="teacher-grading"
+              v-if="(currentQuestion.question_type === 'choice' || currentQuestion.question_type === 'multiple' || currentQuestion.question_type === 'judgment') && currentQuestion.is_correct !== null"
+              class="auto-result-pc"
             >
-              <div class="grading-label">教师批改：</div>
-              <div class="grading-input">
-                <van-stepper
-                  v-model="item.input_score"
+              <el-tag :type="currentQuestion.is_correct ? 'success' : 'danger'">
+                {{ currentQuestion.is_correct ? '正确' : '错误' }}
+              </el-tag>
+              <span class="result-score">得分：{{ currentQuestion.score || 0 }}/{{ currentQuestion.max_score }} 分</span>
+            </div>
+
+            <!-- Teacher grading input -->
+            <div
+              v-if="needsTeacherGrading(currentQuestion) && (isGrading || currentQuestion.teacher_score !== null)"
+              class="teacher-grading-pc"
+            >
+              <div class="grading-header">教师批改</div>
+              <div class="grading-input-row">
+                <span class="grading-label">得分：</span>
+                <el-input-number
+                  v-model="currentQuestion.input_score"
                   :min="0"
-                  :max="item.max_score"
+                  :max="currentQuestion.max_score"
                   :disabled="!isGrading"
-                  integer
+                  :step="1"
+                  :precision="0"
                 />
-                <span class="score-unit">/{{ item.max_score }}分</span>
+                <span class="score-unit">/ {{ currentQuestion.max_score }} 分</span>
               </div>
-              <textarea
-                v-model="item.teacher_comment"
-                class="comment-input"
-                placeholder="批注（选填）"
-                :disabled="!isGrading"
-              ></textarea>
+              <div class="grading-comment-row">
+                <span class="grading-label">批注：</span>
+                <el-input
+                  v-model="currentQuestion.teacher_comment"
+                  type="textarea"
+                  :rows="3"
+                  placeholder="批注（选填）"
+                  :disabled="!isGrading"
+                />
+              </div>
             </div>
+          </div>
+        </div>
 
-            <!-- 已批改显示 -->
-            <div v-if="item.teacher_score !== null" class="teacher-result">
-              <span class="teacher-badge">教师批改</span>
-              <span>得分：{{ item.teacher_score }}/{{ item.max_score }} 分</span>
-              <span v-if="item.teacher_comment" class="teacher-comment-text">
-                （{{ item.teacher_comment }}）
-              </span>
-            </div>
-
-            <!-- 客观题自动判定结果 -->
-            <div
-              v-if="(item.question_type === 'choice' || item.question_type === 'multiple' || item.question_type === 'judgment') && item.is_correct !== null"
-              class="auto-result"
+        <!-- Navigation and actions -->
+        <div class="pc-grading-actions">
+          <div class="nav-buttons">
+            <el-button
+              :disabled="currentQuestionIndex === 0"
+              @click="currentQuestionIndex--"
             >
-              <span :class="['result-badge', item.is_correct ? 'correct' : 'wrong']">
-                {{ item.is_correct ? '正确' : '错误' }}
-              </span>
-              <span>得分：{{ item.score || 0 }}/{{ item.max_score }} 分</span>
-            </div>
+              <el-icon><ArrowLeft /></el-icon>
+              上一题
+            </el-button>
+            <span class="question-progress">{{ currentQuestionIndex + 1 }} / {{ answerDetail.length }}</span>
+            <el-button
+              :disabled="currentQuestionIndex === answerDetail.length - 1"
+              @click="currentQuestionIndex++"
+            >
+              下一题
+              <el-icon><ArrowRight /></el-icon>
+            </el-button>
+          </div>
+          <div class="action-buttons">
+            <el-button v-if="!isGrading && studentDetail.status === 'submitted'" type="primary" @click="startGrading">
+              开始批改
+            </el-button>
+            <el-button v-if="isGrading" type="primary" :loading="saving" @click="saveGrading">
+              保存批改结果
+            </el-button>
           </div>
         </div>
-
-        <!-- 批改操作按钮 -->
-        <div v-if="isGrading" class="grading-actions">
-          <van-button block type="primary" :loading="saving" @click="saveGrading">
-            保存批改结果
-          </van-button>
-        </div>
       </div>
-    </template>
+    </div>
 
-    <!-- 学生选择弹窗 -->
-    <van-popup v-model:show="showStudentPicker" position="bottom" round>
-      <div class="student-picker">
-        <div class="picker-header">
-          <span>选择学生答卷</span>
-          <van-icon name="cross" @click="showStudentPicker = false" />
-        </div>
-        <div class="student-list">
-          <div
-            v-for="student in studentList"
-            :key="student.id"
-            class="student-item"
-            @click="selectStudent(student)"
-          >
-            <div class="student-name">{{ student.student_name }}</div>
-            <div class="student-meta">
-              <span>{{ student.student_no }}</span>
+    <!-- Mobile Version -->
+    <div v-else>
+      <!-- 第一层：考试任务列表 -->
+      <template v-if="currentView === 'list'">
+        <van-nav-bar title="批改任务" left-arrow @click-left="$router.back()" />
+        <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
+          <div class="page-content">
+            <van-empty v-if="taskList.length === 0 && !loading" description="暂无批改任务" />
+            <div v-else class="task-list">
+              <div
+                v-for="task in taskList"
+                :key="task.task_id"
+                class="task-card card"
+                @click="enterTask(task)"
+              >
+                <div class="task-header">
+                  <span class="task-title">{{ task.title }}</span>
+                  <span :class="['task-status', task.pending_count > 0 ? 'pending' : 'done']">
+                    {{ task.pending_count > 0 ? '待批改' : '已完成' }}
+                  </span>
+                </div>
+                <div class="task-info">
+                  <span>{{ task.subject }}</span>
+                  <span class="divider">|</span>
+                  <span>待批改 {{ task.pending_count }} 份</span>
+                  <span class="divider">|</span>
+                  <span>已批改 {{ task.graded_count }} 份</span>
+                </div>
+                <div class="task-mode">
+                  批改模式：{{ getModeText(task.grading_mode) }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </van-pull-refresh>
+      </template>
+
+      <!-- 第二层：学生列表 -->
+      <template v-else-if="currentView === 'students'">
+        <van-nav-bar
+          :title="currentTask?.title || '学生列表'"
+          left-arrow
+          @click-left="backToList"
+        />
+        <div class="page-content">
+          <div class="task-summary card">
+            <div class="summary-row">
+              <span>科目：{{ currentTask?.subject }}</span>
+            </div>
+            <div class="summary-row">
+              <span>待批改：{{ studentList.filter(s => s.status === 'submitted').length }} 人</span>
               <span class="divider">|</span>
-              <span :class="['status', student.status === 'graded' ? 'done' : 'pending']">
-                {{ student.status === 'graded' ? '已批改' : '待批改' }}
-              </span>
+              <span>已批改：{{ studentList.filter(s => s.status === 'graded').length }} 人</span>
+            </div>
+          </div>
+
+          <van-empty v-if="studentList.length === 0" description="暂无学生答卷" />
+          <div v-else class="student-list-page">
+            <div
+              v-for="student in studentList"
+              :key="student.id"
+              class="student-card card"
+              @click="selectStudent(student)"
+            >
+              <div class="student-header">
+                <span class="student-name">{{ student.student_name }}</span>
+                <span :class="['student-status', student.status === 'graded' ? 'done' : 'pending']">
+                  {{ student.status === 'graded' ? '已批改' : '待批改' }}
+                </span>
+              </div>
+              <div class="student-meta">
+                <span>{{ student.student_no }}</span>
+                <span class="divider">|</span>
+                <span>{{ student.grade }}{{ student.class_name }}</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </van-popup>
+      </template>
+
+      <!-- 第三层：学生答卷详情/批改界面 -->
+      <template v-else-if="currentView === 'detail'">
+        <van-nav-bar
+          :title="studentDetail.student_name || '批改详情'"
+          left-arrow
+          @click-left="backToStudents"
+        />
+        <div class="page-content">
+          <!-- 学生信息卡片 -->
+          <div class="student-card card">
+            <div class="student-info">
+              <div class="info-row">
+                <span class="label">学生姓名：</span>
+                <span>{{ studentDetail.student_name }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">年级班级：</span>
+                <span>{{ studentDetail.grade }}{{ studentDetail.class_name }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">考试时间：</span>
+                <span>{{ formatTime(studentDetail.submit_time) }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">批改状态：</span>
+                <span :class="['status', studentDetail.status === 'graded' ? 'done' : 'pending']">
+                  {{ studentDetail.status === 'graded' ? '已批改' : '待批改' }}
+                </span>
+              </div>
+              <div class="info-row">
+                <span class="label">题目数量：</span>
+                <span>{{ answerDetail.length }} 题</span>
+              </div>
+            </div>
+            <div v-if="studentDetail.status === 'submitted'" class="action-btn">
+              <van-button type="primary" size="small" @click="startGrading">
+                开始批改
+              </van-button>
+            </div>
+          </div>
+
+          <!-- 题目列表 -->
+          <div class="question-list">
+            <div
+              v-for="(item, index) in answerDetail"
+              :key="item.id"
+              class="question-card card"
+            >
+              <div class="question-header">
+                <span class="question-index">第{{ index + 1 }}题</span>
+                <span class="question-type">{{ getTypeText(item.question_type) }}</span>
+                <span class="question-score">（{{ item.max_score }}分）</span>
+              </div>
+
+              <!-- 题目内容 -->
+              <div class="question-content">
+                <div class="content-text">{{ item.content }}</div>
+                <!-- 选项 -->
+                <div v-if="item.options" class="options-list">
+                  <div
+                    v-for="(opt, optIndex) in item.options"
+                    :key="optIndex"
+                    :class="[
+                      'option-item',
+                      { correct: isCorrectOption(item, optIndex) },
+                      { selected: is_selected(item, optIndex) }
+                    ]"
+                  >
+                    {{ String.fromCharCode(65 + optIndex) }}. {{ formatOptionText(opt) }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- 学生答案 -->
+              <div class="answer-section">
+                <div class="answer-label">学生答案：</div>
+                <div class="answer-content">
+                  <template v-if="item.question_type === 'choice' || item.question_type === 'multiple'">
+                    {{ formatStudentAnswer(item) || '未作答' }}
+                  </template>
+                  <template v-else>
+                    {{ item.student_answer_text || '未作答' }}
+                  </template>
+                </div>
+              </div>
+
+              <!-- 正确答案 -->
+              <div class="answer-section correct-answer">
+                <div class="answer-label">参考答案：</div>
+                <div class="answer-content">{{ item.answer }}</div>
+              </div>
+
+              <!-- AI批改结果（AI批改模式或混合模式中AI批改的题目） -->
+              <div v-if="item.ai_score !== null && item.ai_score !== undefined" class="ai-result">
+                <div class="ai-badge">AI批改</div>
+                <div class="ai-info">
+                  <span>得分：{{ item.ai_score }}/{{ item.max_score }} 分</span>
+                </div>
+                <div v-if="item.ai_comment" class="ai-comment">
+                  {{ item.ai_comment }}
+                </div>
+              </div>
+
+              <!-- 教师批改区域 -->
+              <div
+                v-if="needsTeacherGrading(item) && (isGrading || item.teacher_score !== null)"
+                class="teacher-grading"
+              >
+                <div class="grading-label">教师批改：</div>
+                <div class="grading-input">
+                  <van-stepper
+                    v-model="item.input_score"
+                    :min="0"
+                    :max="item.max_score"
+                    :disabled="!isGrading"
+                    integer
+                  />
+                  <span class="score-unit">/{{ item.max_score }}分</span>
+                </div>
+                <textarea
+                  v-model="item.teacher_comment"
+                  class="comment-input"
+                  placeholder="批注（选填）"
+                  :disabled="!isGrading"
+                ></textarea>
+              </div>
+
+              <!-- 已批改显示 -->
+              <div v-if="item.teacher_score !== null" class="teacher-result">
+                <span class="teacher-badge">教师批改</span>
+                <span>得分：{{ item.teacher_score }}/{{ item.max_score }} 分</span>
+                <span v-if="item.teacher_comment" class="teacher-comment-text">
+                  （{{ item.teacher_comment }}）
+                </span>
+              </div>
+
+              <!-- 客观题自动判定结果 -->
+              <div
+                v-if="(item.question_type === 'choice' || item.question_type === 'multiple' || item.question_type === 'judgment') && item.is_correct !== null"
+                class="auto-result"
+              >
+                <span :class="['result-badge', item.is_correct ? 'correct' : 'wrong']">
+                  {{ item.is_correct ? '正确' : '错误' }}
+                </span>
+                <span>得分：{{ item.score || 0 }}/{{ item.max_score }} 分</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 批改操作按钮 -->
+          <div v-if="isGrading" class="grading-actions">
+            <van-button block type="primary" :loading="saving" @click="saveGrading">
+              保存批改结果
+            </van-button>
+          </div>
+        </div>
+      </template>
+
+      <!-- 学生选择弹窗 -->
+      <van-popup v-model:show="showStudentPicker" position="bottom" round>
+        <div class="student-picker">
+          <div class="picker-header">
+            <span>选择学生答卷</span>
+            <van-icon name="cross" @click="showStudentPicker = false" />
+          </div>
+          <div class="student-list">
+            <div
+              v-for="student in studentList"
+              :key="student.id"
+              class="student-item"
+              @click="selectStudent(student)"
+            >
+              <div class="student-name">{{ student.student_name }}</div>
+              <div class="student-meta">
+                <span>{{ student.student_no }}</span>
+                <span class="divider">|</span>
+                <span :class="['status', student.status === 'graded' ? 'done' : 'pending']">
+                  {{ student.status === 'graded' ? '已批改' : '待批改' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </van-popup>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import { showSuccessToast, showFailToast } from 'vant';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { ArrowLeft, ArrowRight } from '@element-plus/icons-vue';
+import { useDevice } from '@/composables/useDevice';
 import api from '@/api/index';
+
+// Device detection
+const { isPC } = useDevice();
 
 // 视图状态
 const currentView = ref('list'); // 'list' | 'students' | 'detail'
@@ -276,6 +565,9 @@ const loading = ref(false);
 const refreshing = ref(false);
 const saving = ref(false);
 const isGrading = ref(false);
+
+// PC current question index
+const currentQuestionIndex = ref(0);
 
 // 考试任务列表
 const taskList = ref([]);
@@ -290,6 +582,11 @@ const showStudentPicker = ref(false);
 // 学生答卷详情
 const studentDetail = ref({});
 const answerDetail = ref([]);
+
+// Current question computed
+const currentQuestion = computed(() => {
+  return answerDetail.value[currentQuestionIndex.value] || null;
+});
 
 // 加载考试任务列表
 async function loadTaskList() {
@@ -322,7 +619,11 @@ async function enterTask(task) {
       currentView.value = 'students';
     }
   } catch (err) {
-    showFailToast(err.message || '加载学生列表失败');
+    if (isPC.value) {
+      ElMessage.error(err.message || '加载学生列表失败');
+    } else {
+      showFailToast(err.message || '加载学生列表失败');
+    }
   }
 }
 
@@ -353,10 +654,15 @@ async function selectStudent(student) {
         };
       });
       isGrading.value = student.status === 'submitted';
+      currentQuestionIndex.value = 0; // Reset to first question on PC
       currentView.value = 'detail';
     }
   } catch (err) {
-    showFailToast(err.message || '加载答卷详情失败');
+    if (isPC.value) {
+      ElMessage.error(err.message || '加载答卷详情失败');
+    } else {
+      showFailToast(err.message || '加载答卷详情失败');
+    }
   }
 }
 
@@ -366,6 +672,7 @@ function backToStudents() {
   studentDetail.value = {};
   answerDetail.value = [];
   isGrading.value = false;
+  currentQuestionIndex.value = 0;
 }
 
 // 返回列表
@@ -375,6 +682,7 @@ function backToList() {
   studentDetail.value = {};
   answerDetail.value = [];
   isGrading.value = false;
+  currentQuestionIndex.value = 0;
 }
 
 // 开始批改
@@ -400,19 +708,31 @@ async function saveGrading() {
         gradings: gradingData
       });
       if (res.code !== 0) {
-        showFailToast(res.message || '保存失败');
+        if (isPC.value) {
+          ElMessage.error(res.message || '保存失败');
+        } else {
+          showFailToast(res.message || '保存失败');
+        }
         return;
       }
     }
 
-    showSuccessToast('批改完成');
+    if (isPC.value) {
+      ElMessage.success('批改完成');
+    } else {
+      showSuccessToast('批改完成');
+    }
     isGrading.value = false;
     // 刷新详情
     await selectStudent({ answer_id: studentDetail.value.answer_id, status: 'graded' });
     // 刷新任务列表
     await loadTaskList();
   } catch (err) {
-    showFailToast(err.message || '保存失败');
+    if (isPC.value) {
+      ElMessage.error(err.message || '保存失败');
+    } else {
+      showFailToast(err.message || '保存失败');
+    }
   } finally {
     saving.value = false;
   }
@@ -509,6 +829,330 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* ============================ PC Styles ============================ */
+.grading-pc {
+  padding: 20px;
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+.pc-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.pc-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #303133;
+}
+
+.pc-level-1,
+.pc-level-2,
+.pc-level-3 {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.pc-summary {
+  padding: 12px 16px;
+  background: #f5f7fa;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #606266;
+}
+
+.pc-student-info {
+  margin-left: auto;
+  font-size: 14px;
+  color: #606266;
+}
+
+/* PC Grading Container */
+.pc-grading-container {
+  display: flex;
+  gap: 20px;
+  min-height: 500px;
+}
+
+.pc-question-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sidebar-title {
+  padding: 12px 16px;
+  background: #f5f7fa;
+  font-weight: 500;
+  color: #303133;
+  border-bottom: 1px solid #e4e7ed;
+}
+
+.question-nav-list {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.question-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.question-nav-item:hover {
+  background: #f5f7fa;
+}
+
+.question-nav-item.active {
+  background: #ecf5ff;
+  border-left: 3px solid #409eff;
+}
+
+.nav-index {
+  font-weight: 500;
+  color: #303133;
+}
+
+.nav-type {
+  font-size: 12px;
+  color: #909399;
+}
+
+.nav-score {
+  font-size: 12px;
+  color: #909399;
+  margin-left: auto;
+}
+
+/* PC Question Detail */
+.pc-question-detail {
+  flex: 1;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.question-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e4e7ed;
+}
+
+.question-detail-header .question-index {
+  font-size: 18px;
+  font-weight: 500;
+  color: #303133;
+}
+
+.question-detail-header .question-type {
+  font-size: 12px;
+  padding: 4px 8px;
+  background: #f0f2f5;
+  border-radius: 4px;
+  color: #606266;
+}
+
+.question-detail-header .question-score {
+  font-size: 14px;
+  color: #909399;
+}
+
+.section-label {
+  font-size: 13px;
+  color: #909399;
+  margin-bottom: 8px;
+}
+
+.question-content-section {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.question-content-section .content-text {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #303133;
+  white-space: pre-wrap;
+}
+
+.answer-section {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #f5f7fa;
+  border-radius: 8px;
+}
+
+.answer-section.reference {
+  background: #f0f9eb;
+}
+
+.answer-section .answer-content {
+  font-size: 15px;
+  color: #303133;
+  line-height: 1.6;
+}
+
+.ai-result-pc,
+.teacher-result-pc,
+.auto-result-pc {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.ai-result-pc {
+  background: #ecf5ff;
+  border-left: 3px solid #409eff;
+}
+
+.teacher-result-pc {
+  background: #f0f9eb;
+  border-left: 3px solid #67c23a;
+}
+
+.auto-result-pc {
+  background: #f5f7fa;
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.result-score {
+  font-size: 14px;
+  color: #606266;
+}
+
+.ai-comment,
+.teacher-comment {
+  font-size: 14px;
+  color: #606266;
+  line-height: 1.6;
+  margin-top: 8px;
+}
+
+.teacher-grading-pc {
+  margin-top: 20px;
+  padding: 20px;
+  background: #fffbe8;
+  border-radius: 8px;
+  border-left: 3px solid #e6a23c;
+}
+
+.grading-header {
+  font-size: 15px;
+  font-weight: 500;
+  color: #303133;
+  margin-bottom: 16px;
+}
+
+.grading-input-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.grading-label {
+  font-size: 14px;
+  color: #606266;
+}
+
+.score-unit {
+  font-size: 14px;
+  color: #909399;
+}
+
+.grading-comment-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.grading-comment-row .grading-label {
+  padding-top: 8px;
+  flex-shrink: 0;
+}
+
+.grading-comment-row .el-textarea {
+  flex: 1;
+}
+
+/* PC Grading Actions */
+.pc-grading-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding: 16px 20px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e4e7ed;
+}
+
+.nav-buttons {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.question-progress {
+  font-size: 14px;
+  color: #606266;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+/* PC Options List */
+.options-list {
+  margin-top: 12px;
+}
+
+.option-item {
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  background: white;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #303133;
+  border: 1px solid #e4e7ed;
+}
+
+.option-item.correct {
+  background: #f0f9eb;
+  color: #67c23a;
+  border-color: #67c23a;
+}
+
+.option-item.selected {
+  border-color: #409eff;
+  background: #ecf5ff;
+}
+
+/* ============================ Mobile Styles ============================ */
 .page-content {
   padding: 12px;
   padding-bottom: 20px;

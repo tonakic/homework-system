@@ -1,290 +1,527 @@
 <template>
   <div class="page">
-    <van-nav-bar title="批改管理" left-arrow @click-left="$router.back()" />
+    <!-- PC版本 -->
+    <div v-if="isPC" class="grading-config-pc">
+      <div class="pc-header">
+        <h2 class="page-title">批改管理</h2>
+      </div>
 
-    <div class="page-content">
-      <!-- 标签页切换 -->
-      <van-tabs v-model:active="activeTab" sticky shrink>
-        <van-tab title="批改配置" name="config">
+      <el-tabs v-model="activeTab" class="pc-tabs">
+        <el-tab-pane label="批改配置" name="config">
           <!-- 批改模式 -->
-          <div class="config-section">
-            <div class="section-header">批改模式</div>
-            <div class="mode-options">
-              <div
-                :class="['mode-option', { active: form.grading_mode === 'ai' }]"
-                @click="form.grading_mode = 'ai'"
-              >
-                <van-icon v-if="form.grading_mode === 'ai'" name="success" />
-                <span>AI批改</span>
-              </div>
-              <div
-                :class="['mode-option', { active: form.grading_mode === 'mixed' }]"
-                @click="form.grading_mode = 'mixed'"
-              >
-                <van-icon v-if="form.grading_mode === 'mixed'" name="success" />
-                <span>混合模式</span>
-              </div>
-            </div>
-          </div>
+          <el-card class="pc-card" shadow="never">
+            <template #header>
+              <span class="card-title">批改模式</span>
+            </template>
+            <el-radio-group v-model="form.grading_mode" class="mode-radio-group">
+              <el-radio-button value="ai">AI批改</el-radio-button>
+              <el-radio-button value="mixed">混合模式</el-radio-button>
+            </el-radio-group>
+          </el-card>
 
           <!-- AI批改设置 -->
-          <div class="config-section">
-            <div class="section-header">AI批改设置</div>
-            <van-cell-group inset>
-              <van-cell title="AI提供商" :value="providerText" is-link @click="showProviderPicker = true" />
-              <van-cell v-if="form.ai_provider === 'ollama'" title="API地址">
-                <template #value>
-                  <input v-model="form.ai_endpoint" class="cell-input" placeholder="http://localhost:11434" />
-                </template>
-              </van-cell>
-              <van-cell v-if="form.ai_provider === 'deepseek'" title="API密钥">
-                <template #value>
-                  <input v-model="form.ai_api_key" type="password" class="cell-input" placeholder="请输入密钥" />
-                </template>
-              </van-cell>
-              <van-cell title="模型">
-                <template #value>
-                  <input v-model="form.ai_model" class="cell-input" :placeholder="modelPlaceholder" />
-                </template>
-              </van-cell>
-            </van-cell-group>
-            <div class="test-section">
-              <van-button size="small" :loading="testing" @click="testConnection">测试连接</van-button>
-              <span v-if="testResult" :class="['test-result', testResult.success ? 'success' : 'fail']">
-                {{ testResult.message }}
-              </span>
-            </div>
-          </div>
+          <el-card class="pc-card" shadow="never">
+            <template #header>
+              <span class="card-title">AI批改设置</span>
+            </template>
+            <el-form :model="form" label-width="100px" class="pc-form">
+              <el-form-item label="AI提供商">
+                <el-select v-model="form.ai_provider" placeholder="请选择">
+                  <el-option label="DeepSeek" value="deepseek" />
+                  <el-option label="Ollama (本地)" value="ollama" />
+                </el-select>
+              </el-form-item>
+              <el-form-item v-if="form.ai_provider === 'ollama'" label="API地址">
+                <el-input v-model="form.ai_endpoint" placeholder="http://localhost:11434" />
+              </el-form-item>
+              <el-form-item v-if="form.ai_provider === 'deepseek'" label="API密钥">
+                <el-input v-model="form.ai_api_key" type="password" placeholder="请输入密钥" show-password />
+              </el-form-item>
+              <el-form-item label="模型">
+                <el-input v-model="form.ai_model" :placeholder="modelPlaceholder" />
+              </el-form-item>
+              <el-form-item>
+                <el-button :loading="testing" @click="testConnection">测试连接</el-button>
+                <span v-if="testResult" :class="['test-result', testResult.success ? 'success' : 'fail']">
+                  {{ testResult.message }}
+                </span>
+              </el-form-item>
+            </el-form>
+          </el-card>
 
           <!-- 提示词参数 -->
-          <div class="config-section">
-            <div class="section-header">提示词参数</div>
-            <van-cell-group inset>
-              <van-cell title="评分严格度" :value="strictnessText" is-link @click="showStrictnessPicker = true" />
-              <van-cell title="语言风格" :value="styleText" is-link @click="showStylePicker = true" />
-              <van-cell title="评语长度" :value="lengthText" is-link @click="showLengthPicker = true" />
-              <van-cell title="鼓励性语言">
-                <template #value>
-                  <div class="slider-cell">
-                    <van-slider v-model="form.prompt_encourage_ratio" :min="0" :max="100" active-color="#1989fa" />
-                    <span class="slider-value">{{ form.prompt_encourage_ratio }}%</span>
-                  </div>
-                </template>
-              </van-cell>
-              <van-cell title="错题分析" :value="analysisText" is-link @click="showAnalysisPicker = true" />
-            </van-cell-group>
-          </div>
+          <el-card class="pc-card" shadow="never">
+            <template #header>
+              <span class="card-title">提示词参数</span>
+            </template>
+            <el-form :model="form" label-width="100px" class="pc-form">
+              <el-form-item label="评分严格度">
+                <el-select v-model="form.prompt_strictness" placeholder="请选择">
+                  <el-option label="严格" value="strict" />
+                  <el-option label="中等" value="medium" />
+                  <el-option label="宽松" value="loose" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="语言风格">
+                <el-select v-model="form.prompt_style" placeholder="请选择">
+                  <el-option label="正式" value="formal" />
+                  <el-option label="鼓励型" value="encouraging" />
+                  <el-option label="轻松" value="casual" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="评语长度">
+                <el-select v-model="form.prompt_comment_length" placeholder="请选择">
+                  <el-option label="简短" value="short" />
+                  <el-option label="中等" value="medium" />
+                  <el-option label="详细" value="detailed" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="鼓励性语言">
+                <el-slider v-model="form.prompt_encourage_ratio" :min="0" :max="100" :format-tooltip="(val) => val + '%'" />
+              </el-form-item>
+              <el-form-item label="错题分析">
+                <el-select v-model="form.prompt_analysis_detail" placeholder="请选择">
+                  <el-option label="简要" value="brief" />
+                  <el-option label="中等" value="medium" />
+                  <el-option label="详细" value="detailed" />
+                </el-select>
+              </el-form-item>
+            </el-form>
+          </el-card>
 
           <!-- 混合模式配置 -->
-          <div v-if="form.grading_mode === 'mixed'" class="config-section">
-            <div class="section-header">混合模式配置</div>
-            <van-cell-group inset>
-              <van-cell title="单选题" :value="mixedText.choice" is-link @click="openMixedPicker('choice')" />
-              <van-cell title="多选题" :value="mixedText.multiple" is-link @click="openMixedPicker('multiple')" />
-              <van-cell title="填空题" :value="mixedText.fill" is-link @click="openMixedPicker('fill')" />
-              <van-cell title="判断题" :value="mixedText.judgment" is-link @click="openMixedPicker('judgment')" />
-              <van-cell title="主观题" :value="mixedText.subjective" is-link @click="openMixedPicker('subjective')" />
-            </van-cell-group>
-          </div>
+          <el-card v-if="form.grading_mode === 'mixed'" class="pc-card" shadow="never">
+            <template #header>
+              <span class="card-title">混合模式配置</span>
+            </template>
+            <el-table :data="mixedTableData" border stripe>
+              <el-table-column prop="label" label="题型" width="150" />
+              <el-table-column label="批改方式">
+                <template #default="{ row }">
+                  <el-select v-model="form.mixed_config[row.key]" placeholder="请选择">
+                    <el-option label="自动判定" value="auto" />
+                    <el-option label="AI批改" value="ai" />
+                    <el-option label="手动批改" value="manual" />
+                  </el-select>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-card>
 
           <!-- 模式说明 -->
-          <div class="config-section mode-desc">
-            <div class="desc-item" v-if="form.grading_mode === 'ai'">
-              <van-icon name="info-o" />
-              <span>AI批改：客观题自动判定，主观题由AI智能批改</span>
-            </div>
-            <div class="desc-item" v-else>
-              <van-icon name="info-o" />
-              <span>混合模式：按题型自定义批改方式，可选择自动判定、AI批改或手动批改</span>
-            </div>
-          </div>
+          <el-alert
+            :title="form.grading_mode === 'ai' ? 'AI批改：客观题自动判定，主观题由AI智能批改' : '混合模式：按题型自定义批改方式，可选择自动判定、AI批改或手动批改'"
+            type="info"
+            :closable="false"
+            show-icon
+            class="mode-alert"
+          />
 
           <!-- 保存按钮 -->
-          <div class="save-section">
-            <van-button type="primary" block :loading="saving" @click="saveConfig">保存配置</van-button>
+          <div class="save-section-pc">
+            <el-button type="primary" :loading="saving" @click="saveConfig">保存配置</el-button>
           </div>
-        </van-tab>
+        </el-tab-pane>
 
-        <van-tab title="队列管理" name="queue">
+        <el-tab-pane label="队列管理" name="queue">
           <!-- 队列状态统计 -->
-          <div class="stats-section">
-            <div class="stats-grid">
-              <div class="stat-card pending">
+          <el-card class="pc-card" shadow="never">
+            <template #header>
+              <span class="card-title">队列状态</span>
+            </template>
+            <div class="stats-grid-pc">
+              <div class="stat-card-pc pending">
                 <div class="stat-value">{{ queueStats.pending }}</div>
                 <div class="stat-label">待处理</div>
               </div>
-              <div class="stat-card processing">
+              <div class="stat-card-pc processing">
                 <div class="stat-value">{{ queueStats.processing }}</div>
                 <div class="stat-label">处理中</div>
               </div>
-              <div class="stat-card completed">
+              <div class="stat-card-pc completed">
                 <div class="stat-value">{{ queueStats.completed }}</div>
                 <div class="stat-label">已完成</div>
               </div>
-              <div class="stat-card failed">
+              <div class="stat-card-pc failed">
                 <div class="stat-value">{{ queueStats.failed }}</div>
                 <div class="stat-label">失败</div>
               </div>
             </div>
-          </div>
+          </el-card>
 
           <!-- 筛选条件 -->
-          <div class="filter-section">
-            <div class="filter-row">
-              <van-button
-                size="small"
-                :type="taskFilter === '' ? 'primary' : 'default'"
-                @click="changeTaskFilter('')"
-              >
-                全部
-              </van-button>
-              <van-button
-                size="small"
-                :type="taskFilter === 'pending' ? 'primary' : 'default'"
-                @click="changeTaskFilter('pending')"
-              >
-                待处理
-              </van-button>
-              <van-button
-                size="small"
-                :type="taskFilter === 'processing' ? 'primary' : 'default'"
-                @click="changeTaskFilter('processing')"
-              >
-                处理中
-              </van-button>
-              <van-button
-                size="small"
-                :type="taskFilter === 'completed' ? 'primary' : 'default'"
-                @click="changeTaskFilter('completed')"
-              >
-                已完成
-              </van-button>
-              <van-button
-                size="small"
-                :type="taskFilter === 'failed' ? 'primary' : 'default'"
-                @click="changeTaskFilter('failed')"
-              >
-                失败
-              </van-button>
-            </div>
-          </div>
+          <el-card class="pc-card" shadow="never">
+            <template #header>
+              <span class="card-title">任务筛选</span>
+            </template>
+            <el-form :inline="true" class="filter-form-pc">
+              <el-form-item label="状态">
+                <el-select v-model="taskFilter" placeholder="全部" clearable @change="changeTaskFilter">
+                  <el-option label="全部" value="" />
+                  <el-option label="待处理" value="pending" />
+                  <el-option label="处理中" value="processing" />
+                  <el-option label="已完成" value="completed" />
+                  <el-option label="失败" value="failed" />
+                </el-select>
+              </el-form-item>
+            </el-form>
+          </el-card>
 
           <!-- 任务列表 -->
-          <div class="task-list">
-            <van-pull-refresh v-model="taskRefreshing" @refresh="onTaskRefresh">
-              <van-list
-                v-model:loading="taskLoading"
-                :finished="taskFinished"
-                finished-text="没有更多了"
-                @load="loadTasks"
-              >
-                <div v-for="task in tasks" :key="task.id" class="task-item">
-                  <div class="task-header">
-                    <span class="task-student">{{ task.student_name }}</span>
-                    <van-tag :type="getTaskStatusType(task.status)" size="small">
-                      {{ getTaskStatusText(task.status) }}
-                    </van-tag>
-                  </div>
-                  <div class="task-info">
-                    <div class="task-exam">{{ task.exam_title }}</div>
-                    <div class="task-time">{{ formatTime(task.created_at) }}</div>
-                  </div>
-                  <div v-if="task.error_message" class="task-error">
-                    <van-icon name="warning-o" />
-                    {{ task.error_message }}
-                  </div>
-                  <div class="task-actions">
-                    <van-button
-                      v-if="task.status === 'failed'"
-                      size="small"
-                      type="primary"
-                      :loading="task.retrying"
-                      @click="retryTask(task)"
-                    >
-                      重试
-                    </van-button>
-                    <van-button
-                      v-if="task.status === 'pending' || task.status === 'processing'"
-                      size="small"
-                      type="danger"
-                      :loading="task.cancelling"
-                      @click="cancelTask(task)"
-                    >
-                      取消
-                    </van-button>
-                  </div>
-                </div>
-              </van-list>
-            </van-pull-refresh>
-          </div>
+          <el-card class="pc-card" shadow="never">
+            <template #header>
+              <span class="card-title">任务列表</span>
+            </template>
+            <el-table :data="tasks" border stripe v-loading="taskLoading">
+              <el-table-column prop="student_name" label="学生" width="120" />
+              <el-table-column prop="exam_title" label="考试任务" min-width="200" />
+              <el-table-column prop="status" label="状态" width="100">
+                <template #default="{ row }">
+                  <el-tag :type="getTaskStatusType(row.status)">{{ getTaskStatusText(row.status) }}</el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="created_at" label="创建时间" width="180">
+                <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
+              </el-table-column>
+              <el-table-column prop="error_message" label="错误信息" min-width="200">
+                <template #default="{ row }">
+                  <span v-if="row.error_message" class="error-text">{{ row.error_message }}</span>
+                  <span v-else class="no-data">-</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" width="150" fixed="right">
+                <template #default="{ row }">
+                  <el-button v-if="row.status === 'failed'" type="primary" size="small" :loading="row.retrying" @click="retryTask(row)">重试</el-button>
+                  <el-button v-if="row.status === 'pending' || row.status === 'processing'" type="danger" size="small" :loading="row.cancelling" @click="cancelTask(row)">取消</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+            <el-pagination
+              v-model:current-page="taskCurrentPage"
+              :page-size="taskPageSize"
+              :total="taskTotal"
+              layout="total, prev, pager, next"
+              class="pagination-pc"
+              @current-change="handleTaskPageChange"
+            />
+          </el-card>
 
           <!-- 队列配置 -->
-          <div class="config-section">
-            <div class="section-header">队列配置</div>
-            <van-cell-group inset>
-              <van-field
-                v-model="queueConfig.max_concurrent"
-                type="number"
-                label="最大并发数"
-                placeholder="请输入最大并发数"
-                :rules="[{ required: true, message: '请输入最大并发数' }]"
-              />
-              <van-field
-                v-model="queueConfig.max_retries"
-                type="number"
-                label="最大重试次数"
-                placeholder="请输入最大重试次数"
-                :rules="[{ required: true, message: '请输入最大重试次数' }]"
-              />
-              <van-field
-                v-model="queueConfig.task_timeout"
-                type="number"
-                label="任务超时时间(秒)"
-                placeholder="请输入超时时间"
-                :rules="[{ required: true, message: '请输入超时时间' }]"
-              />
-            </van-cell-group>
-            <div class="config-actions">
-              <van-button type="primary" block :loading="savingQueueConfig" @click="saveQueueConfig">
-                保存队列配置
-              </van-button>
-            </div>
-          </div>
-        </van-tab>
-      </van-tabs>
+          <el-card class="pc-card" shadow="never">
+            <template #header>
+              <span class="card-title">队列配置</span>
+            </template>
+            <el-form :model="queueConfig" label-width="120px" class="pc-form">
+              <el-form-item label="最大并发数">
+                <el-input-number v-model="queueConfig.max_concurrent" :min="1" :max="10" />
+              </el-form-item>
+              <el-form-item label="最大重试次数">
+                <el-input-number v-model="queueConfig.max_retries" :min="0" :max="10" />
+              </el-form-item>
+              <el-form-item label="任务超时时间(秒)">
+                <el-input-number v-model="queueConfig.task_timeout" :min="60" :max="3600" />
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" :loading="savingQueueConfig" @click="saveQueueConfig">保存队列配置</el-button>
+              </el-form-item>
+            </el-form>
+          </el-card>
+        </el-tab-pane>
+      </el-tabs>
     </div>
 
-    <!-- 选择器弹出层 -->
-    <van-popup v-model:show="showProviderPicker" position="bottom" round>
-      <van-picker :columns="providerOptions" @confirm="onProviderConfirm" @cancel="showProviderPicker = false" />
-    </van-popup>
+    <!-- 移动端版本 -->
+    <div v-else>
+      <van-nav-bar title="批改管理" left-arrow @click-left="$router.back()" />
 
-    <van-popup v-model:show="showStrictnessPicker" position="bottom" round>
-      <van-picker :columns="strictnessOptions" @confirm="onStrictnessConfirm" @cancel="showStrictnessPicker = false" />
-    </van-popup>
+      <div class="page-content">
+        <!-- 标签页切换 -->
+        <van-tabs v-model:active="activeTab" sticky shrink>
+          <van-tab title="批改配置" name="config">
+            <!-- 批改模式 -->
+            <div class="config-section">
+              <div class="section-header">批改模式</div>
+              <div class="mode-options">
+                <div
+                  :class="['mode-option', { active: form.grading_mode === 'ai' }]"
+                  @click="form.grading_mode = 'ai'"
+                >
+                  <van-icon v-if="form.grading_mode === 'ai'" name="success" />
+                  <span>AI批改</span>
+                </div>
+                <div
+                  :class="['mode-option', { active: form.grading_mode === 'mixed' }]"
+                  @click="form.grading_mode = 'mixed'"
+                >
+                  <van-icon v-if="form.grading_mode === 'mixed'" name="success" />
+                  <span>混合模式</span>
+                </div>
+              </div>
+            </div>
 
-    <van-popup v-model:show="showStylePicker" position="bottom" round>
-      <van-picker :columns="styleOptions" @confirm="onStyleConfirm" @cancel="showStylePicker = false" />
-    </van-popup>
+            <!-- AI批改设置 -->
+            <div class="config-section">
+              <div class="section-header">AI批改设置</div>
+              <van-cell-group inset>
+                <van-cell title="AI提供商" :value="providerText" is-link @click="showProviderPicker = true" />
+                <van-cell v-if="form.ai_provider === 'ollama'" title="API地址">
+                  <template #value>
+                    <input v-model="form.ai_endpoint" class="cell-input" placeholder="http://localhost:11434" />
+                  </template>
+                </van-cell>
+                <van-cell v-if="form.ai_provider === 'deepseek'" title="API密钥">
+                  <template #value>
+                    <input v-model="form.ai_api_key" type="password" class="cell-input" placeholder="请输入密钥" />
+                  </template>
+                </van-cell>
+                <van-cell title="模型">
+                  <template #value>
+                    <input v-model="form.ai_model" class="cell-input" :placeholder="modelPlaceholder" />
+                  </template>
+                </van-cell>
+              </van-cell-group>
+              <div class="test-section">
+                <van-button size="small" :loading="testing" @click="testConnection">测试连接</van-button>
+                <span v-if="testResult" :class="['test-result', testResult.success ? 'success' : 'fail']">
+                  {{ testResult.message }}
+                </span>
+              </div>
+            </div>
 
-    <van-popup v-model:show="showLengthPicker" position="bottom" round>
-      <van-picker :columns="lengthOptions" @confirm="onLengthConfirm" @cancel="showLengthPicker = false" />
-    </van-popup>
+            <!-- 提示词参数 -->
+            <div class="config-section">
+              <div class="section-header">提示词参数</div>
+              <van-cell-group inset>
+                <van-cell title="评分严格度" :value="strictnessText" is-link @click="showStrictnessPicker = true" />
+                <van-cell title="语言风格" :value="styleText" is-link @click="showStylePicker = true" />
+                <van-cell title="评语长度" :value="lengthText" is-link @click="showLengthPicker = true" />
+                <van-cell title="鼓励性语言">
+                  <template #value>
+                    <div class="slider-cell">
+                      <van-slider v-model="form.prompt_encourage_ratio" :min="0" :max="100" active-color="#1989fa" />
+                      <span class="slider-value">{{ form.prompt_encourage_ratio }}%</span>
+                    </div>
+                  </template>
+                </van-cell>
+                <van-cell title="错题分析" :value="analysisText" is-link @click="showAnalysisPicker = true" />
+              </van-cell-group>
+            </div>
 
-    <van-popup v-model:show="showAnalysisPicker" position="bottom" round>
-      <van-picker :columns="analysisOptions" @confirm="onAnalysisConfirm" @cancel="showAnalysisPicker = false" />
-    </van-popup>
+            <!-- 混合模式配置 -->
+            <div v-if="form.grading_mode === 'mixed'" class="config-section">
+              <div class="section-header">混合模式配置</div>
+              <van-cell-group inset>
+                <van-cell title="单选题" :value="mixedText.choice" is-link @click="openMixedPicker('choice')" />
+                <van-cell title="多选题" :value="mixedText.multiple" is-link @click="openMixedPicker('multiple')" />
+                <van-cell title="填空题" :value="mixedText.fill" is-link @click="openMixedPicker('fill')" />
+                <van-cell title="判断题" :value="mixedText.judgment" is-link @click="openMixedPicker('judgment')" />
+                <van-cell title="主观题" :value="mixedText.subjective" is-link @click="openMixedPicker('subjective')" />
+              </van-cell-group>
+            </div>
 
-    <van-popup v-model:show="showMixedPicker" position="bottom" round>
-      <van-picker :columns="mixedModeOptions" @confirm="onMixedConfirm" @cancel="showMixedPicker = false" />
-    </van-popup>
+            <!-- 模式说明 -->
+            <div class="config-section mode-desc">
+              <div class="desc-item" v-if="form.grading_mode === 'ai'">
+                <van-icon name="info-o" />
+                <span>AI批改：客观题自动判定，主观题由AI智能批改</span>
+              </div>
+              <div class="desc-item" v-else>
+                <van-icon name="info-o" />
+                <span>混合模式：按题型自定义批改方式，可选择自动判定、AI批改或手动批改</span>
+              </div>
+            </div>
+
+            <!-- 保存按钮 -->
+            <div class="save-section">
+              <van-button type="primary" block :loading="saving" @click="saveConfig">保存配置</van-button>
+            </div>
+          </van-tab>
+
+          <van-tab title="队列管理" name="queue">
+            <!-- 队列状态统计 -->
+            <div class="stats-section">
+              <div class="stats-grid">
+                <div class="stat-card pending">
+                  <div class="stat-value">{{ queueStats.pending }}</div>
+                  <div class="stat-label">待处理</div>
+                </div>
+                <div class="stat-card processing">
+                  <div class="stat-value">{{ queueStats.processing }}</div>
+                  <div class="stat-label">处理中</div>
+                </div>
+                <div class="stat-card completed">
+                  <div class="stat-value">{{ queueStats.completed }}</div>
+                  <div class="stat-label">已完成</div>
+                </div>
+                <div class="stat-card failed">
+                  <div class="stat-value">{{ queueStats.failed }}</div>
+                  <div class="stat-label">失败</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 筛选条件 -->
+            <div class="filter-section">
+              <div class="filter-row">
+                <van-button
+                  size="small"
+                  :type="taskFilter === '' ? 'primary' : 'default'"
+                  @click="changeTaskFilter('')"
+                >
+                  全部
+                </van-button>
+                <van-button
+                  size="small"
+                  :type="taskFilter === 'pending' ? 'primary' : 'default'"
+                  @click="changeTaskFilter('pending')"
+                >
+                  待处理
+                </van-button>
+                <van-button
+                  size="small"
+                  :type="taskFilter === 'processing' ? 'primary' : 'default'"
+                  @click="changeTaskFilter('processing')"
+                >
+                  处理中
+                </van-button>
+                <van-button
+                  size="small"
+                  :type="taskFilter === 'completed' ? 'primary' : 'default'"
+                  @click="changeTaskFilter('completed')"
+                >
+                  已完成
+                </van-button>
+                <van-button
+                  size="small"
+                  :type="taskFilter === 'failed' ? 'primary' : 'default'"
+                  @click="changeTaskFilter('failed')"
+                >
+                  失败
+                </van-button>
+              </div>
+            </div>
+
+            <!-- 任务列表 -->
+            <div class="task-list">
+              <van-pull-refresh v-model="taskRefreshing" @refresh="onTaskRefresh">
+                <van-list
+                  v-model:loading="taskLoading"
+                  :finished="taskFinished"
+                  finished-text="没有更多了"
+                  @load="loadTasks"
+                >
+                  <div v-for="task in tasks" :key="task.id" class="task-item">
+                    <div class="task-header">
+                      <span class="task-student">{{ task.student_name }}</span>
+                      <van-tag :type="getTaskStatusType(task.status)" size="small">
+                        {{ getTaskStatusText(task.status) }}
+                      </van-tag>
+                    </div>
+                    <div class="task-info">
+                      <div class="task-exam">{{ task.exam_title }}</div>
+                      <div class="task-time">{{ formatTime(task.created_at) }}</div>
+                    </div>
+                    <div v-if="task.error_message" class="task-error">
+                      <van-icon name="warning-o" />
+                      {{ task.error_message }}
+                    </div>
+                    <div class="task-actions">
+                      <van-button
+                        v-if="task.status === 'failed'"
+                        size="small"
+                        type="primary"
+                        :loading="task.retrying"
+                        @click="retryTask(task)"
+                      >
+                        重试
+                      </van-button>
+                      <van-button
+                        v-if="task.status === 'pending' || task.status === 'processing'"
+                        size="small"
+                        type="danger"
+                        :loading="task.cancelling"
+                        @click="cancelTask(task)"
+                      >
+                        取消
+                      </van-button>
+                    </div>
+                  </div>
+                </van-list>
+              </van-pull-refresh>
+            </div>
+
+            <!-- 队列配置 -->
+            <div class="config-section">
+              <div class="section-header">队列配置</div>
+              <van-cell-group inset>
+                <van-field
+                  v-model="queueConfig.max_concurrent"
+                  type="number"
+                  label="最大并发数"
+                  placeholder="请输入最大并发数"
+                  :rules="[{ required: true, message: '请输入最大并发数' }]"
+                />
+                <van-field
+                  v-model="queueConfig.max_retries"
+                  type="number"
+                  label="最大重试次数"
+                  placeholder="请输入最大重试次数"
+                  :rules="[{ required: true, message: '请输入最大重试次数' }]"
+                />
+                <van-field
+                  v-model="queueConfig.task_timeout"
+                  type="number"
+                  label="任务超时时间(秒)"
+                  placeholder="请输入超时时间"
+                  :rules="[{ required: true, message: '请输入超时时间' }]"
+                />
+              </van-cell-group>
+              <div class="config-actions">
+                <van-button type="primary" block :loading="savingQueueConfig" @click="saveQueueConfig">
+                  保存队列配置
+                </van-button>
+              </div>
+            </div>
+          </van-tab>
+        </van-tabs>
+      </div>
+
+      <!-- 选择器弹出层 -->
+      <van-popup v-model:show="showProviderPicker" position="bottom" round>
+        <van-picker :columns="providerOptions" @confirm="onProviderConfirm" @cancel="showProviderPicker = false" />
+      </van-popup>
+
+      <van-popup v-model:show="showStrictnessPicker" position="bottom" round>
+        <van-picker :columns="strictnessOptions" @confirm="onStrictnessConfirm" @cancel="showStrictnessPicker = false" />
+      </van-popup>
+
+      <van-popup v-model:show="showStylePicker" position="bottom" round>
+        <van-picker :columns="styleOptions" @confirm="onStyleConfirm" @cancel="showStylePicker = false" />
+      </van-popup>
+
+      <van-popup v-model:show="showLengthPicker" position="bottom" round>
+        <van-picker :columns="lengthOptions" @confirm="onLengthConfirm" @cancel="showLengthPicker = false" />
+      </van-popup>
+
+      <van-popup v-model:show="showAnalysisPicker" position="bottom" round>
+        <van-picker :columns="analysisOptions" @confirm="onAnalysisConfirm" @cancel="showAnalysisPicker = false" />
+      </van-popup>
+
+      <van-popup v-model:show="showMixedPicker" position="bottom" round>
+        <van-picker :columns="mixedModeOptions" @confirm="onMixedConfirm" @cancel="showMixedPicker = false" />
+      </van-popup>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { showSuccessToast, showFailToast, showConfirmDialog } from 'vant';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import api from '@/api/index';
+import { useDevice } from '@/composables/useDevice';
+
+const { isPC } = useDevice();
 
 // 标签页
 const activeTab = ref('config');
@@ -379,6 +616,15 @@ const mixedText = computed(() => ({
   subjective: mixedModeOptions.find(o => o.value === form.mixed_config.subjective)?.text || ''
 }));
 
+// PC端混合模式表格数据
+const mixedTableData = computed(() => [
+  { key: 'choice', label: '单选题' },
+  { key: 'multiple', label: '多选题' },
+  { key: 'fill', label: '填空题' },
+  { key: 'judgment', label: '判断题' },
+  { key: 'subjective', label: '主观题' }
+]);
+
 // ========== 队列管理相关 ==========
 
 // 队列统计
@@ -397,13 +643,14 @@ const taskFinished = ref(false);
 const taskRefreshing = ref(false);
 const taskCurrentPage = ref(0);
 const taskPageSize = 20;
+const taskTotal = ref(0);
 const isTaskLoading = ref(false);
 
 // 队列配置
 const queueConfig = reactive({
-  max_concurrent: '3',
-  max_retries: '3',
-  task_timeout: '300'
+  max_concurrent: 3,
+  max_retries: 3,
+  task_timeout: 300
 });
 const savingQueueConfig = ref(false);
 
@@ -423,12 +670,12 @@ function getTaskStatusText(status) {
 function getTaskStatusType(status) {
   const typeMap = {
     pending: 'warning',
-    processing: 'primary',
+    processing: '',
     completed: 'success',
     failed: 'danger',
-    cancelled: 'default'
+    cancelled: 'info'
   };
-  return typeMap[status] || 'default';
+  return typeMap[status] || 'info';
 }
 
 // 格式化时间
@@ -488,6 +735,7 @@ async function loadTasks() {
         cancelling: false
       }));
       tasks.value.push(...newTasks);
+      taskTotal.value = res.data.total || tasks.value.length;
       // 判断是否还有更多数据
       taskFinished.value = newTasks.length < taskPageSize;
     } else {
@@ -495,16 +743,80 @@ async function loadTasks() {
       console.error('加载任务列表失败:', res.message);
       taskCurrentPage.value--; // 回退页码
       taskFinished.value = false; // 允许重试
-      showFailToast(res.message || '加载失败');
+      const errMsg = res.message || '加载失败';
+      if (isPC.value) {
+        ElMessage.error(errMsg);
+      } else {
+        showFailToast(errMsg);
+      }
     }
   } catch (err) {
     console.error('加载任务列表异常:', err);
     taskCurrentPage.value--; // 回退页码，允许重试
     taskFinished.value = false; // 允许重试
-    showFailToast(err.message || '加载任务列表失败');
+    const errMsg = err.message || '加载任务列表失败';
+    if (isPC.value) {
+      ElMessage.error(errMsg);
+    } else {
+      showFailToast(errMsg);
+    }
   } finally {
     taskLoading.value = false;
     taskRefreshing.value = false;
+    isTaskLoading.value = false;
+  }
+}
+
+// PC端分页变化
+async function handleTaskPageChange(page) {
+  taskCurrentPage.value = page;
+  tasks.value = [];
+  taskFinished.value = false;
+  isTaskLoading.value = false;
+  taskLoading.value = false;
+  await loadTasksForPage(page);
+}
+
+// 加载指定页任务
+async function loadTasksForPage(page) {
+  if (isTaskLoading.value) return;
+  isTaskLoading.value = true;
+  taskLoading.value = true;
+
+  try {
+    const params = {
+      page: page,
+      pageSize: taskPageSize
+    };
+    if (taskFilter.value) {
+      params.status = taskFilter.value;
+    }
+    const res = await api.get('/grading-queue/tasks', { params });
+    if (res.code === 0) {
+      tasks.value = (res.data.list || []).map(t => ({
+        ...t,
+        retrying: false,
+        cancelling: false
+      }));
+      taskTotal.value = res.data.total || tasks.value.length;
+      taskFinished.value = tasks.value.length < taskPageSize;
+    } else {
+      const errMsg = res.message || '加载失败';
+      if (isPC.value) {
+        ElMessage.error(errMsg);
+      } else {
+        showFailToast(errMsg);
+      }
+    }
+  } catch (err) {
+    const errMsg = err.message || '加载任务列表失败';
+    if (isPC.value) {
+      ElMessage.error(errMsg);
+    } else {
+      showFailToast(errMsg);
+    }
+  } finally {
+    taskLoading.value = false;
     isTaskLoading.value = false;
   }
 }
@@ -530,10 +842,17 @@ function changeTaskFilter(status) {
   isTaskLoading.value = false;
   taskLoading.value = false; // 重置加载状态
   loadQueueStats(); // 刷新统计数据
-  // 使用 nextTick 确保 van-list 状态同步后再加载
-  setTimeout(() => {
-    loadTasks();
-  }, 50);
+
+  if (isPC.value) {
+    // PC端直接加载第一页
+    taskCurrentPage.value = 1;
+    loadTasksForPage(1);
+  } else {
+    // 移动端使用 nextTick 确保 van-list 状态同步后再加载
+    setTimeout(() => {
+      loadTasks();
+    }, 50);
+  }
 }
 
 // 重试任务
@@ -542,13 +861,27 @@ async function retryTask(task) {
   try {
     const res = await api.post(`/grading-queue/tasks/${task.id}/retry`);
     if (res.code === 0) {
-      showSuccessToast('任务已重新加入队列');
+      if (isPC.value) {
+        ElMessage.success('任务已重新加入队列');
+      } else {
+        showSuccessToast('任务已重新加入队列');
+      }
       onTaskRefresh();
     } else {
-      showFailToast(res.message || '重试失败');
+      const errMsg = res.message || '重试失败';
+      if (isPC.value) {
+        ElMessage.error(errMsg);
+      } else {
+        showFailToast(errMsg);
+      }
     }
   } catch (err) {
-    showFailToast(err.message || '重试失败');
+    const errMsg = err.message || '重试失败';
+    if (isPC.value) {
+      ElMessage.error(errMsg);
+    } else {
+      showFailToast(errMsg);
+    }
   } finally {
     task.retrying = false;
   }
@@ -557,21 +890,39 @@ async function retryTask(task) {
 // 取消任务
 async function cancelTask(task) {
   try {
-    await showConfirmDialog({
-      title: '确认取消',
-      message: '确定要取消该批改任务吗？'
-    });
+    if (isPC.value) {
+      await ElMessageBox.confirm('确定要取消该批改任务吗？', '确认取消');
+    } else {
+      await showConfirmDialog({
+        title: '确认取消',
+        message: '确定要取消该批改任务吗？'
+      });
+    }
     task.cancelling = true;
     const res = await api.post(`/grading-queue/tasks/${task.id}/cancel`);
     if (res.code === 0) {
-      showSuccessToast('任务已取消');
+      if (isPC.value) {
+        ElMessage.success('任务已取消');
+      } else {
+        showSuccessToast('任务已取消');
+      }
       onTaskRefresh();
     } else {
-      showFailToast(res.message || '取消失败');
+      const errMsg = res.message || '取消失败';
+      if (isPC.value) {
+        ElMessage.error(errMsg);
+      } else {
+        showFailToast(errMsg);
+      }
     }
   } catch (err) {
     if (err !== 'cancel') {
-      showFailToast(err.message || '取消失败');
+      const errMsg = err.message || '取消失败';
+      if (isPC.value) {
+        ElMessage.error(errMsg);
+      } else {
+        showFailToast(errMsg);
+      }
     }
   } finally {
     task.cancelling = false;
@@ -583,9 +934,9 @@ async function loadQueueConfig() {
   try {
     const res = await api.get('/grading-queue/config');
     if (res.code === 0 && res.data) {
-      queueConfig.max_concurrent = String(res.data.max_concurrent || '3');
-      queueConfig.max_retries = String(res.data.max_retries || '3');
-      queueConfig.task_timeout = String(res.data.task_timeout || '300');
+      queueConfig.max_concurrent = res.data.max_concurrent || 3;
+      queueConfig.max_retries = res.data.max_retries || 3;
+      queueConfig.task_timeout = res.data.task_timeout || 300;
     }
   } catch (err) {
     console.error('加载队列配置失败:', err);
@@ -603,12 +954,26 @@ async function saveQueueConfig() {
     };
     const res = await api.put('/grading-queue/config', data);
     if (res.code === 0) {
-      showSuccessToast('队列配置保存成功');
+      if (isPC.value) {
+        ElMessage.success('队列配置保存成功');
+      } else {
+        showSuccessToast('队列配置保存成功');
+      }
     } else {
-      showFailToast(res.message || '保存失败');
+      const errMsg = res.message || '保存失败';
+      if (isPC.value) {
+        ElMessage.error(errMsg);
+      } else {
+        showFailToast(errMsg);
+      }
     }
   } catch (err) {
-    showFailToast(err.message || '保存失败');
+    const errMsg = err.message || '保存失败';
+    if (isPC.value) {
+      ElMessage.error(errMsg);
+    } else {
+      showFailToast(errMsg);
+    }
   } finally {
     savingQueueConfig.value = false;
   }
@@ -620,7 +985,12 @@ watch(activeTab, (newVal) => {
     loadQueueStats();
     loadQueueConfig();
     if (tasks.value.length === 0) {
-      loadTasks();
+      if (isPC.value) {
+        taskCurrentPage.value = 1;
+        loadTasksForPage(1);
+      } else {
+        loadTasks();
+      }
     }
   }
 });
@@ -667,15 +1037,29 @@ async function saveConfig() {
       res = await api.post('/grading-config', { ...data, config_name: '系统批改配置' });
     }
     if (res.code === 0) {
-      showSuccessToast('配置保存成功');
+      if (isPC.value) {
+        ElMessage.success('配置保存成功');
+      } else {
+        showSuccessToast('配置保存成功');
+      }
       if (res.data?.id) {
         configId.value = res.data.id;
       }
     } else {
-      showFailToast(res.message || '保存失败');
+      const errMsg = res.message || '保存失败';
+      if (isPC.value) {
+        ElMessage.error(errMsg);
+      } else {
+        showFailToast(errMsg);
+      }
     }
   } catch (err) {
-    showFailToast(err.message || '保存失败');
+    const errMsg = err.message || '保存失败';
+    if (isPC.value) {
+      ElMessage.error(errMsg);
+    } else {
+      showFailToast(errMsg);
+    }
   } finally {
     saving.value = false;
   }
@@ -746,6 +1130,135 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* ========== PC端样式 ========== */
+.grading-config-pc {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pc-header {
+  margin-bottom: 20px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #303133;
+  margin: 0;
+}
+
+.pc-tabs {
+  background: #fff;
+  border-radius: 8px;
+}
+
+.pc-card {
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #303133;
+}
+
+.pc-form {
+  max-width: 600px;
+}
+
+.mode-radio-group {
+  display: flex;
+  gap: 12px;
+}
+
+.test-result {
+  margin-left: 12px;
+  font-size: 14px;
+}
+
+.test-result.success {
+  color: #67c23a;
+}
+
+.test-result.fail {
+  color: #f56c6c;
+}
+
+.mode-alert {
+  margin-bottom: 20px;
+}
+
+.save-section-pc {
+  margin-top: 20px;
+  padding: 20px 0;
+  border-top: 1px solid #ebeef5;
+}
+
+/* PC端统计卡片 */
+.stats-grid-pc {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.stat-card-pc {
+  background: #f5f7fa;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+}
+
+.stat-card-pc .stat-value {
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.stat-card-pc .stat-label {
+  font-size: 14px;
+  color: #909399;
+}
+
+.stat-card-pc.pending .stat-value {
+  color: #e6a23c;
+}
+
+.stat-card-pc.processing .stat-value {
+  color: #409eff;
+}
+
+.stat-card-pc.completed .stat-value {
+  color: #67c23a;
+}
+
+.stat-card-pc.failed .stat-value {
+  color: #f56c6c;
+}
+
+/* PC端筛选表单 */
+.filter-form-pc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* PC端分页 */
+.pagination-pc {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.error-text {
+  color: #f56c6c;
+}
+
+.no-data {
+  color: #c0c4cc;
+}
+
+/* ========== 移动端样式 ========== */
 .page-content {
   padding: 0;
   padding-bottom: 20px;

@@ -1,148 +1,279 @@
 <template>
   <div class="page">
-    <van-nav-bar title="操作日志" left-arrow @click-left="$router.back()">
-      <template #right>
-        <van-icon v-if="!deleteMode" name="delete-o" size="20" style="margin-right: 12px;" @click="enterDeleteMode" />
-        <van-icon v-if="!deleteMode" name="down" size="20" @click="exportLogs" />
-        <span v-if="deleteMode" class="cancel-btn" @click="exitDeleteMode">取消</span>
-      </template>
-    </van-nav-bar>
-
-    <div class="page-content">
-      <!-- 筛选条件 -->
-      <div class="filter-section">
-        <!-- 第一行：筛选按钮 -->
-        <div class="filter-row">
-          <div class="filter-buttons">
-            <van-button
-              size="small"
-              :type="filterUserType ? 'primary' : 'default'"
-              @click="showUserTypePicker = true"
-            >
-              {{ getUserTypeName(filterUserType) }}
-              <van-icon name="arrow-down" />
-            </van-button>
-            <van-button
-              size="small"
-              :type="filterAction ? 'primary' : 'default'"
-              @click="showActionPicker = true"
-            >
-              {{ getActionName(filterAction) }}
-              <van-icon name="arrow-down" />
-            </van-button>
-            <van-button
-              size="small"
-              :type="startDate || endDate ? 'primary' : 'default'"
-              @click="openDatePicker"
-            >
-              {{ getDateFilterShort() }}
-              <van-icon name="arrow-down" />
-            </van-button>
-          </div>
-        </div>
-        <!-- 第二行：搜索框 -->
-        <div class="search-row">
-          <van-search
-            v-model="searchKeyword"
-            placeholder="搜索用户名或详情"
-            shape="round"
-            :clearable="true"
-            @search="onRefresh"
-            @clear="onRefresh"
-          />
-        </div>
-        <!-- 日期筛选标签 -->
-        <div v-if="startDate || endDate" class="date-tags">
-          <van-tag type="primary" size="medium" closeable @close="clearDateFilter">
-            {{ getDateFilterText() }}
-          </van-tag>
+    <!-- PC版本 -->
+    <div v-if="isPC" class="logs-pc">
+      <div class="pc-header">
+        <h2 class="page-title">操作日志</h2>
+        <div class="header-actions">
+          <el-button type="primary" @click="exportLogs">
+            <el-icon><Download /></el-icon>
+            导出日志
+          </el-button>
+          <el-button type="danger" :disabled="selectedIds.length === 0" @click="confirmDelete">
+            <el-icon><Delete /></el-icon>
+            删除选中 ({{ selectedIds.length }})
+          </el-button>
         </div>
       </div>
 
-      <!-- 用户类型筛选弹出层 -->
-      <van-popup v-model:show="showUserTypePicker" position="bottom" round>
-        <van-picker
-          :columns="userTypeOptions"
-          @confirm="onUserTypeConfirm"
-          @cancel="showUserTypePicker = false"
-        />
-      </van-popup>
-
-      <!-- 操作类型筛选弹出层 -->
-      <van-popup v-model:show="showActionPicker" position="bottom" round>
-        <van-picker
-          :columns="actionOptions"
-          @confirm="onActionConfirm"
-          @cancel="showActionPicker = false"
-        />
-      </van-popup>
-
-      <!-- 日期筛选弹出层 -->
-      <van-popup v-model:show="showDatePicker" position="bottom" round>
-        <div class="date-picker-header">
-          <span class="date-picker-title">选择日期范围</span>
-          <span class="date-picker-clear" @click="clearDateFilter">清除</span>
-        </div>
-        <div class="date-range-inputs">
-          <div class="date-input" :class="{ active: selectingStart }" @click="selectingStart = true">
-            <span class="date-label">开始日期</span>
-            <span class="date-value" :class="{ placeholder: !startDate }">{{ startDate || '请选择' }}</span>
-          </div>
-          <span class="date-separator">至</span>
-          <div class="date-input" :class="{ active: !selectingStart }" @click="selectingStart = false">
-            <span class="date-label">结束日期</span>
-            <span class="date-value" :class="{ placeholder: !endDate }">{{ endDate || '请选择' }}</span>
-          </div>
-        </div>
-        <van-date-picker
-          v-model="selectedDateArray"
-          :title="selectingStart ? '选择开始日期' : '选择结束日期'"
-          :columns-type="['year', 'month', 'day']"
-          :min-date="minDate"
-          :max-date="maxDate"
-          @confirm="onDateConfirm"
-          @cancel="cancelDatePicker"
-        />
-        <div class="date-picker-footer">
-          <van-button block type="primary" @click="confirmDateRange">确定筛选</van-button>
-        </div>
-      </van-popup>
+      <!-- 筛选条件 -->
+      <el-card class="pc-card" shadow="never">
+        <template #header>
+          <span class="card-title">筛选条件</span>
+        </template>
+        <el-form :inline="true" class="filter-form-pc">
+          <el-form-item label="用户类型">
+            <el-select v-model="filterUserType" placeholder="全部用户" clearable @change="onRefresh">
+              <el-option label="全部用户" value="" />
+              <el-option label="管理员" value="admin" />
+              <el-option label="教师" value="teacher" />
+              <el-option label="学生" value="student" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="操作类型">
+            <el-select v-model="filterAction" placeholder="全部操作" clearable @change="onRefresh">
+              <el-option label="全部操作" value="" />
+              <el-option label="登录" value="login" />
+              <el-option label="登出" value="logout" />
+              <el-option label="新增" value="add" />
+              <el-option label="修改" value="update" />
+              <el-option label="删除" value="delete" />
+              <el-option label="重置密码" value="reset_password" />
+              <el-option label="修改密码" value="change_password" />
+              <el-option label="导入" value="import" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="日期范围">
+            <el-date-picker
+              v-model="dateRange"
+              type="daterange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              value-format="YYYY-MM-DD"
+              :shortcuts="dateShortcuts"
+              @change="handleDateRangeChange"
+            />
+          </el-form-item>
+          <el-form-item label="搜索">
+            <el-input v-model="searchKeyword" placeholder="搜索用户名或详情" clearable @keyup.enter="onRefresh" @clear="onRefresh" style="width: 200px;">
+              <template #append>
+                <el-button @click="onRefresh">搜索</el-button>
+              </template>
+            </el-input>
+          </el-form-item>
+        </el-form>
+      </el-card>
 
       <!-- 日志列表 -->
-      <div class="log-list">
-        <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
-          <van-list v-model:loading="loading" :finished="finished" finished-text="没有更多了" @load="loadLogs">
-            <div v-for="log in logs" :key="log.id" class="log-item" :class="{ 'selected': selectedIds.includes(log.id) }" @click="toggleSelect(log.id)">
-              <van-checkbox v-if="deleteMode" :model-value="selectedIds.includes(log.id)" @click.stop class="log-checkbox" />
-              <div class="log-content-wrapper">
-                <div class="log-header">
-                  <span class="log-user">
-                    <van-tag :type="getUserTypeTagType(log.user_type)" size="small">
-                      {{ getUserTypeName(log.user_type) }}
-                    </van-tag>
-                    {{ log.user_name }}
-                  </span>
-                  <span class="log-time">{{ formatTime(log.created_at) }}</span>
-                </div>
-                <div class="log-content">
-                  <span class="log-action">{{ getActionName(log.action) }}</span>
-                  <span v-if="log.target_type" class="log-target">{{ getTargetTypeName(log.target_type) }}</span>
-                  <span class="log-detail">{{ log.detail }}</span>
-                </div>
-                <div v-if="log.ip_address" class="log-ip">IP: {{ log.ip_address }}</div>
+      <el-card class="pc-card" shadow="never">
+        <template #header>
+          <span class="card-title">操作日志列表</span>
+        </template>
+        <el-table
+          ref="tableRef"
+          :data="logs"
+          border
+          stripe
+          v-loading="loading"
+          @selection-change="handleSelectionChange"
+        >
+          <el-table-column type="selection" width="55" />
+          <el-table-column prop="user_name" label="用户" width="120">
+            <template #default="{ row }">
+              <div class="user-cell">
+                <el-tag :type="getUserTypeTagType(row.user_type)" size="small">
+                  {{ getUserTypeName(row.user_type) }}
+                </el-tag>
+                <span class="user-name">{{ row.user_name }}</span>
               </div>
-            </div>
-          </van-list>
-        </van-pull-refresh>
-      </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="action" label="操作类型" width="100">
+            <template #default="{ row }">
+              <el-tag :type="getActionTagType(row.action)">{{ getActionName(row.action) }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="target_type" label="操作对象" width="100">
+            <template #default="{ row }">
+              <span v-if="row.target_type">{{ getTargetTypeName(row.target_type) }}</span>
+              <span v-else class="no-data">-</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="detail" label="详情" min-width="250">
+            <template #default="{ row }">
+              <span class="detail-text">{{ row.detail }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="ip_address" label="IP地址" width="130">
+            <template #default="{ row }">
+              <span v-if="row.ip_address">{{ row.ip_address }}</span>
+              <span v-else class="no-data">-</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="created_at" label="时间" width="180">
+            <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          v-model:current-page="currentPage"
+          :page-size="pageSize"
+          :total="total"
+          :page-sizes="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
+          class="pagination-pc"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
+        />
+      </el-card>
+    </div>
 
-      <!-- 删除模式底部操作栏 -->
-      <div v-if="deleteMode" class="delete-toolbar">
-        <van-checkbox v-model="isAllSelected" @change="toggleSelectAll">全选</van-checkbox>
-        <span class="selected-count">已选 {{ selectedIds.length }} 项</span>
-        <van-button type="danger" size="small" :disabled="selectedIds.length === 0" @click="confirmDelete">
-          删除
-        </van-button>
+    <!-- 移动端版本 -->
+    <div v-else>
+      <van-nav-bar title="操作日志" left-arrow @click-left="$router.back()">
+        <template #right>
+          <van-icon v-if="!deleteMode" name="delete-o" size="20" style="margin-right: 12px;" @click="enterDeleteMode" />
+          <van-icon v-if="!deleteMode" name="down" size="20" @click="exportLogs" />
+          <span v-if="deleteMode" class="cancel-btn" @click="exitDeleteMode">取消</span>
+        </template>
+      </van-nav-bar>
+
+      <div class="page-content">
+        <!-- 筛选条件 -->
+        <div class="filter-section">
+          <!-- 第一行：筛选按钮 -->
+          <div class="filter-row">
+            <div class="filter-buttons">
+              <van-button
+                size="small"
+                :type="filterUserType ? 'primary' : 'default'"
+                @click="showUserTypePicker = true"
+              >
+                {{ getUserTypeName(filterUserType) }}
+                <van-icon name="arrow-down" />
+              </van-button>
+              <van-button
+                size="small"
+                :type="filterAction ? 'primary' : 'default'"
+                @click="showActionPicker = true"
+              >
+                {{ getActionName(filterAction) }}
+                <van-icon name="arrow-down" />
+              </van-button>
+              <van-button
+                size="small"
+                :type="startDate || endDate ? 'primary' : 'default'"
+                @click="openDatePicker"
+              >
+                {{ getDateFilterShort() }}
+                <van-icon name="arrow-down" />
+              </van-button>
+            </div>
+          </div>
+          <!-- 第二行：搜索框 -->
+          <div class="search-row">
+            <van-search
+              v-model="searchKeyword"
+              placeholder="搜索用户名或详情"
+              shape="round"
+              :clearable="true"
+              @search="onRefresh"
+              @clear="onRefresh"
+            />
+          </div>
+          <!-- 日期筛选标签 -->
+          <div v-if="startDate || endDate" class="date-tags">
+            <van-tag type="primary" size="medium" closeable @close="clearDateFilter">
+              {{ getDateFilterText() }}
+            </van-tag>
+          </div>
+        </div>
+
+        <!-- 用户类型筛选弹出层 -->
+        <van-popup v-model:show="showUserTypePicker" position="bottom" round>
+          <van-picker
+            :columns="userTypeOptions"
+            @confirm="onUserTypeConfirm"
+            @cancel="showUserTypePicker = false"
+          />
+        </van-popup>
+
+        <!-- 操作类型筛选弹出层 -->
+        <van-popup v-model:show="showActionPicker" position="bottom" round>
+          <van-picker
+            :columns="actionOptions"
+            @confirm="onActionConfirm"
+            @cancel="showActionPicker = false"
+          />
+        </van-popup>
+
+        <!-- 日期筛选弹出层 -->
+        <van-popup v-model:show="showDatePicker" position="bottom" round>
+          <div class="date-picker-header">
+            <span class="date-picker-title">选择日期范围</span>
+            <span class="date-picker-clear" @click="clearDateFilter">清除</span>
+          </div>
+          <div class="date-range-inputs">
+            <div class="date-input" :class="{ active: selectingStart }" @click="selectingStart = true">
+              <span class="date-label">开始日期</span>
+              <span class="date-value" :class="{ placeholder: !startDate }">{{ startDate || '请选择' }}</span>
+            </div>
+            <span class="date-separator">至</span>
+            <div class="date-input" :class="{ active: !selectingStart }" @click="selectingStart = false">
+              <span class="date-label">结束日期</span>
+              <span class="date-value" :class="{ placeholder: !endDate }">{{ endDate || '请选择' }}</span>
+            </div>
+          </div>
+          <van-date-picker
+            v-model="selectedDateArray"
+            :title="selectingStart ? '选择开始日期' : '选择结束日期'"
+            :columns-type="['year', 'month', 'day']"
+            :min-date="minDate"
+            :max-date="maxDate"
+            @confirm="onDateConfirm"
+            @cancel="cancelDatePicker"
+          />
+          <div class="date-picker-footer">
+            <van-button block type="primary" @click="confirmDateRange">确定筛选</van-button>
+          </div>
+        </van-popup>
+
+        <!-- 日志列表 -->
+        <div class="log-list">
+          <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
+            <van-list v-model:loading="loading" :finished="finished" finished-text="没有更多了" @load="loadLogs">
+              <div v-for="log in logs" :key="log.id" class="log-item" :class="{ 'selected': selectedIds.includes(log.id) }" @click="toggleSelect(log.id)">
+                <van-checkbox v-if="deleteMode" :model-value="selectedIds.includes(log.id)" @click.stop class="log-checkbox" />
+                <div class="log-content-wrapper">
+                  <div class="log-header">
+                    <span class="log-user">
+                      <van-tag :type="getUserTypeTagType(log.user_type)" size="small">
+                        {{ getUserTypeName(log.user_type) }}
+                      </van-tag>
+                      {{ log.user_name }}
+                    </span>
+                    <span class="log-time">{{ formatTime(log.created_at) }}</span>
+                  </div>
+                  <div class="log-content">
+                    <span class="log-action">{{ getActionName(log.action) }}</span>
+                    <span v-if="log.target_type" class="log-target">{{ getTargetTypeName(log.target_type) }}</span>
+                    <span class="log-detail">{{ log.detail }}</span>
+                  </div>
+                  <div v-if="log.ip_address" class="log-ip">IP: {{ log.ip_address }}</div>
+                </div>
+              </div>
+            </van-list>
+          </van-pull-refresh>
+        </div>
+
+        <!-- 删除模式底部操作栏 -->
+        <div v-if="deleteMode" class="delete-toolbar">
+          <van-checkbox v-model="isAllSelected" @change="toggleSelectAll">全选</van-checkbox>
+          <span class="selected-count">已选 {{ selectedIds.length }} 项</span>
+          <van-button type="danger" size="small" :disabled="selectedIds.length === 0" @click="confirmDelete">
+            删除
+          </van-button>
+        </div>
       </div>
     </div>
   </div>
@@ -151,8 +282,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { showFailToast, showSuccessToast, showConfirmDialog } from 'vant';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { Download, Delete } from '@element-plus/icons-vue';
 import api from '@/api/index';
 import { formatTime } from '@/utils/time';
+import { useDevice } from '@/composables/useDevice';
+
+const { isPC } = useDevice();
 
 // 筛选条件
 const filterUserType = ref('');
@@ -160,6 +296,47 @@ const filterAction = ref('');
 const searchKeyword = ref('');
 const startDate = ref('');
 const endDate = ref('');
+
+// PC端日期范围
+const dateRange = ref([]);
+
+// 日期快捷选项
+const dateShortcuts = [
+  {
+    text: '今天',
+    value: () => {
+      const today = new Date();
+      return [today, today];
+    }
+  },
+  {
+    text: '最近7天',
+    value: () => {
+      const end = new Date();
+      const start = new Date();
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+      return [start, end];
+    }
+  },
+  {
+    text: '最近30天',
+    value: () => {
+      const end = new Date();
+      const start = new Date();
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+      return [start, end];
+    }
+  },
+  {
+    text: '最近90天',
+    value: () => {
+      const end = new Date();
+      const start = new Date();
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+      return [start, end];
+    }
+  }
+];
 
 // 日期范围限制
 const minDate = ref(new Date(2024, 0, 1));
@@ -184,7 +361,8 @@ const loading = ref(false);
 const finished = ref(false);
 const refreshing = ref(false);
 const currentPage = ref(0);
-const pageSize = 20;
+const pageSize = ref(20);
+const total = ref(0);
 const isLoading = ref(false);
 
 // 删除模式
@@ -276,6 +454,20 @@ function getUserTypeTagType(type) {
   return typeMap[type] || 'default';
 }
 
+function getActionTagType(action) {
+  const typeMap = {
+    login: 'success',
+    logout: 'info',
+    add: 'primary',
+    update: 'warning',
+    delete: 'danger',
+    reset_password: 'warning',
+    change_password: 'info',
+    import: 'primary'
+  };
+  return typeMap[action] || 'info';
+}
+
 function getDateFilterShort() {
   if (!startDate.value && !endDate.value) return '日期';
   return '已选';
@@ -327,7 +519,7 @@ async function loadLogs() {
   try {
     const params = {
       page: currentPage.value,
-      pageSize,
+      pageSize: pageSize.value,
       user_type: filterUserType.value,
       action: filterAction.value,
       keyword: searchKeyword.value,
@@ -337,13 +529,62 @@ async function loadLogs() {
     const res = await api.get('/admin/logs', { params });
     if (res.code === 0) {
       logs.value.push(...res.data.list);
-      finished.value = res.data.list.length < pageSize;
+      total.value = res.data.total || logs.value.length;
+      finished.value = res.data.list.length < pageSize.value;
     } else {
       finished.value = true;
     }
   } catch (err) {
-    showFailToast(err.message || '加载日志列表失败，请稍后重试');
+    const errMsg = err.message || '加载日志列表失败，请稍后重试';
+    if (isPC.value) {
+      ElMessage.error(errMsg);
+    } else {
+      showFailToast(errMsg);
+    }
     finished.value = true;
+  } finally {
+    loading.value = false;
+    refreshing.value = false;
+    isLoading.value = false;
+  }
+}
+
+// PC端加载指定页
+async function loadLogsForPage(page) {
+  if (isLoading.value) return;
+  isLoading.value = true;
+  loading.value = true;
+
+  try {
+    const params = {
+      page: page,
+      pageSize: pageSize.value,
+      user_type: filterUserType.value,
+      action: filterAction.value,
+      keyword: searchKeyword.value,
+      start_date: startDate.value,
+      end_date: endDate.value
+    };
+    const res = await api.get('/admin/logs', { params });
+    if (res.code === 0) {
+      logs.value = res.data.list;
+      total.value = res.data.total || logs.value.length;
+      finished.value = logs.value.length < pageSize.value;
+    } else {
+      const errMsg = res.message || '加载日志列表失败';
+      if (isPC.value) {
+        ElMessage.error(errMsg);
+      } else {
+        showFailToast(errMsg);
+      }
+    }
+  } catch (err) {
+    const errMsg = err.message || '加载日志列表失败';
+    if (isPC.value) {
+      ElMessage.error(errMsg);
+    } else {
+      showFailToast(errMsg);
+    }
   } finally {
     loading.value = false;
     refreshing.value = false;
@@ -358,7 +599,43 @@ function onRefresh() {
   finished.value = false;
   isLoading.value = false;
   selectedIds.value = [];
-  loadLogs();
+
+  if (isPC.value) {
+    currentPage.value = 1;
+    loadLogsForPage(1);
+  } else {
+    loadLogs();
+  }
+}
+
+// PC端分页变化
+function handlePageChange(page) {
+  currentPage.value = page;
+  loadLogsForPage(page);
+}
+
+// PC端每页数量变化
+function handleSizeChange(size) {
+  pageSize.value = size;
+  currentPage.value = 1;
+  loadLogsForPage(1);
+}
+
+// PC端日期范围变化
+function handleDateRangeChange(val) {
+  if (val && val.length === 2) {
+    startDate.value = val[0];
+    endDate.value = val[1];
+  } else {
+    startDate.value = '';
+    endDate.value = '';
+  }
+  onRefresh();
+}
+
+// PC端表格选择变化
+function handleSelectionChange(selection) {
+  selectedIds.value = selection.map(item => item.id);
 }
 
 // 筛选回调
@@ -385,7 +662,11 @@ function onDateConfirm({ selectedValues }) {
 
 function confirmDateRange() {
   if (startDate.value && endDate.value && startDate.value > endDate.value) {
-    showFailToast('开始日期不能晚于结束日期');
+    if (isPC.value) {
+      ElMessage.error('开始日期不能晚于结束日期');
+    } else {
+      showFailToast('开始日期不能晚于结束日期');
+    }
     return;
   }
   showDatePicker.value = false;
@@ -397,6 +678,7 @@ function clearDateFilter() {
   endDate.value = '';
   tempStartDate.value = '';
   tempEndDate.value = '';
+  dateRange.value = [];
 }
 
 function openDatePicker() {
@@ -444,10 +726,16 @@ async function confirmDelete() {
   if (selectedIds.value.length === 0) return;
 
   try {
-    await showConfirmDialog({
-      title: '确认删除',
-      message: `确定要删除选中的 ${selectedIds.value.length} 条日志吗？`
-    });
+    if (isPC.value) {
+      await ElMessageBox.confirm(`确定要删除选中的 ${selectedIds.value.length} 条日志吗？`, '确认删除', {
+        type: 'warning'
+      });
+    } else {
+      await showConfirmDialog({
+        title: '确认删除',
+        message: `确定要删除选中的 ${selectedIds.value.length} 条日志吗？`
+      });
+    }
     await deleteLogs();
   } catch {
     // 取消删除
@@ -458,14 +746,28 @@ async function deleteLogs() {
   try {
     const res = await api.delete('/admin/logs', { data: { ids: selectedIds.value } });
     if (res.code === 0) {
-      showSuccessToast('删除成功');
+      if (isPC.value) {
+        ElMessage.success('删除成功');
+      } else {
+        showSuccessToast('删除成功');
+      }
       selectedIds.value = [];
       onRefresh();
     } else {
-      showFailToast(res.message || '删除失败');
+      const errMsg = res.message || '删除失败';
+      if (isPC.value) {
+        ElMessage.error(errMsg);
+      } else {
+        showFailToast(errMsg);
+      }
     }
   } catch (err) {
-    showFailToast(err.message || '删除失败');
+    const errMsg = err.message || '删除失败';
+    if (isPC.value) {
+      ElMessage.error(errMsg);
+    } else {
+      showFailToast(errMsg);
+    }
   }
 }
 
@@ -474,7 +776,11 @@ async function exportLogs() {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
-      showFailToast('请先登录');
+      if (isPC.value) {
+        ElMessage.error('请先登录');
+      } else {
+        showFailToast('请先登录');
+      }
       return;
     }
 
@@ -515,19 +821,104 @@ async function exportLogs() {
     link.click();
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
-    showSuccessToast('导出成功');
+
+    if (isPC.value) {
+      ElMessage.success('导出成功');
+    } else {
+      showSuccessToast('导出成功');
+    }
   } catch (err) {
     console.error('导出日志失败:', err);
-    showFailToast('导出失败: ' + (err.message || '未知错误'));
+    const errMsg = '导出失败: ' + (err.message || '未知错误');
+    if (isPC.value) {
+      ElMessage.error(errMsg);
+    } else {
+      showFailToast(errMsg);
+    }
   }
 }
 
 onMounted(() => {
   fetchDateRange();
+  if (isPC.value) {
+    currentPage.value = 1;
+    loadLogsForPage(1);
+  }
 });
 </script>
 
 <style scoped>
+/* ========== PC端样式 ========== */
+.logs-pc {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.pc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #303133;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.pc-card {
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #303133;
+}
+
+/* PC端筛选表单 */
+.filter-form-pc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* PC端用户单元格 */
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-name {
+  font-weight: 500;
+}
+
+/* PC端详情文本 */
+.detail-text {
+  word-break: break-all;
+}
+
+.no-data {
+  color: #c0c4cc;
+}
+
+/* PC端分页 */
+.pagination-pc {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ========== 移动端样式 ========== */
 .page-content {
   padding-bottom: 60px;
 }

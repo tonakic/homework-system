@@ -1,5 +1,284 @@
 <template>
-  <div class="exam-start page">
+  <!-- PC Version - Split Layout -->
+  <div v-if="isPC" class="exam-start-pc">
+    <!-- PC Header -->
+    <div class="pc-header">
+      <div class="pc-header-left">
+        <el-icon class="back-icon" @click="handleBack"><ArrowLeft /></el-icon>
+        <span class="pc-exam-title">{{ examInfo.title }}</span>
+      </div>
+      <div class="pc-header-center">
+        <div class="pc-timer" :class="{ 'timer-warning': remainingSeconds < 300 }">
+          <el-icon><Clock /></el-icon>
+          <span>{{ formatTime(remainingSeconds) }}</span>
+        </div>
+      </div>
+      <div class="pc-header-right">
+        <el-button type="primary" @click="handleSubmit">交卷</el-button>
+      </div>
+    </div>
+
+    <!-- PC Main Content -->
+    <div class="pc-main">
+      <!-- Left Sidebar - Question Navigation -->
+      <div class="pc-sidebar">
+        <div class="sidebar-header">
+          <h3>题目列表</h3>
+          <div class="sidebar-stats">
+            <span class="stat-answered">
+              <span class="status-dot answered"></span>
+              已答 {{ answeredCount }}
+            </span>
+            <span class="stat-unanswered">
+              <span class="status-dot unanswered"></span>
+              未答 {{ unansweredCount }}
+            </span>
+          </div>
+        </div>
+        <div class="sidebar-content">
+          <div
+            v-for="group in questionGroups"
+            :key="group.type"
+            class="question-group-pc"
+          >
+            <div class="group-label-pc">{{ group.label }}</div>
+            <div class="group-questions-pc">
+              <div
+                v-for="q in group.questions"
+                :key="q.id"
+                class="question-item-pc"
+                :class="{
+                  answered: isAnswered(q),
+                  current: q.index === currentIndex
+                }"
+                @click="jumpToQuestion(q.index)"
+              >
+                {{ q.index + 1 }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Main - Current Question -->
+      <div class="pc-content">
+        <div class="pc-question-card">
+          <!-- Question Header -->
+          <div class="pc-question-header">
+            <div class="pc-question-info">
+              <el-tag :type="getQuestionTagType(currentQuestion.type)">
+                {{ getQuestionTypeText(currentQuestion.type) }}
+              </el-tag>
+              <span class="pc-question-index">第 {{ currentIndex + 1 }} 题</span>
+              <span class="pc-question-score">（{{ currentQuestion.score }}分）</span>
+            </div>
+          </div>
+
+          <!-- Question Content -->
+          <div class="pc-question-content">
+            {{ currentQuestion.content }}
+          </div>
+
+          <!-- Answer Area -->
+          <div class="pc-answer-area">
+            <!-- Single Choice -->
+            <div v-if="currentQuestion.type === 'choice'" class="pc-options">
+              <el-radio-group
+                v-model="answers[currentQuestion.id]"
+                @change="triggerAutoSave"
+              >
+                <el-radio
+                  v-for="(option, index) in currentQuestion.options"
+                  :key="index"
+                  :label="index"
+                  class="pc-option"
+                >
+                  <span class="option-letter-pc">{{ getOptionLetter(index) }}.</span>
+                  <span class="option-text-pc">{{ option }}</span>
+                </el-radio>
+              </el-radio-group>
+            </div>
+
+            <!-- Multiple Choice -->
+            <div v-else-if="currentQuestion.type === 'multiple'" class="pc-options">
+              <el-checkbox-group
+                v-model="answers[currentQuestion.id + '_multiple']"
+                @change="triggerAutoSave"
+              >
+                <el-checkbox
+                  v-for="(option, index) in currentQuestion.options"
+                  :key="index"
+                  :label="index"
+                  class="pc-option"
+                >
+                  <span class="option-letter-pc">{{ getOptionLetter(index) }}.</span>
+                  <span class="option-text-pc">{{ option }}</span>
+                </el-checkbox>
+              </el-checkbox-group>
+              <div class="multiple-hint-pc">
+                已选择：{{ getMultipleSelectedLetters(currentQuestion.id) }}
+              </div>
+            </div>
+
+            <!-- Judgment -->
+            <div v-else-if="currentQuestion.type === 'judgment'" class="pc-options judgment">
+              <el-radio-group
+                v-model="answers[currentQuestion.id]"
+                @change="triggerAutoSave"
+              >
+                <el-radio :label="0" class="pc-option judgment-option-pc">
+                  <span class="judgment-icon-pc correct">✓</span>
+                  <span>正确</span>
+                </el-radio>
+                <el-radio :label="1" class="pc-option judgment-option-pc">
+                  <span class="judgment-icon-pc incorrect">✗</span>
+                  <span>错误</span>
+                </el-radio>
+              </el-radio-group>
+            </div>
+
+            <!-- Fill in the Blank -->
+            <div v-else-if="currentQuestion.type === 'fill'" class="pc-fill-inputs">
+              <div
+                v-for="(_, index) in (currentQuestion.blanks || [])"
+                :key="index"
+                class="pc-fill-item"
+              >
+                <label class="pc-fill-label">第 {{ index + 1 }} 空</label>
+                <el-input
+                  v-model="answers[currentQuestion.id + '_' + index]"
+                  placeholder="请输入答案"
+                  @change="triggerAutoSave"
+                />
+              </div>
+            </div>
+
+            <!-- Subjective -->
+            <div v-else-if="currentQuestion.type === 'subjective'" class="pc-subjective">
+              <el-input
+                v-model="answers[currentQuestion.id]"
+                type="textarea"
+                placeholder="请输入答案"
+                :rows="8"
+                :maxlength="currentQuestion.maxLength || 500"
+                show-word-limit
+                @change="triggerAutoSave"
+              />
+            </div>
+          </div>
+
+          <!-- Navigation Buttons -->
+          <div class="pc-nav-buttons">
+            <el-button
+              size="large"
+              :disabled="currentIndex === 0"
+              @click="prevQuestion"
+            >
+              <el-icon><ArrowLeft /></el-icon>
+              上一题
+            </el-button>
+            <div class="pc-progress-info">
+              {{ currentIndex + 1 }} / {{ questions.length }}
+            </div>
+            <el-button
+              size="large"
+              :disabled="currentIndex === questions.length - 1"
+              @click="nextQuestion"
+            >
+              下一题
+              <el-icon><ArrowRight /></el-icon>
+            </el-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit Dialog for PC -->
+    <el-dialog
+      v-model="showSubmitDialog"
+      title="确认交卷"
+      width="400px"
+      :close-on-click-modal="false"
+    >
+      <div class="pc-submit-dialog">
+        <div v-if="unansweredCount > 0" class="pc-warning">
+          <el-icon color="#f44336"><WarningFilled /></el-icon>
+          <span>您还有 <strong>{{ unansweredCount }}</strong> 题未作答！</span>
+        </div>
+        <div class="pc-submit-info">
+          <p>已答题数：{{ answeredCount }} / {{ questions.length }}</p>
+          <p>确认交卷后将无法修改答案。</p>
+        </div>
+      </div>
+      <template #footer>
+        <el-button @click="showSubmitDialog = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="confirmSubmit">
+          确认交卷
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- Result Dialog for PC -->
+    <el-dialog
+      v-model="showResultPopup"
+      :title="null"
+      width="360px"
+      :close-on-click-modal="false"
+      :show-close="false"
+    >
+      <div class="pc-result-dialog">
+        <!-- Pending Grading -->
+        <div v-if="submitResult.hasPendingGrading || submitResult.needAIGrading" class="pc-result-content">
+          <div class="pc-result-icon waiting">
+            <el-icon><Clock /></el-icon>
+          </div>
+          <h3>交卷成功</h3>
+          <p class="waiting-tip">待批改</p>
+          <p class="waiting-sub">批改完成后可查看成绩</p>
+        </div>
+        <!-- Auto Graded -->
+        <div v-else-if="examInfo.autoGrade" class="pc-result-content">
+          <div class="pc-result-icon success">
+            <el-icon><CircleCheck /></el-icon>
+          </div>
+          <h3>交卷成功</h3>
+          <div class="pc-score-display">
+            <span class="pc-score-value">{{ resultScore }}</span>
+            <span class="pc-score-unit">分</span>
+          </div>
+          <p class="pc-score-tip">系统已自动批改</p>
+        </div>
+        <!-- Manual Grading -->
+        <div v-else class="pc-result-content">
+          <div class="pc-result-icon waiting">
+            <el-icon><Clock /></el-icon>
+          </div>
+          <h3>交卷成功</h3>
+          <p class="waiting-tip">待批改</p>
+          <p class="waiting-sub">批改完成后可查看成绩</p>
+        </div>
+      </div>
+      <template #footer>
+        <el-button type="primary" size="large" @click="goHome">确认</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- Back Confirmation Dialog for PC -->
+    <el-dialog
+      v-model="showBackDialog"
+      title="提示"
+      width="360px"
+    >
+      <p>确定要退出答题吗？当前答题进度将会保存。</p>
+      <template #footer>
+        <el-button @click="showBackDialog = false">取消</el-button>
+        <el-button type="danger" @click="confirmBack">退出</el-button>
+      </template>
+    </el-dialog>
+  </div>
+
+  <!-- Mobile Version -->
+  <div v-else class="exam-start page">
     <!-- 顶部栏 -->
     <div class="header">
       <div class="header-left">
@@ -246,9 +525,12 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { showDialog, showFailToast, showSuccessToast } from 'vant';
 import { getExamDetail, startExam, saveAnswer, submitExam } from '@/api/auth';
+import { useDevice } from '@/composables/useDevice';
+import { ArrowLeft, ArrowRight, Clock, CircleCheck, WarningFilled } from '@element-plus/icons-vue';
 
 const route = useRoute();
 const router = useRouter();
+const { isPC } = useDevice();
 
 const currentIndex = ref(0);
 const questions = ref([]);
@@ -264,6 +546,7 @@ const remainingSeconds = ref(0);
 const showJumpPopup = ref(false);
 const showSubmitDialog = ref(false);
 const showResultPopup = ref(false);
+const showBackDialog = ref(false);
 const resultScore = ref(0);
 const submitLoading = ref(false);
 const startTime = ref(Date.now());
@@ -479,6 +762,17 @@ function getQuestionTypeText(type) {
   return map[type] || '未知';
 }
 
+function getQuestionTagType(type) {
+  const map = {
+    choice: 'primary',
+    multiple: 'success',
+    fill: 'warning',
+    judgment: 'info',
+    subjective: 'danger'
+  };
+  return map[type] || 'info';
+}
+
 function getOptionLetter(index) {
   return String.fromCharCode(65 + index);
 }
@@ -543,16 +837,25 @@ function jumpToQuestion(index) {
 }
 
 function handleBack() {
-  showDialog({
-    title: '提示',
-    message: '确定要退出答题吗？当前答题进度将会保存。',
-    confirmButtonText: '退出',
-    confirmButtonColor: '#f44336'
-  }).then(() => {
-    router.push('/student/home');
-  }).catch(() => {
-    // 取消
-  });
+  if (isPC.value) {
+    showBackDialog.value = true;
+  } else {
+    showDialog({
+      title: '提示',
+      message: '确定要退出答题吗？当前答题进度将会保存。',
+      confirmButtonText: '退出',
+      confirmButtonColor: '#f44336'
+    }).then(() => {
+      router.push('/student/home');
+    }).catch(() => {
+      // 取消
+    });
+  }
+}
+
+function confirmBack() {
+  showBackDialog.value = false;
+  router.push('/student/home');
 }
 
 function handleSubmit() {
@@ -622,6 +925,443 @@ function goHome() {
 </script>
 
 <style scoped>
+/* ==================== PC Styles ==================== */
+.exam-start-pc {
+  min-height: 100vh;
+  background: #f0f2f5;
+  display: flex;
+  flex-direction: column;
+}
+
+/* PC Header */
+.pc-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+}
+
+.pc-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.back-icon {
+  font-size: 20px;
+  color: #606266;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.back-icon:hover {
+  color: #409eff;
+}
+
+.pc-exam-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.pc-header-center {
+  display: flex;
+  align-items: center;
+}
+
+.pc-timer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #409eff, #67c23a);
+  border-radius: 20px;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.pc-timer.timer-warning {
+  background: linear-gradient(135deg, #f56c6c, #e6a23c);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.pc-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* PC Main Layout */
+.pc-main {
+  display: flex;
+  margin-top: 60px;
+  min-height: calc(100vh - 60px);
+}
+
+/* PC Sidebar */
+.pc-sidebar {
+  width: 280px;
+  background: white;
+  border-right: 1px solid #e4e7ed;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 60px;
+  left: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid #e4e7ed;
+}
+
+.sidebar-header h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #303133;
+}
+
+.sidebar-stats {
+  display: flex;
+  gap: 20px;
+  font-size: 13px;
+}
+
+.stat-answered,
+.stat-unanswered {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-dot.answered {
+  background: #67c23a;
+}
+
+.status-dot.unanswered {
+  background: #f56c6c;
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.question-group-pc {
+  margin-bottom: 24px;
+}
+
+.group-label-pc {
+  font-size: 13px;
+  color: #909399;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.group-questions-pc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.question-item-pc {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #fef0f0;
+  color: #f56c6c;
+  border: 1px solid transparent;
+}
+
+.question-item-pc:hover {
+  border-color: #409eff;
+}
+
+.question-item-pc.answered {
+  background: #f0f9eb;
+  color: #67c23a;
+}
+
+.question-item-pc.current {
+  border: 2px solid #409eff;
+  background: #ecf5ff;
+  color: #409eff;
+  font-weight: 600;
+  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.2);
+}
+
+/* PC Content */
+.pc-content {
+  flex: 1;
+  margin-left: 280px;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.pc-question-card {
+  width: 100%;
+  max-width: 800px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  padding: 32px;
+}
+
+.pc-question-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.pc-question-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pc-question-index {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.pc-question-score {
+  font-size: 14px;
+  color: #909399;
+}
+
+.pc-question-content {
+  font-size: 18px;
+  line-height: 1.8;
+  color: #303133;
+  margin-bottom: 32px;
+  padding: 20px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.pc-answer-area {
+  margin-bottom: 32px;
+}
+
+/* PC Options */
+.pc-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pc-option {
+  display: flex;
+  align-items: flex-start;
+  padding: 16px 20px;
+  background: #fafafa;
+  border-radius: 8px;
+  transition: all 0.2s;
+  margin: 0;
+}
+
+.pc-option:hover {
+  background: #f0f7ff;
+}
+
+.option-letter-pc {
+  font-weight: 600;
+  margin-right: 12px;
+  color: #606266;
+}
+
+.option-text-pc {
+  flex: 1;
+  color: #303133;
+  line-height: 1.6;
+}
+
+.multiple-hint-pc {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: #fdf6ec;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #e6a23c;
+}
+
+/* PC Judgment Options */
+.pc-options.judgment .pc-option {
+  justify-content: center;
+}
+
+.judgment-option-pc {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.judgment-icon-pc {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.judgment-icon-pc.correct {
+  color: #67c23a;
+}
+
+.judgment-icon-pc.incorrect {
+  color: #f56c6c;
+}
+
+/* PC Fill Inputs */
+.pc-fill-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pc-fill-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pc-fill-label {
+  font-size: 14px;
+  color: #606266;
+  font-weight: 500;
+}
+
+/* PC Subjective */
+.pc-subjective {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+/* PC Navigation */
+.pc-nav-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 24px;
+  border-top: 1px solid #ebeef5;
+}
+
+.pc-progress-info {
+  font-size: 14px;
+  color: #909399;
+}
+
+/* PC Submit Dialog */
+.pc-submit-dialog {
+  padding: 8px 0;
+}
+
+.pc-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fef0f0;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  color: #e65100;
+}
+
+.pc-warning strong {
+  color: #f56c6c;
+}
+
+.pc-submit-info {
+  color: #606266;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+/* PC Result Dialog */
+.pc-result-dialog {
+  text-align: center;
+  padding: 16px 0;
+}
+
+.pc-result-content h3 {
+  font-size: 20px;
+  margin: 16px 0;
+  color: #303133;
+}
+
+.pc-result-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  font-size: 32px;
+}
+
+.pc-result-icon.success {
+  background: #f0f9eb;
+  color: #67c23a;
+}
+
+.pc-result-icon.waiting {
+  background: #fdf6ec;
+  color: #e6a23c;
+}
+
+.pc-score-display {
+  margin: 20px 0;
+}
+
+.pc-score-value {
+  font-size: 48px;
+  font-weight: bold;
+  color: #409eff;
+}
+
+.pc-score-unit {
+  font-size: 18px;
+  color: #909399;
+  margin-left: 4px;
+}
+
+.pc-score-tip {
+  color: #909399;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+/* ==================== Mobile Styles ==================== */
 .exam-start {
   min-height: 100vh;
   background: #f5f5f5;
