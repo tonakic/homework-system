@@ -1,10 +1,10 @@
 <template>
   <el-container class="pc-layout">
-    <el-header class="pc-layout-header">
+    <el-header v-if="!isGuestPage" class="pc-layout-header">
       <PcHeader />
     </el-header>
-    <el-container class="pc-layout-body">
-      <el-aside width="auto" class="pc-layout-aside">
+    <el-container class="pc-layout-body" :class="{ 'no-header': isGuestPage }">
+      <el-aside v-if="!isGuestPage" width="auto" class="pc-layout-aside">
         <PcSidebar ref="sidebarRef" />
       </el-aside>
       <el-main class="pc-layout-main">
@@ -17,11 +17,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useRoute } from 'vue-router';
 import PcHeader from '@/components/pc/PcHeader.vue';
 import PcSidebar from '@/components/pc/PcSidebar.vue';
 
+const route = useRoute();
 const sidebarRef = ref(null);
+
+const isGuestPage = computed(() => route.meta.guest === true);
 </script>
 
 <style scoped>
@@ -38,6 +42,10 @@ const sidebarRef = ref(null);
 
 .pc-layout-body {
   height: calc(100vh - 56px);
+}
+
+.pc-layout-body.no-header {
+  height: 100vh;
 }
 
 .pc-layout-aside {
