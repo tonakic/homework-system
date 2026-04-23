@@ -1,10 +1,13 @@
 <template>
-  <el-container class="pc-layout">
-    <el-header v-if="!isGuestPage" class="pc-layout-header">
+  <!-- 访客页面（登录页）直接渲染，无容器包裹，背景可铺满全屏 -->
+  <router-view v-if="isGuestPage" />
+  <!-- 正常页面使用布局容器 -->
+  <el-container v-else class="pc-layout">
+    <el-header class="pc-layout-header">
       <PcHeader />
     </el-header>
-    <el-container class="pc-layout-body" :class="{ 'no-header': isGuestPage }">
-      <el-aside v-if="!isGuestPage" width="auto" class="pc-layout-aside">
+    <el-container class="pc-layout-body">
+      <el-aside width="auto" class="pc-layout-aside">
         <PcSidebar ref="sidebarRef" />
       </el-aside>
       <el-main class="pc-layout-main">
@@ -42,10 +45,6 @@ const isGuestPage = computed(() => route.meta.guest === true);
 
 .pc-layout-body {
   height: calc(100vh - 56px);
-}
-
-.pc-layout-body.no-header {
-  height: 100vh;
 }
 
 .pc-layout-aside {
