@@ -33,8 +33,8 @@
           <p class="subtitle">管理员端</p>
         </div>
 
-        <el-form :model="loginForm" :rules="rules" ref="formRef" class="login-form-pc">
-          <el-form-item prop="account">
+        <el-form :model="loginForm" :rules="rules" ref="formRef" label-position="top" class="login-form-pc">
+          <el-form-item label="用户名" prop="account">
             <el-input
               v-model="loginForm.account"
               placeholder="请输入用户名"
@@ -42,7 +42,7 @@
               size="large"
             />
           </el-form-item>
-          <el-form-item prop="password">
+          <el-form-item label="密码" prop="password">
             <el-input
               v-model="loginForm.password"
               type="password"
@@ -327,7 +327,12 @@ function goToTeacher() {
 }
 
 .login-form-pc {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+}
+
+.login-form-pc :deep(.el-form-item__label) {
+  font-weight: 500;
+  color: #333;
 }
 
 .login-form-pc :deep(.el-input__wrapper) {
@@ -358,7 +363,7 @@ function goToTeacher() {
 
 .login-footer-pc {
   text-align: center;
-  padding-top: 20px;
+  padding-top: 16px;
   border-top: 1px solid #eee;
 }
 
