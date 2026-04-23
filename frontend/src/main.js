@@ -6,6 +6,9 @@ import App from './App.vue';
 // 引入Vant样式
 import 'vant/lib/index.css';
 
+// 引入Element Plus样式
+import 'element-plus/dist/index.css';
+
 // 引入全局样式
 import './styles/index.css';
 
@@ -22,7 +25,15 @@ import {
   setDialogDefaultOptions
 } from 'vant';
 
+// 引入Element Plus图标
+import * as ElementPlusIconsVue from '@element-plus/icons-vue';
+
 const app = createApp(App);
+
+// 注册Element Plus图标
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+  app.component(key, component);
+}
 
 // 配置Toast和Dialog的z-index，确保在Popup之上
 setToastDefaultOptions({ zIndex: 3000 });

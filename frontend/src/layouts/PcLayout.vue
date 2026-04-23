@@ -1,0 +1,58 @@
+<template>
+  <el-container class="pc-layout">
+    <el-header class="pc-layout-header">
+      <PcHeader />
+    </el-header>
+    <el-container class="pc-layout-body">
+      <el-aside width="auto" class="pc-layout-aside">
+        <PcSidebar ref="sidebarRef" />
+      </el-aside>
+      <el-main class="pc-layout-main">
+        <div class="main-content">
+          <router-view />
+        </div>
+      </el-main>
+    </el-container>
+  </el-container>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+import PcHeader from '@/components/pc/PcHeader.vue';
+import PcSidebar from '@/components/pc/PcSidebar.vue';
+
+const sidebarRef = ref(null);
+</script>
+
+<style scoped>
+.pc-layout {
+  height: 100vh;
+  width: 100vw;
+}
+
+.pc-layout-header {
+  height: 56px;
+  padding: 0;
+  background: #fff;
+}
+
+.pc-layout-body {
+  height: calc(100vh - 56px);
+}
+
+.pc-layout-aside {
+  background: #fff;
+  overflow: hidden;
+}
+
+.pc-layout-main {
+  background: #f5f7fa;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.main-content {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+</style>

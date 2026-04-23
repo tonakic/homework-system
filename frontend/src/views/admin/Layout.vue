@@ -1,17 +1,7 @@
 <template>
-  <div class="admin-layout">
-    <router-view />
-  </div>
+  <router-view />
 </template>
 
 <script setup>
-// 管理员端布局
+// Layout 逻辑已移至 MobileLayout/PcLayout
 </script>
-
-<style scoped>
-.admin-layout {
-  min-height: 100vh;
-  background: #f5f5f5;
-  overflow-y: auto;
-}
-</style>
