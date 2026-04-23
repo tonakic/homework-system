@@ -83,77 +83,76 @@
   <!-- Mobile Version -->
   <div v-else class="login-page">
     <div class="login-header">
-        <div class="logo">
-          <!-- 管理员：人物半身加齿轮侧写 -->
-          <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- 背景圆 -->
-            <circle cx="40" cy="40" r="38" fill="#4caf50"/>
-            <!-- 人物头部侧写 -->
-            <ellipse cx="32" cy="30" rx="8" ry="9" fill="white"/>
-            <!-- 人物身体半身 -->
-            <path d="M20 55 Q20 42 32 42 Q44 42 44 55 L44 68 L20 68 Z" fill="white"/>
-            <!-- 齿轮 -->
-            <g transform="translate(48, 32)">
-              <circle cx="12" cy="12" r="10" fill="white" opacity="0.95"/>
-              <circle cx="12" cy="12" r="4" fill="#4caf50"/>
-              <!-- 齿轮齿 -->
-              <rect x="10" y="-2" width="4" height="6" fill="white"/>
-              <rect x="10" y="20" width="4" height="6" fill="white"/>
-              <rect x="-2" y="10" width="6" height="4" fill="white"/>
-              <rect x="20" y="10" width="6" height="4" fill="white"/>
-              <rect x="2" y="2" width="4" height="4" fill="white" transform="rotate(45 4 4)"/>
-              <rect x="18" y="18" width="4" height="4" fill="white" transform="rotate(45 20 20)"/>
-              <rect x="18" y="2" width="4" height="4" fill="white" transform="rotate(-45 20 4)"/>
-              <rect x="2" y="18" width="4" height="4" fill="white" transform="rotate(-45 4 20)"/>
-            </g>
-          </svg>
-        </div>
-        <h1>创新小学作业系统</h1>
-        <p>管理员登录</p>
+      <div class="logo">
+        <!-- 管理员：人物半身加齿轮侧写 -->
+        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 背景圆 -->
+          <circle cx="40" cy="40" r="38" fill="#4caf50"/>
+          <!-- 人物头部侧写 -->
+          <ellipse cx="32" cy="30" rx="8" ry="9" fill="white"/>
+          <!-- 人物身体半身 -->
+          <path d="M20 55 Q20 42 32 42 Q44 42 44 55 L44 68 L20 68 Z" fill="white"/>
+          <!-- 齿轮 -->
+          <g transform="translate(48, 32)">
+            <circle cx="12" cy="12" r="10" fill="white" opacity="0.95"/>
+            <circle cx="12" cy="12" r="4" fill="#4caf50"/>
+            <!-- 齿轮齿 -->
+            <rect x="10" y="-2" width="4" height="6" fill="white"/>
+            <rect x="10" y="20" width="4" height="6" fill="white"/>
+            <rect x="-2" y="10" width="6" height="4" fill="white"/>
+            <rect x="20" y="10" width="6" height="4" fill="white"/>
+            <rect x="2" y="2" width="4" height="4" fill="white" transform="rotate(45 4 4)"/>
+            <rect x="18" y="18" width="4" height="4" fill="white" transform="rotate(45 20 20)"/>
+            <rect x="18" y="2" width="4" height="4" fill="white" transform="rotate(-45 20 4)"/>
+            <rect x="2" y="18" width="4" height="4" fill="white" transform="rotate(-45 4 20)"/>
+          </g>
+        </svg>
+      </div>
+      <h1>创新小学作业系统</h1>
+      <p>管理员登录</p>
+    </div>
+
+    <van-form @submit="handleLogin" class="login-form">
+      <van-cell-group inset>
+        <van-field
+          v-model="account"
+          name="account"
+          label="用户名"
+          placeholder="请输入用户名"
+          :rules="[{ required: true, message: '请输入用户名' }]"
+        />
+        <van-field
+          v-model="password"
+          type="password"
+          name="password"
+          label="密码"
+          placeholder="请输入密码"
+          :rules="[{ required: true, message: '请输入密码' }]"
+        />
+      </van-cell-group>
+
+      <div class="remember-me">
+        <van-checkbox v-model="rememberMe">记住登录</van-checkbox>
       </div>
 
-      <van-form @submit="handleLogin" class="login-form">
-        <van-cell-group inset>
-          <van-field
-            v-model="account"
-            name="account"
-            label="用户名"
-            placeholder="请输入用户名"
-            :rules="[{ required: true, message: '请输入用户名' }]"
-          />
-          <van-field
-            v-model="password"
-            type="password"
-            name="password"
-            label="密码"
-            placeholder="请输入密码"
-            :rules="[{ required: true, message: '请输入密码' }]"
-          />
-        </van-cell-group>
-
-        <div class="remember-me">
-          <van-checkbox v-model="rememberMe">记住登录</van-checkbox>
-        </div>
-
-        <div class="login-actions">
-          <van-button
-            round
-            block
-            type="primary"
-            native-type="submit"
-            :loading="loading"
-            loading-text="登录中..."
-          >
-            登录
-          </van-button>
-        </div>
-      </van-form>
-
-      <div class="login-footer">
-        <a @click="goToStudent">学生登录</a>
-        <span>|</span>
-        <a @click="goToTeacher">教师登录</a>
+      <div class="login-actions">
+        <van-button
+          round
+          block
+          type="primary"
+          native-type="submit"
+          :loading="loading"
+          loading-text="登录中..."
+        >
+          登录
+        </van-button>
       </div>
+    </van-form>
+
+    <div class="login-footer">
+      <a @click="goToStudent">学生登录</a>
+      <span>|</span>
+      <a @click="goToTeacher">教师登录</a>
     </div>
   </div>
 </template>
