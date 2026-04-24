@@ -143,8 +143,8 @@
                 :page-sizes="[20, 50, 100]"
                 :total="totalQuestions"
                 layout="total, sizes, prev, pager, next, jumper"
-                @size-change="handlePCSearch"
-                @current-change="handlePCSearch"
+                @size-change="handlePageSizeChange"
+                @current-change="loadQuestions"
               />
             </div>
           </el-card>
@@ -1212,6 +1212,11 @@ function onRefresh() {
 
 // PC端搜索
 function handlePCSearch() {
+  currentPage.value = 1;
+  loadQuestions();
+}
+
+function handlePageSizeChange() {
   currentPage.value = 1;
   loadQuestions();
 }
