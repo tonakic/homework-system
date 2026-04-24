@@ -93,13 +93,13 @@
             <el-col :span="6">
               <el-button class="action-btn" @click="router.push('/admin/exams')">
                 <el-icon><Tickets /></el-icon>
-                <span>考试管理</span>
+                <span>作业管理</span>
               </el-button>
             </el-col>
             <el-col :span="6">
               <el-button class="action-btn" @click="router.push('/admin/grading-config')">
                 <el-icon><Edit /></el-icon>
-                <span>批改管理</span>
+                <span>批改配置</span>
               </el-button>
             </el-col>
             <el-col :span="6">
