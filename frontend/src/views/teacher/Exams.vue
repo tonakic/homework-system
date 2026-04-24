@@ -90,8 +90,8 @@
               :page-sizes="[20, 50, 100]"
               :total="totalExams"
               layout="total, sizes, prev, pager, next, jumper"
-              @size-change="handlePCSearch"
-              @current-change="handlePCSearch"
+              @size-change="handlePageSizeChange"
+              @current-change="loadPCExams"
             />
           </div>
         </el-card>
@@ -1283,6 +1283,11 @@ function onPCTabChange() {
 }
 
 function handlePCSearch() {
+  page.value = 1;
+  loadPCExams();
+}
+
+function handlePageSizeChange() {
   page.value = 1;
   loadPCExams();
 }
