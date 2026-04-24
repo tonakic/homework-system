@@ -53,8 +53,8 @@ const menuItems = computed(() => {
       { path: '/admin/students', title: '学生管理', icon: 'UserFilled' },
       { path: '/admin/classes', title: '班级管理', icon: 'School' },
       { path: '/admin/questions', title: '题库管理', icon: 'Collection' },
-      { path: '/admin/exams', title: '作业管理', icon: 'DocumentCopy' },
-      { path: '/admin/grading-config', title: '批改配置', icon: 'Setting' },
+      { path: '/admin/exams', title: '考试管理', icon: 'DocumentCopy' },
+      { path: '/admin/grading-config', title: '批改管理', icon: 'Setting' },
       { path: '/admin/settings', title: '系统设置', icon: 'Tools' },
       { path: '/admin/logs', title: '操作日志', icon: 'List' }
     ]
