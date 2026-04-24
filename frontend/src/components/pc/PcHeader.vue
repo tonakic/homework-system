@@ -46,7 +46,7 @@ const handleLogout = async () => {
       type: 'warning'
     });
     const type = userStore.userType;
-    userStore.logout();
+    userStore.clearUserData();
     router.push(`/${type}/login`);
   } catch {
     // 取消退出
