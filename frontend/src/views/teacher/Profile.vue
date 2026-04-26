@@ -6,113 +6,105 @@
     </div>
 
     <div class="profile-content-pc">
-      <el-row :gutter="20">
-        <!-- 左侧个人信息卡片 -->
-        <el-col :span="8">
-          <el-card class="user-card-pc">
-            <template #header>
-              <div class="card-header">
-                <span>个人信息</span>
-              </div>
-            </template>
-            <div class="user-avatar">
-              {{ profile.name ? profile.name.charAt(0) : '教' }}
-            </div>
-            <div class="user-detail">
-              <h3>{{ profile.name || '未知用户' }}</h3>
-              <p>工号：{{ profile.teacher_no || '未设置' }}</p>
-            </div>
-            <el-descriptions :column="1" border size="small" class="user-desc">
-              <el-descriptions-item label="性别">{{ profile.gender || '-' }}</el-descriptions-item>
-              <el-descriptions-item label="任教科目">
-                <span v-if="profile.subjects && profile.subjects.length > 0">{{ profile.subjects.join('、') }}</span>
-                <span v-else>-</span>
-              </el-descriptions-item>
-              <el-descriptions-item label="管理班级">
-                <span v-if="profile.manage_classes && profile.manage_classes.length > 0">{{ profile.manage_classes.join('、') }}</span>
-                <span v-else>-</span>
-              </el-descriptions-item>
-              <el-descriptions-item label="联系电话">{{ profile.phone || '-' }}</el-descriptions-item>
-              <el-descriptions-item label="备注">{{ profile.remark || '-' }}</el-descriptions-item>
-              <el-descriptions-item label="账户状态">
-                <el-tag :type="profile.status === 'active' ? 'success' : 'danger'" size="small">
-                  {{ profile.status === 'active' ? '正常' : '已停用' }}
-                </el-tag>
-              </el-descriptions-item>
-              <el-descriptions-item label="注册时间">{{ profile.created_at || '-' }}</el-descriptions-item>
-            </el-descriptions>
-          </el-card>
-        </el-col>
+      <!-- 个人信息卡片 -->
+      <el-card class="user-card-pc">
+        <template #header>
+          <div class="card-header">
+            <span>个人信息</span>
+          </div>
+        </template>
+        <div class="user-avatar">
+          {{ profile.name ? profile.name.charAt(0) : '教' }}
+        </div>
+        <div class="user-detail">
+          <h3>{{ profile.name || '未知用户' }}</h3>
+          <p>工号：{{ profile.teacher_no || '未设置' }}</p>
+        </div>
+        <el-descriptions :column="1" border size="small" class="user-desc">
+          <el-descriptions-item label="性别">{{ profile.gender || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="任教科目">
+            <span v-if="profile.subjects && profile.subjects.length > 0">{{ profile.subjects.join('、') }}</span>
+            <span v-else>-</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="管理班级">
+            <span v-if="profile.manage_classes && profile.manage_classes.length > 0">{{ profile.manage_classes.join('、') }}</span>
+            <span v-else>-</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="联系电话">{{ profile.phone || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="备注">{{ profile.remark || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="账户状态">
+            <el-tag :type="profile.status === 'active' ? 'success' : 'danger'" size="small">
+              {{ profile.status === 'active' ? '正常' : '已停用' }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="注册时间">{{ profile.created_at || '-' }}</el-descriptions-item>
+        </el-descriptions>
+      </el-card>
 
-        <!-- 右侧编辑和修改密码 -->
-        <el-col :span="16">
-          <!-- 修改密码卡片 -->
-          <el-card class="password-card-pc">
-            <template #header>
-              <div class="card-header">
-                <span>修改密码</span>
-              </div>
-            </template>
-            <el-form
-              ref="passwordFormRef"
-              :model="passwordForm"
-              :rules="passwordRules"
-              label-width="100px"
-              style="max-width: 400px"
-            >
-              <el-form-item label="原密码" prop="oldPassword">
-                <el-input
-                  v-model="passwordForm.oldPassword"
-                  type="password"
-                  placeholder="请输入原密码"
-                  show-password
-                />
-              </el-form-item>
-              <el-form-item label="新密码" prop="newPassword">
-                <el-input
-                  v-model="passwordForm.newPassword"
-                  type="password"
-                  placeholder="请输入新密码"
-                  show-password
-                />
-              </el-form-item>
-              <el-form-item label="确认密码" prop="confirmPassword">
-                <el-input
-                  v-model="passwordForm.confirmPassword"
-                  type="password"
-                  placeholder="请确认新密码"
-                  show-password
-                />
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" :loading="loading" @click="handleChangePassword">
-                  确认修改
-                </el-button>
-              </el-form-item>
-            </el-form>
-          </el-card>
-
-          <!-- 帮助中心 -->
-          <el-card class="help-card-pc">
-            <template #header>
-              <div class="card-header">
-                <span>帮助中心</span>
-              </div>
-            </template>
-            <p class="help-desc">遇到问题或有建议？欢迎提交反馈，我们会尽快处理。</p>
-            <el-button type="primary" @click="openHelpCenter">
-              提交反馈
+      <!-- 修改密码卡片 -->
+      <el-card class="password-card-pc">
+        <template #header>
+          <div class="card-header">
+            <span>修改密码</span>
+          </div>
+        </template>
+        <el-form
+          ref="passwordFormRef"
+          :model="passwordForm"
+          :rules="passwordRules"
+          label-width="100px"
+        >
+          <el-form-item label="原密码" prop="oldPassword">
+            <el-input
+              v-model="passwordForm.oldPassword"
+              type="password"
+              placeholder="请输入原密码"
+              show-password
+            />
+          </el-form-item>
+          <el-form-item label="新密码" prop="newPassword">
+            <el-input
+              v-model="passwordForm.newPassword"
+              type="password"
+              placeholder="请输入新密码"
+              show-password
+            />
+          </el-form-item>
+          <el-form-item label="确认密码" prop="confirmPassword">
+            <el-input
+              v-model="passwordForm.confirmPassword"
+              type="password"
+              placeholder="请确认新密码"
+              show-password
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" :loading="loading" @click="handleChangePassword">
+              确认修改
             </el-button>
-          </el-card>
+          </el-form-item>
+        </el-form>
+      </el-card>
 
-          <!-- 退出登录 -->
-          <el-card class="logout-card-pc">
-            <el-button type="danger" @click="handleLogout">
-              退出登录
-            </el-button>
-          </el-card>
-        </el-col>
-      </el-row>
+      <!-- 帮助中心 -->
+      <el-card class="help-card-pc">
+        <template #header>
+          <div class="card-header">
+            <span>帮助中心</span>
+          </div>
+        </template>
+        <p class="help-desc">遇到问题或有建议？欢迎提交反馈，我们会尽快处理。</p>
+        <el-button type="primary" @click="openHelpCenter">
+          提交反馈
+        </el-button>
+      </el-card>
+
+      <!-- 退出登录 -->
+      <el-card class="logout-card-pc">
+        <el-button type="danger" @click="handleLogout">
+          退出登录
+        </el-button>
+      </el-card>
     </div>
 
     <!-- PC帮助中心弹窗 -->
@@ -601,7 +593,9 @@ function getStatusText(status) {
 }
 
 .profile-content-pc {
-  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .user-card-pc {
@@ -642,7 +636,7 @@ function getStatusText(status) {
 }
 
 .password-card-pc {
-  margin-bottom: 20px;
+  /* 纵向布局，无需特殊margin */
 }
 
 .logout-card-pc {
@@ -701,7 +695,6 @@ function getStatusText(status) {
 
 /* PC端帮助中心样式 */
 .help-card-pc {
-  margin-bottom: 20px;
   text-align: center;
 }
 
