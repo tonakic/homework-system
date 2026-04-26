@@ -59,7 +59,7 @@ const isGuestPage = computed(() => route.meta.guest === true);
 }
 
 .main-content {
-  max-width: 1400px;
-  margin: 0 auto;
+  /* 移除宽度限制，内容区域填满剩余空间 */
+  width: 100%;
 }
 </style>
