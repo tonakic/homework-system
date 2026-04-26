@@ -21,6 +21,7 @@ const adminRoutes = require('./routes/admin');
 const gradingConfigRoutes = require('./routes/gradingConfig');
 const gradingQueueRoutes = require('./routes/gradingQueue');
 const statisticsRoutes = require('./routes/statistics');
+const feedbackRoutes = require('./routes/feedbacks');
 
 // 初始化数据库
 require('./scripts/initDatabase');
@@ -88,6 +89,7 @@ app.use('/api/grading-config', gradingConfigRoutes);
 app.use('/api/grading-queue', gradingQueueRoutes);
 app.use('/api/teacher', statisticsRoutes);
 app.use('/api/statistics', statisticsRoutes);
+app.use('/api/feedbacks', feedbackRoutes);
 
 // 健康检查
 app.get('/api/health', (req, res) => {

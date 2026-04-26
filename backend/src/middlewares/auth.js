@@ -48,8 +48,31 @@ function optionalAuth(req, res, next) {
   next();
 }
 
+/**
+ * 管理员权限中间件
+ */
+function adminMiddleware(req, res, next) {
+  // 先执行认证
+  const token = extractToken(req);
+  if (!token) {
+    return error(res, ErrorCodes.AUTH_TOKEN_INVALID, '未登录或登录已过期');
+  }
+  const decoded = verifyToken(token);
+  if (!decoded) {
+    return error(res, ErrorCodes.AUTH_TOKEN_EXPIRED, '登录已过期，请重新登录');
+  }
+  req.user = decoded;
+  
+  // 检查管理员权限
+  if (req.user.userType !== 'admin') {
+    return error(res, ErrorCodes.PERMISSION_DENIED, '需要管理员权限');
+  }
+  next();
+}
+
 module.exports = {
   authMiddleware,
   roleMiddleware,
-  optionalAuth
+  optionalAuth,
+  adminMiddleware
 };

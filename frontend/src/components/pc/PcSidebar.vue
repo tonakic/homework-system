@@ -56,7 +56,8 @@ const menuItems = computed(() => {
       { path: '/admin/exams', title: '考试管理', icon: 'DocumentCopy' },
       { path: '/admin/grading-config', title: '批改管理', icon: 'Setting' },
       { path: '/admin/settings', title: '系统设置', icon: 'Tools' },
-      { path: '/admin/logs', title: '操作日志', icon: 'List' }
+      { path: '/admin/logs', title: '操作日志', icon: 'List' },
+      { path: '/admin/feedbacks', title: '反馈管理', icon: 'Comment' }
     ]
   };
   return menus[userType.value] || [];

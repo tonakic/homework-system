@@ -212,6 +212,12 @@ const routes = [
         name: 'AdminLogs',
         component: () => import('@/views/admin/Logs.vue'),
         meta: { requiresAuth: true }
+      },
+      {
+        path: 'feedbacks',
+        name: 'AdminFeedbacks',
+        component: () => import('@/views/admin/Feedbacks.vue'),
+        meta: { requiresAuth: true }
       }
     ]
   },

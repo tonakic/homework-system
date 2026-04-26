@@ -92,6 +92,19 @@
             </el-form>
           </el-card>
 
+          <!-- 帮助中心 -->
+          <el-card class="help-card-pc">
+            <template #header>
+              <div class="card-header">
+                <span>帮助中心</span>
+              </div>
+            </template>
+            <p class="help-desc">遇到问题或有建议？欢迎提交反馈，我们会尽快处理。</p>
+            <el-button type="primary" @click="openHelpCenter">
+              提交反馈
+            </el-button>
+          </el-card>
+
           <!-- 退出登录 -->
           <el-card class="logout-card-pc">
             <el-button type="danger" @click="handleLogout">
@@ -101,6 +114,74 @@
         </el-col>
       </el-row>
     </div>
+
+    <!-- PC帮助中心弹窗 -->
+    <el-dialog
+      v-model="showHelpDialog"
+      title="帮助中心"
+      width="500px"
+      destroy-on-close
+    >
+      <el-tabs v-model="activeTab">
+        <el-tab-pane label="提交反馈" name="submit">
+          <el-form :model="feedbackForm" label-width="80px">
+            <el-form-item label="标题" required>
+              <el-input
+                v-model="feedbackForm.title"
+                placeholder="请输入反馈标题"
+                maxlength="100"
+                show-word-limit
+              />
+            </el-form-item>
+            <el-form-item label="内容" required>
+              <el-input
+                v-model="feedbackForm.content"
+                type="textarea"
+                placeholder="请详细描述您遇到的问题或建议"
+                :rows="5"
+                maxlength="1000"
+                show-word-limit
+              />
+            </el-form-item>
+            <el-form-item>
+              <el-button
+                type="primary"
+                :loading="feedbackLoading"
+                :disabled="!feedbackForm.title || !feedbackForm.content"
+                @click="handleSubmitFeedback"
+              >
+                提交
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+        <el-tab-pane label="我的反馈" name="my">
+          <div v-loading="feedbackLoading" class="feedback-list">
+            <div v-if="myFeedbacks.length === 0" class="empty-feedback">
+              暂无反馈记录
+            </div>
+            <div
+              v-for="item in myFeedbacks"
+              :key="item.id"
+              class="feedback-item"
+            >
+              <div class="feedback-header">
+                <span class="feedback-title">{{ item.title }}</span>
+                <el-tag :type="getStatusType(item.status)" size="small">
+                  {{ getStatusText(item.status) }}
+                </el-tag>
+              </div>
+              <div class="feedback-content">{{ item.content }}</div>
+              <div v-if="item.reply" class="feedback-reply">
+                <span class="reply-label">管理员回复：</span>
+                {{ item.reply }}
+              </div>
+              <div class="feedback-time">{{ item.created_at }}</div>
+            </div>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+    </el-dialog>
 
     <!-- 首次登录提示弹窗 -->
     <el-dialog
@@ -162,6 +243,7 @@
 
       <van-cell-group inset>
         <van-cell title="修改密码" is-link @click="showChangePassword = true" />
+        <van-cell title="帮助中心" is-link @click="openHelpCenter" />
       </van-cell-group>
 
       <div class="logout">
@@ -205,6 +287,75 @@
         </van-form>
       </div>
     </van-popup>
+
+    <!-- 移动端帮助中心弹窗 -->
+    <van-popup v-model:show="showHelpDialog" round position="bottom" style="height: 80%">
+      <div class="help-popup">
+        <van-tabs v-model:active="activeTab">
+          <van-tab title="提交反馈" name="submit">
+            <van-form @submit="handleSubmitFeedback">
+              <van-field
+                v-model="feedbackForm.title"
+                label="标题"
+                placeholder="请输入反馈标题"
+                maxlength="100"
+                show-word-limit
+                :rules="[{ required: true, message: '请输入标题' }]"
+              />
+              <van-field
+                v-model="feedbackForm.content"
+                type="textarea"
+                label="内容"
+                placeholder="请详细描述您遇到的问题或建议"
+                rows="5"
+                autosize
+                maxlength="1000"
+                show-word-limit
+                :rules="[{ required: true, message: '请输入内容' }]"
+              />
+              <div class="form-actions">
+                <van-button
+                  block
+                  type="primary"
+                  native-type="submit"
+                  :loading="feedbackLoading"
+                >
+                  提交
+                </van-button>
+              </div>
+            </van-form>
+          </van-tab>
+          <van-tab title="我的反馈" name="my">
+            <div v-if="feedbackLoading" class="loading-container">
+              <van-loading size="24px">加载中...</van-loading>
+            </div>
+            <div v-else-if="myFeedbacks.length === 0" class="empty-feedback">
+              暂无反馈记录
+            </div>
+            <div v-else class="feedback-list-mobile">
+              <div
+                v-for="item in myFeedbacks"
+                :key="item.id"
+                class="feedback-item-mobile"
+              >
+                <div class="feedback-header-mobile">
+                  <span class="feedback-title-mobile">{{ item.title }}</span>
+                  <van-tag :type="getStatusType(item.status)" size="medium">
+                    {{ getStatusText(item.status) }}
+                  </van-tag>
+                </div>
+                <div class="feedback-content-mobile">{{ item.content }}</div>
+                <div v-if="item.reply" class="feedback-reply-mobile">
+                  <span class="reply-label-mobile">管理员回复：</span>
+                  {{ item.reply }}
+                </div>
+                <div class="feedback-time-mobile">{{ item.created_at }}</div>
+              </div>
+            </div>
+          </van-tab>
+        </van-tabs>
+      </div>
+    </van-popup>
   </div>
 </template>
 
@@ -215,6 +366,7 @@ import { showSuccessToast, showFailToast, showDialog } from 'vant';
 import { ElMessage } from 'element-plus';
 import { useUserStore } from '@/store/user';
 import { changePassword, getProfile } from '@/api/auth';
+import { submitFeedback, getMyFeedbacks } from '@/api/feedbacks';
 import { useDevice } from '@/composables/useDevice';
 
 const { isPC } = useDevice();
@@ -227,6 +379,13 @@ const showChangePassword = ref(false);
 const showFirstLoginDialog = ref(false);
 const loading = ref(false);
 const profile = ref({});
+
+// 帮助中心相关状态
+const showHelpDialog = ref(false);
+const activeTab = ref('submit');
+const feedbackForm = reactive({ title: '', content: '' });
+const myFeedbacks = ref([]);
+const feedbackLoading = ref(false);
 
 const passwordFormRef = ref(null);
 
@@ -342,6 +501,88 @@ async function handleLogout() {
   await userStore.clearUserData();
   router.push('/teacher/login');
 }
+
+// 帮助中心相关方法
+function openHelpCenter() {
+  showHelpDialog.value = true;
+  activeTab.value = 'submit';
+  feedbackForm.title = '';
+  feedbackForm.content = '';
+  loadMyFeedbacks();
+}
+
+async function loadMyFeedbacks() {
+  feedbackLoading.value = true;
+  try {
+    const res = await getMyFeedbacks();
+    if (res.code === 0) {
+      myFeedbacks.value = res.data || [];
+    }
+  } catch (e) {
+    console.error('获取反馈列表失败:', e);
+  } finally {
+    feedbackLoading.value = false;
+  }
+}
+
+async function handleSubmitFeedback() {
+  if (!feedbackForm.title || !feedbackForm.content) {
+    if (isPC.value) {
+      ElMessage.warning('请填写标题和内容');
+    } else {
+      showFailToast('请填写标题和内容');
+    }
+    return;
+  }
+
+  feedbackLoading.value = true;
+  try {
+    const res = await submitFeedback(feedbackForm.title, feedbackForm.content);
+    if (res.code === 0) {
+      if (isPC.value) {
+        ElMessage.success('提交成功');
+      } else {
+        showSuccessToast('提交成功');
+      }
+      feedbackForm.title = '';
+      feedbackForm.content = '';
+      activeTab.value = 'my';
+      loadMyFeedbacks();
+    } else {
+      if (isPC.value) {
+        ElMessage.error(res.message || '提交失败');
+      } else {
+        showFailToast(res.message || '提交失败');
+      }
+    }
+  } catch (e) {
+    if (isPC.value) {
+      ElMessage.error(e.message || '提交失败');
+    } else {
+      showFailToast(e.message || '提交失败');
+    }
+  } finally {
+    feedbackLoading.value = false;
+  }
+}
+
+function getStatusType(status) {
+  switch (status) {
+    case 'pending': return 'warning';
+    case 'in_progress': return 'info';
+    case 'resolved': return 'success';
+    default: return 'default';
+  }
+}
+
+function getStatusText(status) {
+  switch (status) {
+    case 'pending': return '待处理';
+    case 'in_progress': return '处理中';
+    case 'resolved': return '已处理';
+    default: return status;
+  }
+}
 </script>
 
 <style scoped>
@@ -456,5 +697,144 @@ async function handleLogout() {
 
 .form-actions {
   margin-top: 20px;
+}
+
+/* PC端帮助中心样式 */
+.help-card-pc {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.help-desc {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.feedback-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.empty-feedback {
+  text-align: center;
+  color: #999;
+  padding: 40px 0;
+}
+
+.feedback-item {
+  padding: 16px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.feedback-item:last-child {
+  border-bottom: none;
+}
+
+.feedback-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.feedback-title {
+  font-weight: 500;
+  font-size: 15px;
+  color: #303133;
+}
+
+.feedback-content {
+  font-size: 14px;
+  color: #606266;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.feedback-reply {
+  background: #f5f7fa;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #409eff;
+  margin-bottom: 8px;
+}
+
+.reply-label {
+  color: #909399;
+}
+
+.feedback-time {
+  font-size: 12px;
+  color: #909399;
+}
+
+/* 移动端帮助中心样式 */
+.help-popup {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.feedback-list-mobile {
+  padding: 0 16px;
+}
+
+.feedback-item-mobile {
+  padding: 16px 0;
+  border-bottom: 1px solid #ebedf0;
+}
+
+.feedback-item-mobile:last-child {
+  border-bottom: none;
+}
+
+.feedback-header-mobile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.feedback-title-mobile {
+  font-weight: 500;
+  font-size: 15px;
+  color: #323233;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 8px;
+}
+
+.feedback-content-mobile {
+  font-size: 14px;
+  color: #646566;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.feedback-reply-mobile {
+  background: #f7f8fa;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1989fa;
+  margin-bottom: 8px;
+}
+
+.reply-label-mobile {
+  color: #969799;
+}
+
+.feedback-time-mobile {
+  font-size: 12px;
+  color: #969799;
 }
 </style>

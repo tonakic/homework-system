@@ -268,6 +268,22 @@ function initTables() {
     )
   `);
 
+  // 反馈表
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS feedbacks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_type VARCHAR(10) NOT NULL,
+      user_id INTEGER NOT NULL,
+      user_name VARCHAR(20),
+      title VARCHAR(100) NOT NULL,
+      content TEXT NOT NULL,
+      status VARCHAR(20) DEFAULT 'pending',
+      admin_reply TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   // 创建索引
   db.exec(`CREATE INDEX IF NOT EXISTS idx_grading_queue_status ON grading_queue(status)`);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_grading_queue_priority ON grading_queue(priority DESC, created_at ASC)`);
