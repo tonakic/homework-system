@@ -1,9 +1,10 @@
-const db = require('../config/database');
+const { getDatabase } = require('../config/database');
 
 // 提交反馈（学生/教师）
 exports.submitFeedback = (req, res) => {
   const { title, content } = req.body;
   const { userType, userId, userName } = req.user;
+  const db = getDatabase();
 
   if (!title || !content) {
     return res.status(400).json({ code: 1001, message: '标题和内容不能为空' });
@@ -25,6 +26,7 @@ exports.submitFeedback = (req, res) => {
 // 获取我的反馈列表（学生/教师）
 exports.getMyFeedbacks = (req, res) => {
   const { userType, userId } = req.user;
+  const db = getDatabase();
 
   try {
     const stmt = db.prepare(`
@@ -44,6 +46,7 @@ exports.getMyFeedbacks = (req, res) => {
 exports.getAllFeedbacks = (req, res) => {
   const { status, page = 1, pageSize = 20 } = req.query;
   const offset = (page - 1) * pageSize;
+  const db = getDatabase();
 
   try {
     let sql = 'SELECT * FROM feedbacks';
@@ -68,11 +71,9 @@ exports.getAllFeedbacks = (req, res) => {
 
     res.json({
       code: 0,
-      data: feedbacks,
-      pagination: {
-        total,
-        page: parseInt(page),
-        pageSize: parseInt(pageSize)
+      data: {
+        list: feedbacks,
+        total: total
       }
     });
   } catch (err) {
@@ -84,6 +85,7 @@ exports.getAllFeedbacks = (req, res) => {
 exports.updateFeedback = (req, res) => {
   const { id } = req.params;
   const { status, admin_reply } = req.body;
+  const db = getDatabase();
 
   // 验证：标记已处理时必须填写回复
   if (status === 'resolved' && !admin_reply) {
@@ -107,6 +109,7 @@ exports.updateFeedback = (req, res) => {
 // 删除反馈（管理员）
 exports.deleteFeedback = (req, res) => {
   const { id } = req.params;
+  const db = getDatabase();
 
   try {
     const stmt = db.prepare('DELETE FROM feedbacks WHERE id = ?');

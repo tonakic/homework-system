@@ -2,51 +2,54 @@
   <!-- PC Version - Split Layout -->
   <div v-if="isPC" class="exam-start-pc">
     <!-- PC Header -->
-    <div class="pc-header">
+    <header class="pc-header">
       <div class="pc-header-left">
         <el-icon class="back-icon" @click="handleBack"><ArrowLeft /></el-icon>
-        <span class="pc-exam-title">{{ examInfo.title }}</span>
+        <h1 class="pc-exam-title">{{ examInfo.title }}</h1>
       </div>
       <div class="pc-header-center">
         <div class="pc-timer" :class="{ 'timer-warning': remainingSeconds < 300 }">
           <el-icon><Clock /></el-icon>
-          <span>{{ formatTime(remainingSeconds) }}</span>
+          <span class="timer-value">{{ formatTime(remainingSeconds) }}</span>
         </div>
       </div>
       <div class="pc-header-right">
-        <el-button type="primary" @click="handleSubmit">交卷</el-button>
+        <el-button type="primary" class="submit-btn" @click="handleSubmit">
+          <el-icon><Position /></el-icon>
+          交卷
+        </el-button>
       </div>
-    </div>
+    </header>
 
     <!-- PC Main Content -->
-    <div class="pc-main">
+    <main class="pc-main">
       <!-- Left Sidebar - Question Navigation -->
-      <div class="pc-sidebar">
+      <aside class="pc-sidebar">
         <div class="sidebar-header">
-          <h3>题目列表</h3>
+          <h3 class="sidebar-title">答题卡</h3>
           <div class="sidebar-stats">
-            <span class="stat-answered">
-              <span class="status-dot answered"></span>
-              已答 {{ answeredCount }}
-            </span>
-            <span class="stat-unanswered">
-              <span class="status-dot unanswered"></span>
-              未答 {{ unansweredCount }}
-            </span>
+            <div class="stat-item answered">
+              <span class="status-dot"></span>
+              <span>已答 {{ answeredCount }}</span>
+            </div>
+            <div class="stat-item unanswered">
+              <span class="status-dot"></span>
+              <span>未答 {{ unansweredCount }}</span>
+            </div>
           </div>
         </div>
         <div class="sidebar-content">
           <div
             v-for="group in questionGroups"
             :key="group.type"
-            class="question-group-pc"
+            class="question-group"
           >
-            <div class="group-label-pc">{{ group.label }}</div>
-            <div class="group-questions-pc">
-              <div
+            <div class="group-label">{{ group.label }}</div>
+            <div class="group-questions">
+              <button
                 v-for="q in group.questions"
                 :key="q.id"
-                class="question-item-pc"
+                class="question-badge"
                 :class="{
                   answered: isAnswered(q),
                   current: q.index === currentIndex
@@ -54,35 +57,35 @@
                 @click="jumpToQuestion(q.index)"
               >
                 {{ q.index + 1 }}
-              </div>
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      </aside>
 
       <!-- Right Main - Current Question -->
       <div class="pc-content">
-        <div class="pc-question-card">
+        <article class="pc-question-card">
           <!-- Question Header -->
-          <div class="pc-question-header">
-            <div class="pc-question-info">
-              <el-tag :type="getQuestionTagType(currentQuestion.type)">
+          <header class="question-header">
+            <div class="question-info">
+              <el-tag :type="getQuestionTagType(currentQuestion.type)" class="type-tag">
                 {{ getQuestionTypeText(currentQuestion.type) }}
               </el-tag>
-              <span class="pc-question-index">第 {{ currentIndex + 1 }} 题</span>
-              <span class="pc-question-score">（{{ currentQuestion.score }}分）</span>
+              <span class="question-index">第 {{ currentIndex + 1 }} 题</span>
+              <span class="question-score">（{{ currentQuestion.score }}分）</span>
             </div>
-          </div>
+          </header>
 
           <!-- Question Content -->
-          <div class="pc-question-content">
+          <div class="question-content">
             {{ currentQuestion.content }}
           </div>
 
           <!-- Answer Area -->
-          <div class="pc-answer-area">
+          <div class="answer-area">
             <!-- Single Choice -->
-            <div v-if="currentQuestion.type === 'choice'" class="pc-options">
+            <div v-if="currentQuestion.type === 'choice'" class="options-list">
               <el-radio-group
                 v-model="answers[currentQuestion.id]"
                 @change="triggerAutoSave"
@@ -91,16 +94,16 @@
                   v-for="(option, index) in currentQuestion.options"
                   :key="index"
                   :label="index"
-                  class="pc-option"
+                  class="option-item"
                 >
-                  <span class="option-letter-pc">{{ getOptionLetter(index) }}.</span>
-                  <span class="option-text-pc">{{ option }}</span>
+                  <span class="option-letter">{{ getOptionLetter(index) }}.</span>
+                  <span class="option-text">{{ option }}</span>
                 </el-radio>
               </el-radio-group>
             </div>
 
             <!-- Multiple Choice -->
-            <div v-else-if="currentQuestion.type === 'multiple'" class="pc-options">
+            <div v-else-if="currentQuestion.type === 'multiple'" class="options-list">
               <el-checkbox-group
                 v-model="answers[currentQuestion.id + '_multiple']"
                 @change="triggerAutoSave"
@@ -109,42 +112,43 @@
                   v-for="(option, index) in currentQuestion.options"
                   :key="index"
                   :label="index"
-                  class="pc-option"
+                  class="option-item"
                 >
-                  <span class="option-letter-pc">{{ getOptionLetter(index) }}.</span>
-                  <span class="option-text-pc">{{ option }}</span>
+                  <span class="option-letter">{{ getOptionLetter(index) }}.</span>
+                  <span class="option-text">{{ option }}</span>
                 </el-checkbox>
               </el-checkbox-group>
-              <div class="multiple-hint-pc">
+              <div class="multiple-hint">
+                <el-icon><InfoFilled /></el-icon>
                 已选择：{{ getMultipleSelectedLetters(currentQuestion.id) }}
               </div>
             </div>
 
             <!-- Judgment -->
-            <div v-else-if="currentQuestion.type === 'judgment'" class="pc-options judgment">
+            <div v-else-if="currentQuestion.type === 'judgment'" class="options-list judgment">
               <el-radio-group
                 v-model="answers[currentQuestion.id]"
                 @change="triggerAutoSave"
               >
-                <el-radio :label="0" class="pc-option judgment-option-pc">
-                  <span class="judgment-icon-pc correct">✓</span>
+                <el-radio :label="0" class="option-item judgment-option">
+                  <span class="judgment-icon correct">✓</span>
                   <span>正确</span>
                 </el-radio>
-                <el-radio :label="1" class="pc-option judgment-option-pc">
-                  <span class="judgment-icon-pc incorrect">✗</span>
+                <el-radio :label="1" class="option-item judgment-option">
+                  <span class="judgment-icon incorrect">✗</span>
                   <span>错误</span>
                 </el-radio>
               </el-radio-group>
             </div>
 
             <!-- Fill in the Blank -->
-            <div v-else-if="currentQuestion.type === 'fill'" class="pc-fill-inputs">
+            <div v-else-if="currentQuestion.type === 'fill'" class="fill-inputs">
               <div
                 v-for="(_, index) in (currentQuestion.blanks || [])"
                 :key="index"
-                class="pc-fill-item"
+                class="fill-item"
               >
-                <label class="pc-fill-label">第 {{ index + 1 }} 空</label>
+                <label class="fill-label">第 {{ index + 1 }} 空</label>
                 <el-input
                   v-model="answers[currentQuestion.id + '_' + index]"
                   placeholder="请输入答案"
@@ -154,7 +158,7 @@
             </div>
 
             <!-- Subjective -->
-            <div v-else-if="currentQuestion.type === 'subjective'" class="pc-subjective">
+            <div v-else-if="currentQuestion.type === 'subjective'" class="subjective-area">
               <el-input
                 v-model="answers[currentQuestion.id]"
                 type="textarea"
@@ -168,7 +172,7 @@
           </div>
 
           <!-- Navigation Buttons -->
-          <div class="pc-nav-buttons">
+          <footer class="question-nav">
             <el-button
               size="large"
               :disabled="currentIndex === 0"
@@ -177,8 +181,10 @@
               <el-icon><ArrowLeft /></el-icon>
               上一题
             </el-button>
-            <div class="pc-progress-info">
-              {{ currentIndex + 1 }} / {{ questions.length }}
+            <div class="progress-info">
+              <span class="progress-current">{{ currentIndex + 1 }}</span>
+              <span class="progress-sep">/</span>
+              <span class="progress-total">{{ questions.length }}</span>
             </div>
             <el-button
               size="large"
@@ -188,33 +194,39 @@
               下一题
               <el-icon><ArrowRight /></el-icon>
             </el-button>
-          </div>
-        </div>
+          </footer>
+        </article>
       </div>
-    </div>
+    </main>
 
     <!-- Submit Dialog for PC -->
     <el-dialog
       v-model="showSubmitDialog"
       title="确认交卷"
-      width="400px"
+      width="420px"
       :close-on-click-modal="false"
+      class="submit-dialog"
     >
-      <div class="pc-submit-dialog">
-        <div v-if="unansweredCount > 0" class="pc-warning">
-          <el-icon color="#f44336"><WarningFilled /></el-icon>
+      <div class="submit-content">
+        <div v-if="unansweredCount > 0" class="submit-warning">
+          <el-icon class="warning-icon"><WarningFilled /></el-icon>
           <span>您还有 <strong>{{ unansweredCount }}</strong> 题未作答！</span>
         </div>
-        <div class="pc-submit-info">
-          <p>已答题数：{{ answeredCount }} / {{ questions.length }}</p>
-          <p>确认交卷后将无法修改答案。</p>
+        <div class="submit-info">
+          <div class="info-row">
+            <span class="info-label">已答题数</span>
+            <span class="info-value">{{ answeredCount }} / {{ questions.length }}</span>
+          </div>
+          <p class="info-tip">确认交卷后将无法修改答案。</p>
         </div>
       </div>
       <template #footer>
-        <el-button @click="showSubmitDialog = false">取消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="confirmSubmit">
-          确认交卷
-        </el-button>
+        <div class="dialog-footer">
+          <el-button @click="showSubmitDialog = false">取消</el-button>
+          <el-button type="primary" :loading="submitLoading" @click="confirmSubmit">
+            确认交卷
+          </el-button>
+        </div>
       </template>
     </el-dialog>
 
@@ -222,44 +234,47 @@
     <el-dialog
       v-model="showResultPopup"
       :title="null"
-      width="360px"
+      width="380px"
       :close-on-click-modal="false"
       :show-close="false"
+      class="result-dialog"
     >
-      <div class="pc-result-dialog">
+      <div class="result-content">
         <!-- Pending Grading -->
-        <div v-if="submitResult.hasPendingGrading || submitResult.needAIGrading" class="pc-result-content">
-          <div class="pc-result-icon waiting">
+        <div v-if="submitResult.hasPendingGrading || submitResult.needAIGrading" class="result-body">
+          <div class="result-icon waiting">
             <el-icon><Clock /></el-icon>
           </div>
-          <h3>交卷成功</h3>
-          <p class="waiting-tip">待批改</p>
-          <p class="waiting-sub">批改完成后可查看成绩</p>
+          <h3 class="result-title">交卷成功</h3>
+          <p class="result-status">待批改</p>
+          <p class="result-tip">批改完成后可查看成绩</p>
         </div>
         <!-- Auto Graded -->
-        <div v-else-if="examInfo.autoGrade" class="pc-result-content">
-          <div class="pc-result-icon success">
+        <div v-else-if="examInfo.autoGrade" class="result-body">
+          <div class="result-icon success">
             <el-icon><CircleCheck /></el-icon>
           </div>
-          <h3>交卷成功</h3>
-          <div class="pc-score-display">
-            <span class="pc-score-value">{{ resultScore }}</span>
-            <span class="pc-score-unit">分</span>
+          <h3 class="result-title">交卷成功</h3>
+          <div class="score-display">
+            <span class="score-value">{{ resultScore }}</span>
+            <span class="score-unit">分</span>
           </div>
-          <p class="pc-score-tip">系统已自动批改</p>
+          <p class="result-tip">系统已自动批改</p>
         </div>
         <!-- Manual Grading -->
-        <div v-else class="pc-result-content">
-          <div class="pc-result-icon waiting">
+        <div v-else class="result-body">
+          <div class="result-icon waiting">
             <el-icon><Clock /></el-icon>
           </div>
-          <h3>交卷成功</h3>
-          <p class="waiting-tip">待批改</p>
-          <p class="waiting-sub">批改完成后可查看成绩</p>
+          <h3 class="result-title">交卷成功</h3>
+          <p class="result-status">待批改</p>
+          <p class="result-tip">批改完成后可查看成绩</p>
         </div>
       </div>
       <template #footer>
-        <el-button type="primary" size="large" @click="goHome">确认</el-button>
+        <el-button type="primary" size="large" class="confirm-btn" @click="goHome">
+          确认
+        </el-button>
       </template>
     </el-dialog>
 
@@ -267,12 +282,15 @@
     <el-dialog
       v-model="showBackDialog"
       title="提示"
-      width="360px"
+      width="380px"
+      class="back-dialog"
     >
-      <p>确定要退出答题吗？当前答题进度将会保存。</p>
+      <p class="back-message">确定要退出答题吗？当前答题进度将会保存。</p>
       <template #footer>
-        <el-button @click="showBackDialog = false">取消</el-button>
-        <el-button type="danger" @click="confirmBack">退出</el-button>
+        <div class="dialog-footer">
+          <el-button @click="showBackDialog = false">取消</el-button>
+          <el-button type="danger" @click="confirmBack">退出</el-button>
+        </div>
       </template>
     </el-dialog>
   </div>
@@ -280,22 +298,22 @@
   <!-- Mobile Version -->
   <div v-else class="exam-start page">
     <!-- 顶部栏 -->
-    <div class="header">
+    <header class="header">
       <div class="header-left">
         <van-icon name="arrow-left" class="back-btn" @click="handleBack" />
-        <span class="exam-title">{{ examInfo.title }}</span>
+        <h1 class="exam-title">{{ examInfo.title }}</h1>
       </div>
       <div class="header-right">
         <div class="progress">第 {{ currentIndex + 1 }}/{{ questions.length }} 题</div>
-        <div class="timer" v-if="duration > 0">
+        <div class="timer" v-if="duration > 0" :class="{ 'timer-warning': remainingSeconds < 300 }">
           <van-icon name="clock-o" />
-          {{ formatTime(remainingSeconds) }}
+          <span>{{ formatTime(remainingSeconds) }}</span>
         </div>
       </div>
-    </div>
+    </header>
 
     <!-- 题目区域 -->
-    <div class="question-area">
+    <main class="question-area">
       <div class="question-header">
         <span class="question-type">{{ getQuestionTypeText(currentQuestion.type) }}</span>
         <span class="question-score">{{ currentQuestion.score }}分</span>
@@ -378,12 +396,12 @@
           @change="triggerAutoSave"
         />
       </div>
-    </div>
+    </main>
 
     <!-- 底部答题菜单栏 -->
-    <div class="exam-toolbar">
+    <footer class="exam-toolbar">
       <van-button
-        class="toolbar-btn"
+        class="toolbar-btn nav-btn"
         :disabled="currentIndex === 0"
         @click="prevQuestion"
       >
@@ -391,7 +409,7 @@
         上一题
       </van-button>
       <van-button
-        class="toolbar-btn"
+        class="toolbar-btn nav-btn"
         :disabled="currentIndex === questions.length - 1"
         @click="nextQuestion"
       >
@@ -405,7 +423,7 @@
       <van-button class="toolbar-btn submit-btn" type="primary" @click="handleSubmit">
         交卷
       </van-button>
-    </div>
+    </footer>
 
     <!-- 跳转弹窗 -->
     <van-popup
@@ -414,20 +432,21 @@
       round
       closeable
       :style="{ height: '60%' }"
+      class="jump-popup"
     >
-      <div class="jump-popup">
+      <div class="jump-popup-content">
         <h3 class="popup-title">题目跳转</h3>
         <div class="jump-summary">
-          <span class="answered-count">
-            <span class="dot green"></span>
-            已答 {{ answeredCount }} 题
-          </span>
-          <span class="unanswered-count">
-            <span class="dot red"></span>
-            未答 {{ questions.length - answeredCount }} 题
-          </span>
+          <div class="summary-item answered">
+            <span class="dot"></span>
+            <span>已答 {{ answeredCount }} 题</span>
+          </div>
+          <div class="summary-item unanswered">
+            <span class="dot"></span>
+            <span>未答 {{ questions.length - answeredCount }} 题</span>
+          </div>
         </div>
-        <div class="jump-content">
+        <div class="jump-groups">
           <div
             v-for="group in questionGroups"
             :key="group.type"
@@ -435,7 +454,7 @@
           >
             <div class="group-title">{{ group.label }}</div>
             <div class="group-questions" v-if="group.questions.length > 0">
-              <div
+              <button
                 v-for="q in group.questions"
                 :key="q.id"
                 class="question-badge"
@@ -446,7 +465,7 @@
                 @click="jumpToQuestion(q.index)"
               >
                 {{ q.index + 1 }}
-              </div>
+              </button>
             </div>
             <div v-else class="no-questions">暂无此类题目</div>
           </div>
@@ -459,11 +478,12 @@
       v-model:show="showSubmitDialog"
       title="确认交卷"
       show-cancel-button
+      class="submit-dialog"
       @confirm="confirmSubmit"
     >
       <div class="submit-dialog-content">
         <div v-if="unansweredCount > 0" class="warning">
-          <van-icon name="warning-o" color="#f44336" />
+          <van-icon name="warning-o" class="warning-icon" />
           <span>您还有 <strong>{{ unansweredCount }}</strong> 题未作答！</span>
         </div>
         <div class="submit-info">
@@ -479,9 +499,10 @@
       round
       closeable
       :close-on-click-overlay="false"
-      :style="{ width: '85%', maxWidth: '320px' }"
+      :style="{ width: '85%', maxWidth: '340px' }"
+      class="result-popup"
     >
-      <div class="result-popup">
+      <div class="result-popup-content">
         <!-- 有待批改题目（混合模式含手动、AI批改响应中）：显示等待批改 -->
         <div v-if="submitResult.hasPendingGrading || submitResult.needAIGrading" class="result-manual">
           <div class="result-icon waiting">
@@ -512,7 +533,7 @@
           <p class="waiting-tip">待批改</p>
           <p class="waiting-sub">批改完成后可查看成绩</p>
         </div>
-        <van-button type="primary" block round @click="goHome">
+        <van-button type="primary" block round class="result-btn" @click="goHome">
           确认
         </van-button>
       </div>
@@ -526,7 +547,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { showDialog, showFailToast, showSuccessToast } from 'vant';
 import { getExamDetail, startExam, saveAnswer, submitExam } from '@/api/auth';
 import { useDevice } from '@/composables/useDevice';
-import { ArrowLeft, ArrowRight, Clock, CircleCheck, WarningFilled } from '@element-plus/icons-vue';
+import { ArrowLeft, ArrowRight, Clock, CircleCheck, WarningFilled, Position, InfoFilled } from '@element-plus/icons-vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -925,10 +946,54 @@ function goHome() {
 </script>
 
 <style scoped>
-/* ==================== PC Styles ==================== */
+/* ==================== CSS 变量定义 ==================== */
+:root {
+  --exam-primary: var(--color-primary);
+  --exam-primary-light: var(--color-primary-light-9);
+  --exam-success: var(--color-success);
+  --exam-success-light: var(--color-success-light-9);
+  --exam-warning: var(--color-warning);
+  --exam-warning-light: var(--color-warning-light-9);
+  --exam-danger: var(--color-danger);
+  --exam-danger-light: var(--color-danger-light-9);
+  --exam-info: var(--text-color-secondary);
+  --exam-info-light: var(--fill-color-light);
+  
+  --exam-text-primary: var(--text-color-primary);
+  --exam-text-regular: var(--text-color-regular);
+  --exam-text-secondary: var(--text-color-secondary);
+  --exam-text-placeholder: var(--text-color-placeholder);
+  
+  --exam-border: var(--border-color);
+  --exam-border-light: var(--border-color-light);
+  --exam-border-lighter: var(--border-color-lighter);
+  
+  --exam-bg-page: var(--fill-color);
+  --exam-bg-card: var(--fill-color-blank);
+  --exam-bg-hover: var(--fill-color-light);
+  
+  --exam-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --exam-shadow-light: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --exam-shadow-card: 0 4px 16px rgba(0, 0, 0, 0.06);
+  
+  --exam-radius: 8px;
+  --exam-radius-lg: 12px;
+  --exam-radius-xl: 16px;
+  
+  --exam-spacing-xs: 4px;
+  --exam-spacing-sm: 8px;
+  --exam-spacing-md: 16px;
+  --exam-spacing-lg: 24px;
+  --exam-spacing-xl: 32px;
+  
+  --exam-header-height: 60px;
+  --exam-sidebar-width: 280px;
+}
+
+/* ==================== PC 端样式 ==================== */
 .exam-start-pc {
   min-height: 100vh;
-  background: #f0f2f5;
+  background: var(--exam-bg-page);
   display: flex;
   flex-direction: column;
 }
@@ -939,37 +1004,41 @@ function goHome() {
   top: 0;
   left: 0;
   right: 0;
-  height: 60px;
-  background: white;
+  height: var(--exam-header-height);
+  background: var(--exam-bg-card);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 0 var(--exam-spacing-lg);
+  box-shadow: var(--exam-shadow-light);
   z-index: 100;
 }
 
 .pc-header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--exam-spacing-md);
 }
 
 .back-icon {
   font-size: 20px;
-  color: #606266;
+  color: var(--exam-text-secondary);
   cursor: pointer;
   transition: color 0.2s;
+  padding: var(--exam-spacing-sm);
+  border-radius: var(--exam-radius);
 }
 
 .back-icon:hover {
-  color: #409eff;
+  color: var(--exam-primary);
+  background: var(--exam-primary-light);
 }
 
 .pc-exam-title {
   font-size: 18px;
   font-weight: 600;
-  color: #303133;
+  color: var(--exam-text-primary);
+  margin: 0;
 }
 
 .pc-header-center {
@@ -980,18 +1049,19 @@ function goHome() {
 .pc-timer {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 20px;
-  background: linear-gradient(135deg, #409eff, #67c23a);
-  border-radius: 20px;
-  color: white;
+  gap: var(--exam-spacing-sm);
+  padding: var(--exam-spacing-sm) var(--exam-spacing-lg);
+  background: linear-gradient(135deg, var(--exam-primary), var(--exam-success));
+  border-radius: 24px;
+  color: var(--color-white);
   font-size: 18px;
   font-weight: 600;
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
 }
 
 .pc-timer.timer-warning {
-  background: linear-gradient(135deg, #f56c6c, #e6a23c);
-  animation: pulse 1s infinite;
+  background: linear-gradient(135deg, var(--exam-danger), var(--exam-warning));
+  animation: pulse 1s ease-in-out infinite;
 }
 
 @keyframes pulse {
@@ -999,122 +1069,134 @@ function goHome() {
   50% { transform: scale(1.05); }
 }
 
+.timer-value {
+  font-variant-numeric: tabular-nums;
+}
+
 .pc-header-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--exam-spacing-md);
+}
+
+.submit-btn {
+  padding: 10px 24px;
+  font-weight: 500;
 }
 
 /* PC Main Layout */
 .pc-main {
   display: flex;
-  margin-top: 60px;
-  min-height: calc(100vh - 60px);
+  margin-top: var(--exam-header-height);
+  min-height: calc(100vh - var(--exam-header-height));
 }
 
 /* PC Sidebar */
 .pc-sidebar {
-  width: 280px;
-  background: white;
-  border-right: 1px solid #e4e7ed;
+  width: var(--exam-sidebar-width);
+  background: var(--exam-bg-card);
+  border-right: 1px solid var(--exam-border-light);
   display: flex;
   flex-direction: column;
   position: fixed;
-  top: 60px;
+  top: var(--exam-header-height);
   left: 0;
   bottom: 0;
   overflow: hidden;
 }
 
 .sidebar-header {
-  padding: 20px;
-  border-bottom: 1px solid #e4e7ed;
+  padding: var(--exam-spacing-lg);
+  border-bottom: 1px solid var(--exam-border-lighter);
 }
 
-.sidebar-header h3 {
-  margin: 0 0 12px 0;
+.sidebar-title {
   font-size: 16px;
-  color: #303133;
+  font-weight: 600;
+  color: var(--exam-text-primary);
+  margin: 0 0 var(--exam-spacing-md) 0;
 }
 
 .sidebar-stats {
   display: flex;
-  gap: 20px;
-  font-size: 13px;
+  gap: var(--exam-spacing-lg);
 }
 
-.stat-answered,
-.stat-unanswered {
+.stat-item {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--exam-spacing-xs);
+  font-size: 13px;
+  color: var(--exam-text-regular);
 }
 
-.status-dot {
+.stat-item .status-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
 }
 
-.status-dot.answered {
-  background: #67c23a;
+.stat-item.answered .status-dot {
+  background: var(--exam-success);
 }
 
-.status-dot.unanswered {
-  background: #f56c6c;
+.stat-item.unanswered .status-dot {
+  background: var(--exam-danger);
 }
 
 .sidebar-content {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
+  padding: var(--exam-spacing-md);
 }
 
-.question-group-pc {
-  margin-bottom: 24px;
+.question-group {
+  margin-bottom: var(--exam-spacing-lg);
 }
 
-.group-label-pc {
+.group-label {
   font-size: 13px;
-  color: #909399;
-  margin-bottom: 12px;
+  color: var(--exam-text-secondary);
+  margin-bottom: var(--exam-spacing-sm);
   font-weight: 500;
 }
 
-.group-questions-pc {
+.group-questions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--exam-spacing-sm);
 }
 
-.question-item-pc {
+.question-badge {
   width: 36px;
   height: 36px;
-  border-radius: 6px;
+  border-radius: var(--exam-radius);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
-  background: #fef0f0;
-  color: #f56c6c;
-  border: 1px solid transparent;
+  background: var(--exam-danger-light);
+  color: var(--exam-danger);
+  border: 2px solid transparent;
+  font-weight: 500;
 }
 
-.question-item-pc:hover {
-  border-color: #409eff;
+.question-badge:hover {
+  border-color: var(--exam-primary);
+  transform: translateY(-1px);
 }
 
-.question-item-pc.answered {
-  background: #f0f9eb;
-  color: #67c23a;
+.question-badge.answered {
+  background: var(--exam-success-light);
+  color: var(--exam-success);
 }
 
-.question-item-pc.current {
-  border: 2px solid #409eff;
-  background: #ecf5ff;
-  color: #409eff;
+.question-badge.current {
+  border-color: var(--exam-primary);
+  background: var(--exam-primary-light);
+  color: var(--exam-primary);
   font-weight: 600;
   box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.2);
 }
@@ -1122,8 +1204,8 @@ function goHome() {
 /* PC Content */
 .pc-content {
   flex: 1;
-  margin-left: 280px;
-  padding: 24px;
+  margin-left: var(--exam-sidebar-width);
+  padding: var(--exam-spacing-lg);
   display: flex;
   justify-content: center;
 }
@@ -1131,240 +1213,314 @@ function goHome() {
 .pc-question-card {
   width: 100%;
   max-width: 800px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  padding: 32px;
+  background: var(--exam-bg-card);
+  border-radius: var(--exam-radius-xl);
+  box-shadow: var(--exam-shadow-card);
+  overflow: hidden;
 }
 
-.pc-question-header {
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #ebeef5;
+.question-header {
+  padding: var(--exam-spacing-lg);
+  border-bottom: 1px solid var(--exam-border-lighter);
 }
 
-.pc-question-info {
+.question-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--exam-spacing-md);
 }
 
-.pc-question-index {
+.type-tag {
+  font-weight: 500;
+}
+
+.question-index {
   font-size: 16px;
   font-weight: 600;
-  color: #303133;
+  color: var(--exam-text-primary);
 }
 
-.pc-question-score {
+.question-score {
   font-size: 14px;
-  color: #909399;
+  color: var(--exam-text-secondary);
 }
 
-.pc-question-content {
+.question-content {
   font-size: 18px;
   line-height: 1.8;
-  color: #303133;
-  margin-bottom: 32px;
-  padding: 20px;
-  background: #fafafa;
-  border-radius: 8px;
+  color: var(--exam-text-primary);
+  margin: var(--exam-spacing-lg);
+  padding: var(--exam-spacing-lg);
+  background: var(--exam-bg-page);
+  border-radius: var(--exam-radius);
 }
 
-.pc-answer-area {
-  margin-bottom: 32px;
+.answer-area {
+  margin: var(--exam-spacing-lg);
 }
 
 /* PC Options */
-.pc-options {
+.options-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--exam-spacing-md);
 }
 
-.pc-option {
+.option-item {
   display: flex;
   align-items: flex-start;
-  padding: 16px 20px;
-  background: #fafafa;
-  border-radius: 8px;
+  padding: var(--exam-spacing-md) var(--exam-spacing-lg);
+  background: var(--exam-bg-page);
+  border-radius: var(--exam-radius);
   transition: all 0.2s;
   margin: 0;
+  cursor: pointer;
 }
 
-.pc-option:hover {
-  background: #f0f7ff;
+.option-item:hover {
+  background: var(--exam-primary-light);
 }
 
-.option-letter-pc {
+.option-letter {
   font-weight: 600;
-  margin-right: 12px;
-  color: #606266;
+  margin-right: var(--exam-spacing-md);
+  color: var(--exam-text-regular);
+  min-width: 20px;
 }
 
-.option-text-pc {
+.option-text {
   flex: 1;
-  color: #303133;
+  color: var(--exam-text-primary);
   line-height: 1.6;
 }
 
-.multiple-hint-pc {
-  margin-top: 16px;
-  padding: 12px 16px;
-  background: #fdf6ec;
-  border-radius: 8px;
+.multiple-hint {
+  display: flex;
+  align-items: center;
+  gap: var(--exam-spacing-sm);
+  margin-top: var(--exam-spacing-md);
+  padding: var(--exam-spacing-md);
+  background: var(--exam-warning-light);
+  border-radius: var(--exam-radius);
   font-size: 14px;
-  color: #e6a23c;
+  color: var(--exam-warning);
 }
 
 /* PC Judgment Options */
-.pc-options.judgment .pc-option {
+.options-list.judgment {
+  flex-direction: row;
+  gap: var(--exam-spacing-lg);
+}
+
+.judgment-option {
+  flex: 1;
   justify-content: center;
+  padding: var(--exam-spacing-lg);
 }
 
-.judgment-option-pc {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.judgment-icon-pc {
-  font-size: 20px;
+.judgment-icon {
+  font-size: 24px;
   font-weight: bold;
+  margin-right: var(--exam-spacing-sm);
 }
 
-.judgment-icon-pc.correct {
-  color: #67c23a;
+.judgment-icon.correct {
+  color: var(--exam-success);
 }
 
-.judgment-icon-pc.incorrect {
-  color: #f56c6c;
+.judgment-icon.incorrect {
+  color: var(--exam-danger);
 }
 
 /* PC Fill Inputs */
-.pc-fill-inputs {
+.fill-inputs {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--exam-spacing-lg);
 }
 
-.pc-fill-item {
+.fill-item {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--exam-spacing-sm);
 }
 
-.pc-fill-label {
+.fill-label {
   font-size: 14px;
-  color: #606266;
+  color: var(--exam-text-regular);
   font-weight: 500;
 }
 
 /* PC Subjective */
-.pc-subjective {
-  background: #fafafa;
-  border-radius: 8px;
-  padding: 4px;
+.subjective-area {
+  background: var(--exam-bg-page);
+  border-radius: var(--exam-radius);
+  padding: var(--exam-spacing-xs);
 }
 
 /* PC Navigation */
-.pc-nav-buttons {
+.question-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 24px;
-  border-top: 1px solid #ebeef5;
+  padding: var(--exam-spacing-lg);
+  border-top: 1px solid var(--exam-border-lighter);
+  background: var(--exam-bg-page);
 }
 
-.pc-progress-info {
+.progress-info {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
   font-size: 14px;
-  color: #909399;
 }
 
-/* PC Submit Dialog */
-.pc-submit-dialog {
-  padding: 8px 0;
+.progress-current {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--exam-primary);
 }
 
-.pc-warning {
+.progress-sep {
+  color: var(--exam-text-secondary);
+}
+
+.progress-total {
+  color: var(--exam-text-secondary);
+}
+
+/* PC Dialogs */
+.submit-dialog,
+.result-dialog,
+.back-dialog {
+  border-radius: var(--exam-radius-lg);
+}
+
+.submit-content {
+  padding: var(--exam-spacing-sm) 0;
+}
+
+.submit-warning {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background: #fef0f0;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  color: #e65100;
+  gap: var(--exam-spacing-sm);
+  padding: var(--exam-spacing-md);
+  background: var(--exam-danger-light);
+  border-radius: var(--exam-radius);
+  margin-bottom: var(--exam-spacing-md);
+  color: var(--exam-warning);
 }
 
-.pc-warning strong {
-  color: #f56c6c;
+.warning-icon {
+  font-size: 20px;
+  color: var(--exam-danger);
 }
 
-.pc-submit-info {
-  color: #606266;
+.submit-warning strong {
+  color: var(--exam-danger);
+}
+
+.submit-info {
+  color: var(--exam-text-regular);
   font-size: 14px;
   line-height: 1.8;
 }
 
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--exam-spacing-sm);
+}
+
+.info-label {
+  color: var(--exam-text-secondary);
+}
+
+.info-value {
+  font-weight: 500;
+  color: var(--exam-text-primary);
+}
+
+.info-tip {
+  color: var(--exam-text-secondary);
+  font-size: 13px;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--exam-spacing-md);
+}
+
 /* PC Result Dialog */
-.pc-result-dialog {
+.result-content {
   text-align: center;
-  padding: 16px 0;
+  padding: var(--exam-spacing-md) 0;
 }
 
-.pc-result-content h3 {
+.result-body h3 {
   font-size: 20px;
-  margin: 16px 0;
-  color: #303133;
+  margin: var(--exam-spacing-md) 0;
+  color: var(--exam-text-primary);
 }
 
-.pc-result-icon {
-  width: 64px;
-  height: 64px;
+.result-icon {
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto;
-  font-size: 32px;
+  font-size: 36px;
 }
 
-.pc-result-icon.success {
-  background: #f0f9eb;
-  color: #67c23a;
+.result-icon.success {
+  background: var(--exam-success-light);
+  color: var(--exam-success);
 }
 
-.pc-result-icon.waiting {
-  background: #fdf6ec;
-  color: #e6a23c;
+.result-icon.waiting {
+  background: var(--exam-warning-light);
+  color: var(--exam-warning);
 }
 
-.pc-score-display {
-  margin: 20px 0;
-}
-
-.pc-score-value {
-  font-size: 48px;
-  font-weight: bold;
-  color: #409eff;
-}
-
-.pc-score-unit {
+.result-status {
   font-size: 18px;
-  color: #909399;
-  margin-left: 4px;
+  color: var(--exam-warning);
+  margin-bottom: var(--exam-spacing-xs);
 }
 
-.pc-score-tip {
-  color: #909399;
+.result-tip {
+  color: var(--exam-text-secondary);
   font-size: 14px;
-  margin-bottom: 16px;
 }
 
-/* ==================== Mobile Styles ==================== */
+.score-display {
+  margin: var(--exam-spacing-lg) 0;
+}
+
+.score-value {
+  font-size: 56px;
+  font-weight: 700;
+  color: var(--exam-primary);
+}
+
+.score-unit {
+  font-size: 20px;
+  color: var(--exam-text-secondary);
+  margin-left: var(--exam-spacing-xs);
+}
+
+.confirm-btn {
+  width: 100%;
+  margin-top: var(--exam-spacing-lg);
+}
+
+/* ==================== 移动端样式 ==================== */
 .exam-start {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--exam-bg-page);
   display: flex;
   flex-direction: column;
   padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
@@ -1376,64 +1532,71 @@ function goHome() {
   top: 0;
   left: 0;
   right: 0;
-  background: white;
-  padding: 12px 16px;
+  background: var(--exam-bg-card);
+  padding: 12px var(--exam-spacing-md);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--exam-shadow-light);
   z-index: 100;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--exam-spacing-md);
   flex: 1;
   min-width: 0;
 }
 
 .back-btn {
   font-size: 22px;
-  color: #333;
+  color: var(--exam-text-primary);
   cursor: pointer;
   flex-shrink: 0;
+  padding: var(--exam-spacing-xs);
 }
 
 .exam-title {
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin: 0;
 }
 
 .header-right {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 4px;
+  gap: var(--exam-spacing-xs);
   flex-shrink: 0;
 }
 
 .progress {
   font-size: 14px;
-  color: #666;
+  color: var(--exam-text-secondary);
 }
 
 .timer {
   display: flex;
   align-items: center;
-  gap: 4px;
-  color: #f44336;
+  gap: var(--exam-spacing-xs);
+  color: var(--exam-danger);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.timer.timer-warning {
+  animation: pulse 1s ease-in-out infinite;
 }
 
 /* 题目区域 */
 .question-area {
   margin-top: 60px;
-  padding: 16px;
+  padding: var(--exam-spacing-md);
   flex: 1;
   overflow-y: auto;
 }
@@ -1441,33 +1604,36 @@ function goHome() {
 .question-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 12px;
+  align-items: center;
+  margin-bottom: var(--exam-spacing-md);
 }
 
 .question-type {
-  background: #fff3e0;
-  color: #ff9800;
-  padding: 4px 12px;
-  border-radius: 4px;
+  background: var(--exam-warning-light);
+  color: var(--exam-warning);
+  padding: var(--exam-spacing-xs) var(--exam-spacing-md);
+  border-radius: var(--exam-radius);
   font-size: 14px;
+  font-weight: 500;
 }
 
 .question-score {
-  color: #666;
+  color: var(--exam-text-secondary);
   font-size: 14px;
 }
 
 .question-content {
   font-size: 18px;
   line-height: 1.6;
-  margin-bottom: 24px;
+  margin-bottom: var(--exam-spacing-lg);
+  color: var(--exam-text-primary);
 }
 
 /* 选择题选项 */
 .options {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--exam-spacing-md);
 }
 
 .options.multiple .option {
@@ -1478,101 +1644,106 @@ function goHome() {
   content: '';
   width: 20px;
   height: 20px;
-  border: 2px solid #e8e8e8;
-  border-radius: 4px;
-  margin-right: 12px;
+  border: 2px solid var(--exam-border);
+  border-radius: var(--exam-spacing-xs);
+  margin-right: var(--exam-spacing-md);
   flex-shrink: 0;
+  transition: all 0.2s;
 }
 
 .options.multiple .option.selected::before {
-  background: #ff9800;
-  border-color: #ff9800;
+  background: var(--exam-warning);
+  border-color: var(--exam-warning);
 }
 
 .multiple-hint {
-  margin-top: 12px;
-  padding: 8px 12px;
-  background: #fff3e0;
-  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: var(--exam-spacing-sm);
+  margin-top: var(--exam-spacing-md);
+  padding: var(--exam-spacing-sm) var(--exam-spacing-md);
+  background: var(--exam-warning-light);
+  border-radius: var(--exam-radius);
   font-size: 14px;
-  color: #ff9800;
+  color: var(--exam-warning);
 }
 
 .option {
   display: flex;
   align-items: center;
-  padding: 16px;
-  background: white;
-  border-radius: 8px;
+  padding: var(--exam-spacing-md);
+  background: var(--exam-bg-card);
+  border-radius: var(--exam-radius);
   cursor: pointer;
   transition: all 0.2s;
-  border: 2px solid #e8e8e8;
+  border: 2px solid var(--exam-border-lighter);
 }
 
 .option.selected {
-  background: #fff3e0;
-  border-color: #ff9800;
+  background: var(--exam-warning-light);
+  border-color: var(--exam-warning);
 }
 
 .option-letter {
   width: 28px;
   height: 28px;
-  background: #f5f5f5;
+  background: var(--exam-bg-page);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 12px;
-  font-weight: 500;
+  margin-right: var(--exam-spacing-md);
+  font-weight: 600;
   flex-shrink: 0;
+  font-size: 14px;
+  color: var(--exam-text-regular);
 }
 
 .option.selected .option-letter {
-  background: #ff9800;
-  color: white;
+  background: var(--exam-warning);
+  color: var(--color-white);
 }
 
 .option-text {
   flex: 1;
   font-size: 16px;
+  color: var(--exam-text-primary);
 }
 
 /* 判断题选项 */
 .options.judgment {
-  gap: 20px;
+  flex-direction: row;
+  gap: var(--exam-spacing-lg);
 }
 
 .judgment-option {
-  padding: 20px;
+  flex: 1;
   justify-content: center;
+  padding: var(--exam-spacing-lg);
 }
 
 .judgment-option .judgment-icon {
   font-size: 24px;
   font-weight: bold;
-}
-
-.judgment-option.selected .judgment-icon {
-  background: #ff9800;
-  color: white;
+  margin-right: var(--exam-spacing-sm);
 }
 
 /* 填空题 */
 .fill-inputs {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--exam-spacing-md);
 }
 
 .fill-input {
-  background: white;
-  border-radius: 8px;
+  background: var(--exam-bg-card);
+  border-radius: var(--exam-radius);
 }
 
 /* 主观题 */
 .subjective-area {
-  background: white;
-  border-radius: 8px;
+  background: var(--exam-bg-card);
+  border-radius: var(--exam-radius);
   overflow: hidden;
 }
 
@@ -1582,12 +1753,12 @@ function goHome() {
   bottom: 0;
   left: 0;
   right: 0;
-  background: white;
+  background: var(--exam-bg-card);
   padding: 10px 12px;
   padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   display: flex;
-  gap: 8px;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  gap: var(--exam-spacing-sm);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
   z-index: 100;
 }
 
@@ -1598,139 +1769,150 @@ function goHome() {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: var(--exam-spacing-xs);
+  border-radius: var(--exam-radius);
+}
+
+.nav-btn {
+  background: var(--exam-bg-page);
+  border: 1px solid var(--exam-border-light);
+  color: var(--exam-text-regular);
 }
 
 .jump-btn {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: var(--exam-primary-light);
+  color: var(--exam-primary);
   border: none;
 }
 
 .submit-btn {
   flex: 0.8;
+  font-weight: 500;
 }
 
 /* 跳转弹窗 */
 .jump-popup {
+  border-radius: var(--exam-radius-lg) var(--exam-radius-lg) 0 0;
+}
+
+.jump-popup-content {
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 20px 16px;
+  padding: var(--exam-spacing-lg) var(--exam-spacing-md);
 }
 
 .popup-title {
   text-align: center;
   font-size: 18px;
-  margin-bottom: 16px;
+  font-weight: 600;
+  margin-bottom: var(--exam-spacing-md);
+  color: var(--exam-text-primary);
 }
 
 .jump-summary {
   display: flex;
   justify-content: center;
-  gap: 24px;
-  margin-bottom: 16px;
+  gap: var(--exam-spacing-lg);
+  margin-bottom: var(--exam-spacing-md);
   font-size: 14px;
 }
 
-.dot {
-  display: inline-block;
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: var(--exam-spacing-xs);
+  color: var(--exam-text-regular);
+}
+
+.summary-item .dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  margin-right: 4px;
 }
 
-.dot.green {
-  background: #4caf50;
+.summary-item.answered .dot {
+  background: var(--exam-success);
 }
 
-.dot.red {
-  background: #f44336;
+.summary-item.unanswered .dot {
+  background: var(--exam-danger);
 }
 
-.jump-content {
+.jump-groups {
   flex: 1;
   overflow-y: auto;
 }
 
 .question-group {
-  margin-bottom: 20px;
+  margin-bottom: var(--exam-spacing-lg);
 }
 
 .group-title {
   font-size: 14px;
-  color: #666;
-  margin-bottom: 10px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid #eee;
+  color: var(--exam-text-secondary);
+  margin-bottom: var(--exam-spacing-sm);
+  padding-bottom: var(--exam-spacing-xs);
+  border-bottom: 1px solid var(--exam-border-lighter);
 }
 
 .group-questions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-}
-
-.question-badge {
-  width: 40px;
-  height: 40px;
-  background: #ffebee;
-  color: #f44336;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.question-badge.answered {
-  background: #e8f5e9;
-  color: #4caf50;
-}
-
-.question-badge.current {
-  border: 2px solid #ff9800;
-  box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.2);
+  gap: var(--exam-spacing-sm);
 }
 
 .no-questions {
-  color: #999;
+  color: var(--exam-text-secondary);
   font-size: 14px;
+  padding: var(--exam-spacing-sm) 0;
 }
 
 /* 交卷确认弹窗 */
 .submit-dialog-content {
-  padding: 20px;
+  padding: var(--exam-spacing-lg);
 }
 
 .warning {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px;
-  background: #fff3e0;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  color: #e65100;
+  gap: var(--exam-spacing-sm);
+  padding: var(--exam-spacing-md);
+  background: var(--exam-warning-light);
+  border-radius: var(--exam-radius);
+  margin-bottom: var(--exam-spacing-md);
+  color: var(--exam-warning);
+}
+
+.warning-icon {
+  font-size: 20px;
+  color: var(--exam-danger);
 }
 
 .warning strong {
-  color: #f44336;
+  color: var(--exam-danger);
 }
 
 .submit-info {
-  color: #666;
+  color: var(--exam-text-secondary);
   font-size: 14px;
   line-height: 1.8;
 }
 
 /* 结果弹窗 */
 .result-popup {
-  padding: 32px 24px;
+  border-radius: var(--exam-radius-lg);
+}
+
+.result-popup-content {
+  padding: var(--exam-spacing-xl) var(--exam-spacing-lg);
   text-align: center;
+}
+
+.result-popup-content h3 {
+  font-size: 20px;
+  margin-bottom: var(--exam-spacing-md);
+  color: var(--exam-text-primary);
 }
 
 .result-icon {
@@ -1740,61 +1922,59 @@ function goHome() {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 16px;
+  margin: 0 auto var(--exam-spacing-md);
+  font-size: 32px;
 }
 
 .result-icon.success {
-  background: #e8f5e9;
-  color: #4caf50;
-  font-size: 32px;
+  background: var(--exam-success-light);
+  color: var(--exam-success);
 }
 
 .result-icon.waiting {
-  background: #fff3e0;
-  color: #ff9800;
-  font-size: 32px;
-}
-
-.result-popup h3 {
-  font-size: 20px;
-  margin-bottom: 16px;
+  background: var(--exam-warning-light);
+  color: var(--exam-warning);
 }
 
 .score-display {
-  margin: 20px 0;
+  margin: var(--exam-spacing-lg) 0;
 }
 
 .score-value {
   font-size: 48px;
-  font-weight: bold;
-  color: #ff9800;
+  font-weight: 700;
+  color: var(--exam-warning);
 }
 
 .score-unit {
   font-size: 18px;
-  color: #666;
-  margin-left: 4px;
+  color: var(--exam-text-secondary);
+  margin-left: var(--exam-spacing-xs);
 }
 
 .score-tip {
-  color: #999;
+  color: var(--exam-text-secondary);
   font-size: 14px;
-  margin-bottom: 24px;
+  margin-bottom: var(--exam-spacing-lg);
 }
 
 .waiting-tip {
   font-size: 18px;
-  color: #ff9800;
-  margin-bottom: 8px;
+  color: var(--exam-warning);
+  margin-bottom: var(--exam-spacing-xs);
 }
 
 .waiting-sub {
-  color: #999;
+  color: var(--exam-text-secondary);
   font-size: 14px;
-  margin-bottom: 24px;
+  margin-bottom: var(--exam-spacing-lg);
 }
 
-/* 响应式 */
+.result-btn {
+  margin-top: var(--exam-spacing-md);
+}
+
+/* ==================== 响应式优化 ==================== */
 @media (max-width: 375px) {
   .header {
     padding: 10px 12px;
@@ -1805,8 +1985,8 @@ function goHome() {
   }
 
   .exam-toolbar {
-    gap: 6px;
-    padding: 8px 10px;
+    gap: var(--exam-spacing-xs);
+    padding: var(--exam-spacing-sm) 10px;
   }
 
   .toolbar-btn {
@@ -1818,6 +1998,17 @@ function goHome() {
     width: 36px;
     height: 36px;
     font-size: 14px;
+  }
+}
+
+/* PC 端响应式 */
+@media (min-width: 1400px) {
+  .pc-sidebar {
+    width: 320px;
+  }
+  
+  .pc-content {
+    margin-left: 320px;
   }
 }
 </style>

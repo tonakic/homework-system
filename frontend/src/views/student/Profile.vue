@@ -534,11 +534,11 @@ function getStatusText(status) {
 /* ==================== 移动端样式 ==================== */
 .profile-page {
   min-height: 100%;
-  background: #f5f5f5;
+  background-color: var(--bg-color);
 }
 
 .page-content {
-  padding: 12px;
+  padding: var(--spacing-md, 16px);
 }
 
 .user-card {
@@ -546,12 +546,15 @@ function getStatusText(status) {
   align-items: center;
   padding: 20px;
   margin-bottom: 16px;
+  background-color: var(--fill-color-blank);
+  border-radius: 12px;
+  box-shadow: var(--box-shadow-light);
 }
 
 .avatar {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, #ff9800, #ffb74d);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light-3));
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -560,16 +563,18 @@ function getStatusText(status) {
   font-size: 28px;
   font-weight: bold;
   margin-right: 16px;
+  flex-shrink: 0;
 }
 
 .user-info h2 {
   font-size: 18px;
   margin-bottom: 4px;
+  color: var(--text-color-primary);
 }
 
 .user-info p {
   font-size: 14px;
-  color: #666;
+  color: var(--text-color-secondary);
 }
 
 .logout {
@@ -584,6 +589,8 @@ function getStatusText(status) {
 .password-popup h3 {
   text-align: center;
   margin-bottom: 20px;
+  color: var(--text-color-primary);
+  font-size: 18px;
 }
 
 .form-actions {
@@ -592,6 +599,10 @@ function getStatusText(status) {
 
 /* 移动端响应式优化 */
 @media (max-width: 375px) {
+  .page-content {
+    padding: 12px;
+  }
+
   .user-card {
     padding: 16px;
   }
@@ -629,7 +640,7 @@ function getStatusText(status) {
 /* ==================== PC 端样式 ==================== */
 .profile-pc {
   min-height: 100%;
-  background: #f0f2f5;
+  background-color: var(--bg-color);
   padding: 24px 32px;
 }
 
@@ -648,7 +659,7 @@ function getStatusText(status) {
 .profile-pc-header h1 {
   font-size: 24px;
   font-weight: 600;
-  color: #303133;
+  color: var(--text-color-primary);
   margin: 0;
 }
 
@@ -665,12 +676,17 @@ function getStatusText(status) {
 
 .user-info-card {
   text-align: center;
+  border-radius: 12px;
+}
+
+.user-info-card :deep(.el-card__body) {
+  padding: 24px;
 }
 
 .pc-avatar {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #ff9800, #ffb74d);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light-3));
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -684,13 +700,13 @@ function getStatusText(status) {
 .pc-username {
   font-size: 20px;
   font-weight: 600;
-  color: #303133;
+  color: var(--text-color-primary);
   margin: 0 0 4px;
 }
 
 .pc-account {
   font-size: 14px;
-  color: #909399;
+  color: var(--text-color-secondary);
   margin: 0;
 }
 
@@ -703,7 +719,7 @@ function getStatusText(status) {
   justify-content: space-between;
   align-items: center;
   padding: 10px 0;
-  border-bottom: 1px solid #f2f3f5;
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .pc-info-item:last-child {
@@ -712,14 +728,14 @@ function getStatusText(status) {
 
 .pc-info-label {
   font-size: 14px;
-  color: #909399;
+  color: var(--text-color-secondary);
   flex-shrink: 0;
   width: 80px;
 }
 
 .pc-info-value {
   font-size: 14px;
-  color: #303133;
+  color: var(--text-color-primary);
   text-align: right;
   word-break: break-all;
 }
@@ -742,11 +758,29 @@ function getStatusText(status) {
 .card-header span {
   font-size: 16px;
   font-weight: 600;
-  color: #303133;
+  color: var(--text-color-primary);
+}
+
+.edit-card {
+  border-radius: 12px;
+}
+
+.edit-card :deep(.el-card__header) {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .edit-card :deep(.el-form-item) {
   margin-bottom: 18px;
+}
+
+.actions-card {
+  border-radius: 12px;
+}
+
+.actions-card :deep(.el-card__header) {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .pc-actions {
@@ -769,13 +803,13 @@ function getStatusText(status) {
 
 .empty-feedback {
   text-align: center;
-  color: #909399;
+  color: var(--text-color-secondary);
   padding: 40px 0;
 }
 
 .feedback-item {
   padding: 16px;
-  border-bottom: 1px solid #f2f3f5;
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .feedback-item:last-child {
@@ -792,18 +826,18 @@ function getStatusText(status) {
 .feedback-title {
   font-size: 15px;
   font-weight: 500;
-  color: #303133;
+  color: var(--text-color-primary);
 }
 
 .feedback-content {
   font-size: 14px;
-  color: #606266;
+  color: var(--text-color-regular);
   line-height: 1.6;
   margin-bottom: 8px;
 }
 
 .feedback-reply {
-  background: #f5f7fa;
+  background-color: var(--fill-color);
   padding: 10px 12px;
   border-radius: 6px;
   margin-bottom: 8px;
@@ -811,20 +845,20 @@ function getStatusText(status) {
 
 .reply-label {
   font-size: 13px;
-  color: #409eff;
+  color: var(--color-primary);
   font-weight: 500;
   margin-bottom: 4px;
 }
 
 .reply-content {
   font-size: 13px;
-  color: #606266;
+  color: var(--text-color-regular);
   line-height: 1.5;
 }
 
 .feedback-time {
   font-size: 12px;
-  color: #909399;
+  color: var(--text-color-secondary);
 }
 
 /* 移动端帮助中心弹窗 */
@@ -855,11 +889,11 @@ function getStatusText(status) {
 }
 
 .feedback-item-mobile {
-  background: #fff;
+  background-color: var(--fill-color-blank);
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--box-shadow-lighter);
 }
 
 .feedback-header-mobile {
@@ -872,7 +906,7 @@ function getStatusText(status) {
 .feedback-title-mobile {
   font-size: 15px;
   font-weight: 500;
-  color: #323233;
+  color: var(--text-color-primary);
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -882,13 +916,13 @@ function getStatusText(status) {
 
 .feedback-content-mobile {
   font-size: 14px;
-  color: #646566;
+  color: var(--text-color-regular);
   line-height: 1.6;
   margin-bottom: 8px;
 }
 
 .feedback-reply-mobile {
-  background: #f7f8fa;
+  background-color: var(--fill-color);
   padding: 10px;
   border-radius: 6px;
   margin-bottom: 8px;
@@ -896,19 +930,19 @@ function getStatusText(status) {
 
 .reply-label-mobile {
   font-size: 13px;
-  color: #1989fa;
+  color: var(--color-primary);
   font-weight: 500;
   margin-bottom: 4px;
 }
 
 .reply-content-mobile {
   font-size: 13px;
-  color: #646566;
+  color: var(--text-color-regular);
   line-height: 1.5;
 }
 
 .feedback-time-mobile {
   font-size: 12px;
-  color: #969799;
+  color: var(--text-color-secondary);
 }
 </style>

@@ -2,7 +2,7 @@
   <!-- PC 版本 -->
   <div v-if="isPC" class="settings-pc">
     <div class="pc-header">
-      <h2>系统设置</h2>
+      <h2 class="page-title">系统设置</h2>
     </div>
 
     <div class="pc-content">
@@ -51,7 +51,7 @@
             <el-input-number v-model.number="configs.login_lock_time" :min="1" :max="60" />
           </el-form-item>
           <el-form-item label="默认密码">
-            <el-input v-model="configs.default_password" placeholder="请输入默认密码" style="width: 200px" />
+            <el-input v-model="configs.default_password" placeholder="请输入默认密码" class="config-input" />
           </el-form-item>
           <el-form-item label="答题最大时长(分钟)">
             <el-input-number v-model.number="configs.max_exam_duration" :min="1" :max="300" />
@@ -66,7 +66,7 @@
       </el-card>
 
       <!-- 退出登录 -->
-      <el-card shadow="hover" class="pc-section-card">
+      <el-card shadow="hover" class="pc-section-card pc-logout-card">
         <div class="pc-logout-section">
           <el-button type="danger" size="large" @click="handleLogout">
             <el-icon><SwitchButton /></el-icon>
@@ -85,8 +85,9 @@
       :close-on-press-escape="!isFirstLogin"
       :show-close="!isFirstLogin"
       destroy-on-close
+      class="password-dialog"
     >
-      <el-form :model="passwordForm" label-width="80px" @submit.prevent="handleChangePassword">
+      <el-form :model="passwordForm" label-width="80px" @submit.prevent="handleChangePassword" class="password-form">
         <el-form-item label="原密码" required>
           <el-input v-model="passwordForm.oldPassword" type="password" placeholder="请输入原密码" show-password />
         </el-form-item>
@@ -98,17 +99,20 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button v-if="!isFirstLogin" @click="showChangePassword = false">取消</el-button>
-        <el-button type="primary" :loading="loading" @click="handleChangePassword">确认修改</el-button>
+        <div class="dialog-footer">
+          <el-button v-if="!isFirstLogin" @click="showChangePassword = false">取消</el-button>
+          <el-button type="primary" :loading="loading" @click="handleChangePassword">确认修改</el-button>
+        </div>
       </template>
     </el-dialog>
   </div>
 
   <!-- 移动端版本 -->
-  <div v-else class="profile-page page">
+  <div v-else class="settings-mobile page">
     <van-nav-bar title="系统设置" left-arrow @click-left="$router.back()" />
 
     <div class="page-content">
+      <!-- 用户信息卡片 -->
       <div class="user-card card">
         <div class="avatar">
           {{ userStore.userName ? userStore.userName.charAt(0) : '管' }}
@@ -119,11 +123,17 @@
         </div>
       </div>
 
-      <van-cell-group inset title="账户设置">
-        <van-cell title="修改密码" is-link @click="showChangePassword = true" />
+      <!-- 账户设置 -->
+      <van-cell-group inset title="账户设置" class="settings-group">
+        <van-cell title="修改密码" is-link @click="showChangePassword = true">
+          <template #icon>
+            <van-icon name="lock" class="cell-icon" />
+          </template>
+        </van-cell>
       </van-cell-group>
 
-      <van-cell-group inset title="系统配置">
+      <!-- 系统配置 -->
+      <van-cell-group inset title="系统配置" class="settings-group">
         <van-field
           v-model="configs.login_max_attempts"
           type="number"
@@ -158,18 +168,20 @@
         </div>
       </van-cell-group>
 
-      <div class="logout">
+      <!-- 退出登录 -->
+      <div class="logout-section">
         <van-button type="danger" block round @click="handleLogout">
+          <van-icon name="logout" />
           退出登录
         </van-button>
       </div>
     </div>
 
     <!-- 修改密码弹窗 -->
-    <van-popup v-model:show="showChangePassword" round position="bottom" :close-on-click-overlay="!isFirstLogin">
-      <div class="password-popup">
-        <h3>{{ isFirstLogin ? '首次登录请修改密码' : '修改密码' }}</h3>
-        <van-form @submit="handleChangePassword">
+    <van-popup v-model:show="showChangePassword" round position="bottom" :close-on-click-overlay="!isFirstLogin" class="password-popup">
+      <div class="popup-content">
+        <h3 class="popup-title">{{ isFirstLogin ? '首次登录请修改密码' : '修改密码' }}</h3>
+        <van-form @submit="handleChangePassword" class="password-form-mobile">
           <van-field
             v-model="passwordForm.oldPassword"
             type="password"
@@ -366,21 +378,21 @@ async function handleLogout() {
 </script>
 
 <style scoped>
-/* ========== PC 样式 ========== */
+/* ==================== PC端样式 ==================== */
 .settings-pc {
-  padding: 24px;
-  min-height: 100vh;
-  background: #f5f7fa;
+  min-height: 100%;
+  background: var(--bg-color);
+  padding: var(--spacing-lg, 24px);
 }
 
 .pc-header {
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-lg, 24px);
 }
 
-.pc-header h2 {
-  font-size: 24px;
+.page-title {
+  font-size: var(--font-size-extra-large, 24px);
   font-weight: 600;
-  color: #303133;
+  color: var(--text-color-primary);
   margin: 0;
 }
 
@@ -389,121 +401,253 @@ async function handleLogout() {
   margin: 0 auto;
 }
 
+/* 用户信息卡片 */
 .pc-user-card {
-  margin-bottom: 20px;
-  border-radius: 12px;
+  margin-bottom: var(--spacing-md, 20px);
+  border-radius: var(--border-radius-large, 12px);
+  border: none;
+  box-shadow: var(--box-shadow-light, 0 2px 8px 0 rgba(0, 0, 0, 0.06));
+  transition: transform var(--transition-duration, 0.3s), box-shadow var(--transition-duration, 0.3s);
+}
+
+.pc-user-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow, 0 2px 12px 0 rgba(0, 0, 0, 0.1));
+}
+
+.pc-user-card :deep(.el-card__body) {
+  padding: var(--spacing-lg, 24px);
 }
 
 .pc-user-info {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: var(--spacing-lg, 20px);
 }
 
 .pc-avatar {
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, #4caf50, #81c784);
-  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-light) 100%);
+  border-radius: var(--border-radius-circle, 50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--fill-color-blank);
   font-size: 28px;
   font-weight: bold;
+  flex-shrink: 0;
 }
 
 .pc-user-detail h3 {
-  font-size: 20px;
+  font-size: var(--font-size-large, 20px);
   font-weight: 600;
-  color: #303133;
-  margin: 0 0 8px 0;
+  color: var(--text-color-primary);
+  margin: 0 0 var(--spacing-xs, 8px) 0;
 }
 
 .pc-user-detail p {
-  font-size: 14px;
-  color: #909399;
+  font-size: var(--font-size-base, 14px);
+  color: var(--text-color-secondary);
   margin: 0;
 }
 
+/* 配置卡片 */
 .pc-section-card {
-  margin-bottom: 20px;
-  border-radius: 12px;
+  margin-bottom: var(--spacing-md, 20px);
+  border-radius: var(--border-radius-large, 12px);
+  border: none;
+  box-shadow: var(--box-shadow-light, 0 2px 8px 0 rgba(0, 0, 0, 0.06));
+  transition: transform var(--transition-duration, 0.3s), box-shadow var(--transition-duration, 0.3s);
+}
+
+.pc-section-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow, 0 2px 12px 0 rgba(0, 0, 0, 0.1));
+}
+
+.pc-section-card :deep(.el-card__header) {
+  padding: var(--spacing-md, 16px) var(--spacing-lg, 24px);
+  border-bottom: 1px solid var(--border-color-lighter);
+}
+
+.pc-section-card :deep(.el-card__body) {
+  padding: var(--spacing-lg, 24px);
 }
 
 .pc-section-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 16px;
+  gap: var(--spacing-xs, 8px);
+  font-size: var(--font-size-medium, 16px);
   font-weight: 500;
-  color: #303133;
+  color: var(--text-color-primary);
 }
 
 .pc-section-content {
-  padding: 10px 0;
+  padding: var(--spacing-xs, 10px) 0;
 }
 
 .pc-config-form {
-  padding: 10px 0;
+  padding: var(--spacing-xs, 10px) 0;
+}
+
+.config-input {
+  width: 200px;
+}
+
+/* 退出登录卡片 */
+.pc-logout-card :deep(.el-card__body) {
+  padding: var(--spacing-lg, 24px);
 }
 
 .pc-logout-section {
-  padding: 20px 0;
   text-align: center;
 }
 
-/* ========== 移动端样式 ========== */
+/* 弹窗样式 */
+.password-dialog :deep(.el-dialog__header) {
+  padding: var(--spacing-lg, 24px);
+  border-bottom: 1px solid var(--border-color-lighter);
+}
+
+.password-dialog :deep(.el-dialog__body) {
+  padding: var(--spacing-lg, 24px);
+}
+
+.password-dialog :deep(.el-dialog__footer) {
+  padding: var(--spacing-md, 16px) var(--spacing-lg, 24px);
+  border-top: 1px solid var(--border-color-lighter);
+}
+
+.password-form :deep(.el-form-item) {
+  margin-bottom: var(--spacing-lg, 24px);
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md, 16px);
+}
+
+/* ==================== 移动端样式 ==================== */
+.settings-mobile {
+  min-height: 100%;
+  background: var(--bg-color-page);
+}
+
+.page-content {
+  padding: var(--spacing-md, 16px);
+}
+
+/* 用户卡片 */
 .user-card {
   display: flex;
   align-items: center;
-  padding: 20px;
-  margin-bottom: 16px;
+  padding: var(--spacing-lg, 20px);
+  margin-bottom: var(--spacing-md, 16px);
+  background: var(--fill-color-blank);
+  border-radius: var(--border-radius-large, 12px);
+  box-shadow: var(--box-shadow-light, 0 2px 8px 0 rgba(0, 0, 0, 0.06));
 }
 
 .avatar {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, #4caf50, #81c784);
-  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-light) 100%);
+  border-radius: var(--border-radius-circle, 50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--fill-color-blank);
   font-size: 28px;
   font-weight: bold;
-  margin-right: 16px;
+  margin-right: var(--spacing-md, 16px);
+  flex-shrink: 0;
 }
 
 .user-info h2 {
-  font-size: 18px;
-  margin-bottom: 4px;
+  font-size: var(--font-size-large, 18px);
+  font-weight: 600;
+  color: var(--text-color-primary);
+  margin-bottom: var(--spacing-xs, 4px);
 }
 
 .user-info p {
-  font-size: 14px;
-  color: #666;
+  font-size: var(--font-size-base, 14px);
+  color: var(--text-color-secondary);
 }
 
+/* 设置分组 */
+.settings-group {
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+.settings-group :deep(.van-cell-group__title) {
+  padding: var(--spacing-md, 16px);
+  font-size: var(--font-size-base, 14px);
+  font-weight: 500;
+  color: var(--text-color-secondary);
+}
+
+.settings-group :deep(.van-cell) {
+  padding: var(--spacing-lg, 24px) var(--spacing-md, 16px);
+}
+
+.settings-group :deep(.van-field__label) {
+  width: 140px;
+  font-size: var(--font-size-base, 14px);
+  color: var(--text-color-regular);
+}
+
+.cell-icon {
+  font-size: 20px;
+  margin-right: var(--spacing-sm, 8px);
+  color: var(--color-primary);
+}
+
+/* 配置操作按钮 */
 .config-actions {
-  padding: 16px;
+  padding: var(--spacing-md, 16px);
+  background: var(--fill-color-blank);
 }
 
-.logout {
-  margin-top: 32px;
-  padding: 0 16px;
+/* 退出登录 */
+.logout-section {
+  margin-top: var(--spacing-xl, 32px);
+  padding: 0 var(--spacing-md, 16px);
 }
 
+.logout-section :deep(.van-button) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm, 8px);
+}
+
+/* 弹窗样式 */
 .password-popup {
-  padding: 20px;
+  border-radius: var(--border-radius-large, 16px) var(--border-radius-large, 16px) 0 0;
 }
 
-.password-popup h3 {
+.popup-content {
+  padding: var(--spacing-lg, 20px);
+}
+
+.popup-title {
   text-align: center;
-  margin-bottom: 20px;
+  font-size: var(--font-size-large, 18px);
+  font-weight: 600;
+  color: var(--text-color-primary);
+  margin-bottom: var(--spacing-lg, 20px);
+}
+
+.password-form-mobile :deep(.van-field) {
+  padding: var(--spacing-md, 16px);
 }
 
 .form-actions {
-  margin-top: 20px;
+  margin-top: var(--spacing-lg, 20px);
+  padding: 0 var(--spacing-md, 16px);
 }
 </style>

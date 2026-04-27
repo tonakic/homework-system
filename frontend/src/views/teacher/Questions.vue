@@ -4,14 +4,12 @@
     <div v-if="isPC" class="questions-pc">
       <div class="pc-container">
         <!-- 左侧目录树 -->
-        <div class="left-panel">
-          <el-card class="tree-card">
-            <template #header>
-              <div class="tree-header">
-                <span>题库目录</span>
-                <el-tag type="primary" size="small">{{ totalCount }}题</el-tag>
-              </div>
-            </template>
+        <aside class="left-panel">
+          <div class="tree-card">
+            <div class="tree-header">
+              <h3 class="tree-title">题库目录</h3>
+              <span class="tree-count">{{ totalCount }}题</span>
+            </div>
             <el-tree
               ref="treeRef"
               :data="treeData"
@@ -24,33 +22,33 @@
             >
               <template #default="{ node, data }">
                 <span class="custom-tree-node">
-                  <el-icon v-if="data.type === 'subject'"><Folder /></el-icon>
-                  <el-icon v-else-if="data.type === 'grade'"><Document /></el-icon>
-                  <el-icon v-else><Notebook /></el-icon>
+                  <el-icon v-if="data.type === 'subject'" class="tree-icon"><Folder /></el-icon>
+                  <el-icon v-else-if="data.type === 'grade'" class="tree-icon tree-icon--grade"><Document /></el-icon>
+                  <el-icon v-else class="tree-icon tree-icon--chapter"><Notebook /></el-icon>
                   <span class="node-label">{{ node.label }}</span>
-                  <el-tag v-if="data.count" type="primary" size="small" plain>{{ data.count }}</el-tag>
+                  <span v-if="data.count" class="node-count">{{ data.count }}</span>
                 </span>
               </template>
             </el-tree>
-          </el-card>
-        </div>
+          </div>
+        </aside>
 
         <!-- 右侧内容区 -->
-        <div class="right-panel">
+        <main class="right-panel">
           <!-- 工具栏 -->
           <div class="toolbar">
             <div class="toolbar-left">
-              <el-button type="primary" @click="openAddPopup">
+              <el-button type="primary" class="toolbar-btn" @click="openAddPopup">
                 <el-icon><Plus /></el-icon>
-                新增题目
+                <span>新增题目</span>
               </el-button>
-              <el-button @click="openImportPopup">
+              <el-button class="toolbar-btn" @click="openImportPopup">
                 <el-icon><Upload /></el-icon>
-                批量导入
+                <span>批量导入</span>
               </el-button>
-              <el-button type="danger" :disabled="selectedRows.length === 0" @click="batchDelete">
+              <el-button type="danger" class="toolbar-btn toolbar-btn--danger" :disabled="selectedRows.length === 0" @click="batchDelete">
                 <el-icon><Delete /></el-icon>
-                批量删除
+                <span>批量删除</span>
               </el-button>
             </div>
             <div class="toolbar-right">
@@ -58,7 +56,7 @@
                 v-model="searchKeyword"
                 placeholder="搜索题目内容"
                 clearable
-                style="width: 200px"
+                class="search-input"
                 @clear="handlePCSearch"
                 @keyup.enter="handlePCSearch"
               >
@@ -66,14 +64,14 @@
                   <el-icon><Search /></el-icon>
                 </template>
               </el-input>
-              <el-select v-model="filterType" placeholder="题目类型" clearable style="width: 120px" @change="handlePCSearch">
+              <el-select v-model="filterType" placeholder="题目类型" clearable class="filter-select" @change="handlePCSearch">
                 <el-option label="单选题" value="choice" />
                 <el-option label="多选题" value="multiple" />
                 <el-option label="填空题" value="fill" />
                 <el-option label="判断题" value="judgment" />
                 <el-option label="主观题" value="subjective" />
               </el-select>
-              <el-select v-model="filterDifficulty" placeholder="难度" clearable style="width: 100px" @change="handlePCSearch">
+              <el-select v-model="filterDifficulty" placeholder="难度" clearable class="filter-select filter-select--small" @change="handlePCSearch">
                 <el-option label="简单" value="easy" />
                 <el-option label="中等" value="medium" />
                 <el-option label="困难" value="hard" />
@@ -82,19 +80,19 @@
           </div>
 
           <!-- 当前筛选条件 -->
-          <div v-if="selectedChapter" class="current-filter-pc">
+          <div v-if="selectedChapter" class="current-filter">
             <el-tag closable @close="clearFilter">
               {{ selectedSubject }} / {{ selectedGrade }} / {{ selectedChapter }}
             </el-tag>
           </div>
 
           <!-- 题目表格 -->
-          <el-card class="table-card">
+          <div class="table-card">
             <el-table
               ref="tableRef"
               :data="questions"
               stripe
-              style="width: 100%"
+              class="question-table"
               v-loading="loading"
               @selection-change="handleSelectionChange"
             >
@@ -108,29 +106,35 @@
               </el-table-column>
               <el-table-column label="类型" width="100">
                 <template #default="{ row }">
-                  <el-tag :type="getElTypeTagType(row.question_type)" size="small">
+                  <span :class="['type-tag', `type-tag--${row.question_type}`]">
                     {{ getTypeName(row.question_type) }}
-                  </el-tag>
+                  </span>
                 </template>
               </el-table-column>
               <el-table-column label="难度" width="80">
                 <template #default="{ row }">
-                  <el-tag :type="getElDifficultyTagType(row.difficulty)" size="small">
+                  <span :class="['difficulty-tag', `difficulty-tag--${row.difficulty}`]">
                     {{ getDifficultyName(row.difficulty) }}
-                  </el-tag>
+                  </span>
                 </template>
               </el-table-column>
               <el-table-column prop="subject" label="科目" width="80" />
-              <el-table-column prop="score" label="分值" width="60" />
+              <el-table-column prop="score" label="分值" width="60">
+                <template #default="{ row }">
+                  <span class="score-text">{{ row.score }}</span>
+                </template>
+              </el-table-column>
               <el-table-column label="创建时间" width="160">
                 <template #default="{ row }">
-                  {{ formatDate(row.created_at) }}
+                  <span class="time-text">{{ formatDate(row.created_at) }}</span>
                 </template>
               </el-table-column>
               <el-table-column label="操作" fixed="right" width="150">
                 <template #default="{ row }">
-                  <el-button type="primary" link size="small" @click="editQuestion(row)">编辑</el-button>
-                  <el-button type="danger" link size="small" @click="confirmDeletePC(row)">删除</el-button>
+                  <div class="action-btns">
+                    <el-button type="primary" link size="small" @click="editQuestion(row)">编辑</el-button>
+                    <el-button type="danger" link size="small" @click="confirmDeletePC(row)">删除</el-button>
+                  </div>
                 </template>
               </el-table-column>
             </el-table>
@@ -147,8 +151,8 @@
                 @current-change="loadQuestions"
               />
             </div>
-          </el-card>
-        </div>
+          </div>
+        </main>
       </div>
 
       <!-- 新增/编辑题目弹窗 -->
@@ -157,8 +161,9 @@
         :title="editingQuestion ? '编辑题目' : '新增题目'"
         width="700px"
         :close-on-click-modal="false"
+        class="question-dialog"
       >
-        <el-form :model="questionForm" label-width="80px">
+        <el-form :model="questionForm" label-width="80px" class="question-form">
           <el-row :gutter="20">
             <el-col :span="12">
               <el-form-item label="题目类型" required>
@@ -278,28 +283,32 @@
       </el-dialog>
 
       <!-- 题目详情弹窗 -->
-      <el-dialog v-model="showDetailPopup" title="题目详情" width="600px">
-        <div v-if="currentQuestion" class="detail-content-pc">
-          <div class="detail-header-pc">
-            <el-tag :type="getElTypeTagType(currentQuestion.question_type)">{{ getTypeName(currentQuestion.question_type) }}</el-tag>
-            <el-tag :type="getElDifficultyTagType(currentQuestion.difficulty)" plain>{{ getDifficultyName(currentQuestion.difficulty) }}</el-tag>
+      <el-dialog v-model="showDetailPopup" title="题目详情" width="600px" class="detail-dialog">
+        <div v-if="currentQuestion" class="detail-content">
+          <div class="detail-header">
+            <span :class="['type-tag', `type-tag--${currentQuestion.question_type}`]">
+              {{ getTypeName(currentQuestion.question_type) }}
+            </span>
+            <span :class="['difficulty-tag', `difficulty-tag--${currentQuestion.difficulty}`]">
+              {{ getDifficultyName(currentQuestion.difficulty) }}
+            </span>
             <span class="detail-score">{{ currentQuestion.score }}分</span>
           </div>
-          <div class="detail-section-pc">
-            <div class="section-title-pc">题干</div>
-            <div class="section-text-pc">{{ currentQuestion.content }}</div>
+          <div class="detail-section">
+            <div class="section-title">题干</div>
+            <div class="section-text">{{ currentQuestion.content }}</div>
           </div>
-          <div v-if="currentQuestion.question_type === 'choice' || currentQuestion.question_type === 'multiple'" class="detail-section-pc">
-            <div class="section-title-pc">选项</div>
-            <div v-for="(opt, idx) in currentQuestion.options" :key="idx" class="option-item-pc">{{ optionLetters[idx] }}. {{ opt }}</div>
+          <div v-if="currentQuestion.question_type === 'choice' || currentQuestion.question_type === 'multiple'" class="detail-section">
+            <div class="section-title">选项</div>
+            <div v-for="(opt, idx) in currentQuestion.options" :key="idx" class="option-item">{{ optionLetters[idx] }}. {{ opt }}</div>
           </div>
-          <div class="detail-section-pc">
-            <div class="section-title-pc">答案</div>
-            <div class="section-text-pc answer-text">{{ currentQuestion.answer }}</div>
+          <div class="detail-section">
+            <div class="section-title">答案</div>
+            <div class="section-text section-text--answer">{{ currentQuestion.answer }}</div>
           </div>
-          <div v-if="currentQuestion.analysis" class="detail-section-pc">
-            <div class="section-title-pc">解析</div>
-            <div class="section-text-pc">{{ currentQuestion.analysis }}</div>
+          <div v-if="currentQuestion.analysis" class="detail-section">
+            <div class="section-title">解析</div>
+            <div class="section-text">{{ currentQuestion.analysis }}</div>
           </div>
         </div>
         <template #footer>
@@ -309,11 +318,11 @@
       </el-dialog>
 
       <!-- 批量导入弹窗 -->
-      <el-dialog v-model="showImportPopup" title="批量导入" width="500px">
-        <div class="import-content-pc">
-          <p>支持导入 Excel 格式的题库文件（.xlsx）</p>
-          <p>每个工作簿对应一种题型，示例行不会导入</p>
-          <div class="import-actions-pc">
+      <el-dialog v-model="showImportPopup" title="批量导入" width="500px" class="import-dialog">
+        <div class="import-content">
+          <p class="import-desc">支持导入 Excel 格式的题库文件（.xlsx）</p>
+          <p class="import-desc">每个工作簿对应一种题型，示例行不会导入</p>
+          <div class="import-actions">
             <el-upload
               :show-file-list="false"
               accept=".xlsx,.xls"
@@ -329,17 +338,17 @@
               下载模板
             </el-button>
           </div>
-          <div v-if="importResult" class="import-result-pc">
+          <div v-if="importResult" class="import-result">
             <el-alert
               :title="importResult.message"
               :type="importResult.success ? 'success' : 'error'"
               show-icon
             />
-            <div v-if="importResult.errors && importResult.errors.length > 0" class="result-errors-pc">
+            <div v-if="importResult.errors && importResult.errors.length > 0" class="result-errors">
               <div class="error-title">失败原因：</div>
               <div v-for="(err, idx) in importResult.errors" :key="idx" class="error-item">{{ err }}</div>
             </div>
-            <div v-if="importResult.details && importResult.details.length > 0" class="result-details-pc">
+            <div v-if="importResult.details && importResult.details.length > 0" class="result-details">
               <p v-for="(detail, idx) in importResult.details" :key="idx">{{ detail }}</p>
             </div>
           </div>
@@ -351,8 +360,8 @@
     <div v-else>
       <van-nav-bar title="题库管理" left-arrow @click-left="$router.back()">
         <template #right>
-          <van-icon name="description" size="20" style="margin-right: 12px;" @click="openImportPopup" />
-          <van-icon name="plus" size="20" @click="openAddPopup" />
+          <van-icon name="description" size="20" class="nav-icon" @click="openImportPopup" />
+          <van-icon name="plus" size="20" class="nav-icon" @click="openAddPopup" />
         </template>
       </van-nav-bar>
 
@@ -377,16 +386,16 @@
                 <div v-for="grade in subject.grades" :key="grade.grade" class="tree-grade">
                   <div class="tree-node" @click="toggleGrade(subject.subject, grade.grade)">
                     <van-icon :name="expandedGrades.includes(subject.subject + grade.grade) ? 'arrow-down' : 'arrow'" />
-                    <van-icon name="orders-o" class="node-icon grade-icon" />
+                    <van-icon name="orders-o" class="node-icon node-icon--grade" />
                     <span class="node-text">{{ grade.grade }}</span>
                   </div>
 
                   <div v-show="expandedGrades.includes(subject.subject + grade.grade)" class="tree-children">
                     <div v-for="chapter in grade.chapters" :key="chapter.chapter"
-                         class="tree-node chapter-node"
-                         :class="{ active: selectedChapter === chapter.chapter && selectedSubject === subject.subject }"
+                         class="tree-node tree-node--chapter"
+                         :class="{ 'is-active': selectedChapter === chapter.chapter && selectedSubject === subject.subject }"
                          @click="selectChapter(subject.subject, grade.grade, chapter.chapter)">
-                      <van-icon name="notes-o" class="node-icon chapter-icon" />
+                      <van-icon name="notes-o" class="node-icon node-icon--chapter" />
                       <span class="node-text">{{ chapter.chapter }}</span>
                       <van-tag type="primary" size="small" plain>{{ chapter.count }}</van-tag>
                     </div>
@@ -510,7 +519,7 @@
                   v-for="t in typeList"
                   :key="t.value"
                   class="type-btn"
-                  :class="{ active: questionForm.question_type === t.value }"
+                  :class="{ 'is-active': questionForm.question_type === t.value }"
                   @click="questionForm.question_type = t.value"
                 >
                   {{ t.text }}
@@ -525,7 +534,7 @@
               <div class="form-item" @click="showSubjectSheet = true">
                 <span class="item-label"><span class="required">*</span>科目</span>
                 <div class="item-value">
-                  <span :class="{ placeholder: !questionForm.subject }">{{ questionForm.subject || '请选择' }}</span>
+                  <span :class="{ 'is-placeholder': !questionForm.subject }">{{ questionForm.subject || '请选择' }}</span>
                   <van-icon name="arrow" />
                 </div>
               </div>
@@ -533,7 +542,7 @@
               <div class="form-item" @click="showGradeSheet = true">
                 <span class="item-label"><span class="required">*</span>年级</span>
                 <div class="item-value">
-                  <span :class="{ placeholder: !questionForm.grade }">{{ questionForm.grade || '请选择' }}</span>
+                  <span :class="{ 'is-placeholder': !questionForm.grade }">{{ questionForm.grade || '请选择' }}</span>
                   <van-icon name="arrow" />
                 </div>
               </div>
@@ -584,7 +593,7 @@
                   v-for="(opt, idx) in questionForm.options"
                   :key="idx"
                   class="answer-btn"
-                  :class="{ active: questionForm.answer === optionLetters[idx] }"
+                  :class="{ 'is-active': questionForm.answer === optionLetters[idx] }"
                   @click="questionForm.answer = optionLetters[idx]"
                 >
                   {{ optionLetters[idx] }}
@@ -597,7 +606,7 @@
                   v-for="(opt, idx) in questionForm.options"
                   :key="idx"
                   class="answer-btn"
-                  :class="{ active: questionForm.answerArray && questionForm.answerArray.includes(optionLetters[idx]) }"
+                  :class="{ 'is-active': questionForm.answerArray && questionForm.answerArray.includes(optionLetters[idx]) }"
                   @click="toggleMultipleAnswer(optionLetters[idx])"
                 >
                   {{ optionLetters[idx] }}
@@ -608,15 +617,15 @@
               <!-- 判断题答案 -->
               <div v-else-if="questionForm.question_type === 'judgment'" class="answer-btns">
                 <div
-                  class="answer-btn judgment-btn"
-                  :class="{ active: questionForm.answer === 'A' }"
+                  class="answer-btn answer-btn--judgment"
+                  :class="{ 'is-active': questionForm.answer === 'A' }"
                   @click="questionForm.answer = 'A'"
                 >
                   正确
                 </div>
                 <div
-                  class="answer-btn judgment-btn"
-                  :class="{ active: questionForm.answer === 'B' }"
+                  class="answer-btn answer-btn--judgment"
+                  :class="{ 'is-active': questionForm.answer === 'B' }"
                   @click="questionForm.answer = 'B'"
                 >
                   错误
@@ -674,7 +683,7 @@
             </div>
             <div class="detail-section">
               <div class="section-title">答案</div>
-              <div class="section-content answer">{{ currentQuestion.answer }}</div>
+              <div class="section-content section-content--answer">{{ currentQuestion.answer }}</div>
             </div>
             <div v-if="currentQuestion.analysis" class="detail-section">
               <div class="section-title">解析</div>
@@ -716,7 +725,7 @@
               </van-button>
             </div>
             <div v-if="importResult" class="import-result">
-              <van-notice-bar :color="importResult.success ? '#07c160' : '#ee0a24'" background="#f7f8fa">
+              <van-notice-bar :color="importResult.success ? 'var(--color-success)' : 'var(--color-danger)'" background="var(--bg-color)">
                 {{ importResult.message }}
               </van-notice-bar>
               <div v-if="importResult.errors && importResult.errors.length > 0" class="result-errors">
@@ -1618,78 +1627,160 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* PC端样式 */
+/* ==========================================
+   PC端样式 - 使用CSS变量
+   ========================================== */
 .questions-pc {
-  padding: 20px;
-  min-height: calc(100vh - 60px);
-  background: #f5f7fa;
+  padding: var(--spacing-lg, 24px);
+  min-height: calc(100vh - var(--header-height, 56px));
+  background-color: var(--bg-color);
 }
 
 .pc-container {
   display: flex;
-  gap: 20px;
+  gap: var(--spacing-lg, 24px);
   max-width: 1400px;
   margin: 0 auto;
 }
 
+/* 左侧目录树 */
 .left-panel {
   width: 280px;
   flex-shrink: 0;
 }
 
 .tree-card {
+  background-color: var(--fill-color-blank);
+  border-radius: var(--border-radius-large, 8px);
+  padding: var(--spacing-md, 16px);
   height: calc(100vh - 100px);
   overflow: auto;
+  box-shadow: var(--box-shadow-light, 0 2px 8px 0 rgba(0, 0, 0, 0.06));
 }
 
 .tree-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding-bottom: var(--spacing-md, 16px);
+  border-bottom: 1px solid var(--border-color-lighter);
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+.tree-title {
+  font-size: var(--font-size-medium, 16px);
+  font-weight: 600;
+  color: var(--text-color-primary);
+  margin: 0;
+}
+
+.tree-count {
+  font-size: var(--font-size-extra-small, 12px);
+  color: var(--color-primary);
+  font-weight: 500;
 }
 
 .custom-tree-node {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--spacing-xs, 4px);
   flex: 1;
+}
+
+.tree-icon {
+  color: var(--color-primary);
+  font-size: 16px;
+}
+
+.tree-icon--grade {
+  color: var(--color-warning);
+}
+
+.tree-icon--chapter {
+  color: var(--color-success);
 }
 
 .node-label {
   flex: 1;
+  font-size: var(--font-size-small, 13px);
+  color: var(--text-color-regular);
 }
 
+.node-count {
+  font-size: var(--font-size-extra-small, 12px);
+  color: var(--text-color-secondary);
+  background-color: var(--fill-color);
+  padding: 2px 6px;
+  border-radius: var(--border-radius-small, 2px);
+}
+
+/* 右侧内容区 */
 .right-panel {
   flex: 1;
   min-width: 0;
 }
 
+/* 工具栏 */
 .toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-  background: #fff;
-  padding: 12px 16px;
-  border-radius: 4px;
+  margin-bottom: var(--spacing-md, 16px);
+  background-color: var(--fill-color-blank);
+  padding: var(--spacing-md, 16px);
+  border-radius: var(--border-radius-large, 8px);
+  box-shadow: var(--box-shadow-lighter, 0 1px 4px 0 rgba(0, 0, 0, 0.04));
 }
 
 .toolbar-left {
   display: flex;
-  gap: 10px;
+  gap: var(--spacing-sm, 8px);
 }
 
 .toolbar-right {
   display: flex;
-  gap: 10px;
+  gap: var(--spacing-sm, 8px);
+  align-items: center;
 }
 
-.current-filter-pc {
-  margin-bottom: 16px;
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs, 4px);
 }
 
+.toolbar-btn--danger {
+  margin-left: var(--spacing-sm, 8px);
+}
+
+.search-input {
+  width: 200px;
+}
+
+.filter-select {
+  width: 120px;
+}
+
+.filter-select--small {
+  width: 100px;
+}
+
+/* 当前筛选条件 */
+.current-filter {
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+/* 表格卡片 */
 .table-card {
-  margin-bottom: 20px;
+  background-color: var(--fill-color-blank);
+  border-radius: var(--border-radius-large, 8px);
+  padding: var(--spacing-md, 16px);
+  margin-bottom: var(--spacing-lg, 24px);
+  box-shadow: var(--box-shadow-light, 0 2px 8px 0 rgba(0, 0, 0, 0.06));
+}
+
+.question-table {
+  width: 100%;
 }
 
 .question-content-cell {
@@ -1699,19 +1790,87 @@ onUnmounted(() => {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  color: var(--text-color-regular);
+  transition: color var(--transition-duration, 0.3s);
 }
 
 .question-content-cell:hover {
-  color: #409eff;
+  color: var(--color-primary);
 }
 
+/* 类型标签 */
+.type-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--border-radius-small, 2px);
+  font-size: var(--font-size-extra-small, 12px);
+  font-weight: 500;
+}
+
+.type-tag--choice,
+.type-tag--multiple,
+.type-tag--judgment {
+  background-color: var(--color-primary-light-9);
+  color: var(--color-primary);
+}
+
+.type-tag--fill {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.type-tag--subjective {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+/* 难度标签 */
+.difficulty-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--border-radius-small, 2px);
+  font-size: var(--font-size-extra-small, 12px);
+  font-weight: 500;
+}
+
+.difficulty-tag--easy {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.difficulty-tag--medium {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.difficulty-tag--hard {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.score-text {
+  font-weight: 600;
+  color: var(--color-warning);
+}
+
+.time-text {
+  font-size: var(--font-size-extra-small, 12px);
+  color: var(--text-color-secondary);
+}
+
+.action-btns {
+  display: flex;
+  gap: var(--spacing-xs, 4px);
+}
+
+/* 分页 */
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
-  padding-top: 16px;
+  padding-top: var(--spacing-md, 16px);
 }
 
-/* PC端表单样式 */
+/* 表单样式 */
 .options-container {
   width: 100%;
 }
@@ -1719,139 +1878,146 @@ onUnmounted(() => {
 .option-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: var(--spacing-sm, 8px);
+  margin-bottom: var(--spacing-sm, 8px);
 }
 
 .option-letter {
   width: 24px;
   font-weight: bold;
-  color: #409eff;
+  color: var(--color-primary);
 }
 
 .answer-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: var(--spacing-md, 16px);
   align-items: center;
 }
 
 .answer-hint {
-  color: #909399;
-  font-size: 12px;
+  color: var(--text-color-secondary);
+  font-size: var(--font-size-extra-small, 12px);
 }
 
-/* PC端详情弹窗样式 */
-.detail-content-pc {
-  padding: 10px 0;
+/* 详情弹窗样式 */
+.detail-content {
+  padding: var(--spacing-sm, 8px) 0;
 }
 
-.detail-header-pc {
+.detail-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: var(--spacing-sm, 8px);
+  margin-bottom: var(--spacing-md, 16px);
 }
 
 .detail-score {
-  color: #e6a23c;
+  color: var(--color-warning);
   font-weight: 500;
+  font-size: var(--font-size-base, 14px);
 }
 
-.detail-section-pc {
-  margin-bottom: 16px;
+.detail-section {
+  margin-bottom: var(--spacing-md, 16px);
 }
 
-.section-title-pc {
-  font-size: 14px;
-  color: #909399;
-  margin-bottom: 8px;
+.section-title {
+  font-size: var(--font-size-small, 13px);
+  color: var(--text-color-secondary);
+  margin-bottom: var(--spacing-sm, 8px);
 }
 
-.section-text-pc {
-  font-size: 15px;
+.section-text {
+  font-size: var(--font-size-base, 14px);
   line-height: 1.6;
+  color: var(--text-color-primary);
 }
 
-.section-text-pc.answer-text {
-  color: #67c23a;
+.section-text--answer {
+  color: var(--color-success);
   font-weight: 500;
 }
 
-.option-item-pc {
-  padding: 8px 0;
-  border-bottom: 1px solid #ebeef5;
+.option-item {
+  padding: var(--spacing-sm, 8px) 0;
+  border-bottom: 1px solid var(--border-color-lighter);
+  font-size: var(--font-size-base, 14px);
+  color: var(--text-color-regular);
 }
 
-.option-item-pc:last-child {
+.option-item:last-child {
   border-bottom: none;
 }
 
-/* PC端导入弹窗样式 */
-.import-content-pc {
-  padding: 10px 0;
+/* 导入弹窗样式 */
+.import-content {
+  padding: var(--spacing-sm, 8px) 0;
 }
 
-.import-content-pc p {
-  margin: 8px 0;
-  color: #606266;
+.import-desc {
+  margin: var(--spacing-sm, 8px) 0;
+  color: var(--text-color-regular);
+  font-size: var(--font-size-base, 14px);
 }
 
-.import-actions-pc {
+.import-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 20px;
+  gap: var(--spacing-md, 16px);
+  margin-top: var(--spacing-lg, 24px);
 }
 
-.import-result-pc {
-  margin-top: 20px;
+.import-result {
+  margin-top: var(--spacing-lg, 24px);
 }
 
-.result-errors-pc {
-  margin-top: 12px;
-  padding: 12px;
-  background: #fef0f0;
-  border-radius: 4px;
+.result-errors {
+  margin-top: var(--spacing-md, 16px);
+  padding: var(--spacing-md, 16px);
+  background-color: var(--color-danger-light);
+  border-radius: var(--border-radius-base, 4px);
   max-height: 150px;
   overflow-y: auto;
 }
 
 .error-title {
-  font-size: 14px;
+  font-size: var(--font-size-base, 14px);
   font-weight: 500;
-  color: #f56c6c;
-  margin-bottom: 8px;
+  color: var(--color-danger);
+  margin-bottom: var(--spacing-sm, 8px);
 }
 
 .error-item {
-  font-size: 13px;
-  color: #606266;
-  padding: 4px 0;
-  border-bottom: 1px solid #fde2e2;
+  font-size: var(--font-size-small, 13px);
+  color: var(--text-color-regular);
+  padding: var(--spacing-xs, 4px) 0;
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .error-item:last-child {
   border-bottom: none;
 }
 
-.result-details-pc {
-  margin-top: 12px;
-  padding: 12px;
-  background: #f5f7fa;
-  border-radius: 4px;
+.result-details {
+  margin-top: var(--spacing-md, 16px);
+  padding: var(--spacing-md, 16px);
+  background-color: var(--fill-color);
+  border-radius: var(--border-radius-base, 4px);
   max-height: 150px;
   overflow-y: auto;
 }
 
-.result-details-pc p {
-  margin: 4px 0;
-  font-size: 13px;
-  color: #606266;
+.result-details p {
+  margin: var(--spacing-xs, 4px) 0;
+  font-size: var(--font-size-small, 13px);
+  color: var(--text-color-regular);
 }
 
-/* 移动端样式 */
+/* ==========================================
+   移动端样式 - 使用CSS变量
+   ========================================== */
 .page-content {
-  padding-bottom: 20px;
+  padding-bottom: var(--spacing-lg, 24px);
 }
 
 .loading-center {
@@ -1861,63 +2027,105 @@ onUnmounted(() => {
   padding: 40px;
 }
 
+.nav-icon {
+  margin-right: var(--spacing-md, 16px);
+}
+
+.nav-icon:last-child {
+  margin-right: 0;
+}
+
 .tree-section {
-  background: #fff;
-  margin-bottom: 10px;
+  background-color: var(--fill-color-blank);
+  margin-bottom: var(--spacing-sm, 8px);
 }
 
 .section-header {
   display: flex;
   align-items: center;
-  padding: 12px 16px;
-  background: #f7f8fa;
-  gap: 8px;
+  padding: var(--spacing-md, 16px);
+  background-color: var(--fill-color);
+  gap: var(--spacing-sm, 8px);
 }
 
 .section-header span {
   flex: 1;
   font-weight: 500;
+  font-size: var(--font-size-base, 14px);
+  color: var(--text-color-primary);
 }
 
-.tree-content { padding: 8px 0; }
-.tree-subject { border-bottom: 1px solid #eee; }
+.tree-content {
+  padding: var(--spacing-sm, 8px) 0;
+}
+
+.tree-subject {
+  border-bottom: 1px solid var(--border-color-lighter);
+}
 
 .tree-node {
   display: flex;
   align-items: center;
-  padding: 10px 16px;
-  gap: 8px;
+  padding: 10px var(--spacing-md, 16px);
+  gap: var(--spacing-sm, 8px);
+  cursor: pointer;
+  transition: background-color var(--transition-duration, 0.3s);
 }
 
-.tree-node:active { background: #f5f5f5; }
-.tree-node.active { background: #ecf5ff; color: #1989fa; }
-.node-icon { color: #969799; }
-.grade-icon { color: #1989fa; }
-.chapter-icon { color: #ff976a; }
-.node-text { flex: 1; }
-.tree-children { padding-left: 20px; }
-.chapter-node { padding-left: 40px; }
+.tree-node:active {
+  background-color: var(--fill-color);
+}
+
+.tree-node.is-active {
+  background-color: var(--color-primary-light-9);
+  color: var(--color-primary);
+}
+
+.node-icon {
+  color: var(--text-color-secondary);
+}
+
+.node-icon--grade {
+  color: var(--color-primary);
+}
+
+.node-icon--chapter {
+  color: var(--color-warning);
+}
+
+.node-text {
+  flex: 1;
+  font-size: var(--font-size-base, 14px);
+}
+
+.tree-children {
+  padding-left: var(--spacing-lg, 24px);
+}
+
+.tree-node--chapter {
+  padding-left: 40px;
+}
 
 .filter-section {
-  background: #fff;
-  margin-bottom: 10px;
+  background-color: var(--fill-color-blank);
+  margin-bottom: var(--spacing-sm, 8px);
   display: flex;
   align-items: center;
-  padding: 8px 12px;
-  gap: 10px;
+  padding: var(--spacing-sm, 8px) var(--spacing-md, 16px);
+  gap: var(--spacing-sm, 8px);
 }
 
 .filter-buttons {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-sm, 8px);
 }
 
 .filter-buttons :deep(.van-button) {
-  padding: 0 12px;
+  padding: 0 var(--spacing-md, 16px);
 }
 
 .filter-buttons :deep(.van-icon) {
-  margin-left: 4px;
+  margin-left: var(--spacing-xs, 4px);
 }
 
 .search-box {
@@ -1926,64 +2134,83 @@ onUnmounted(() => {
 }
 
 .search-box :deep(.van-search) {
-  padding: 8px 0;
+  padding: var(--spacing-sm, 8px) 0;
 }
 
 .search-box :deep(.van-search__content) {
-  background: #f7f8fa;
+  background-color: var(--fill-color);
 }
 
-.current-filter { padding: 8px 16px; background: #fff; }
+.current-filter {
+  padding: var(--spacing-sm, 8px) var(--spacing-md, 16px);
+  background-color: var(--fill-color-blank);
+}
 
-.question-list { padding: 0 12px; }
+.question-list {
+  padding: 0 var(--spacing-md, 16px);
+}
 
 .question-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: var(--fill-color-blank);
+  border-radius: var(--border-radius-large, 8px);
+  padding: var(--spacing-md, 16px);
+  margin-bottom: var(--spacing-sm, 8px);
+  box-shadow: var(--box-shadow-lighter, 0 1px 4px 0 rgba(0, 0, 0, 0.04));
+  cursor: pointer;
+  transition: box-shadow var(--transition-duration, 0.3s);
+}
+
+.question-card:active {
+  box-shadow: var(--box-shadow-light, 0 2px 8px 0 rgba(0, 0, 0, 0.06));
 }
 
 .question-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: var(--spacing-sm, 8px);
+  margin-bottom: var(--spacing-sm, 8px);
 }
 
 .question-score {
   margin-left: auto;
-  color: #ff976a;
+  color: var(--color-warning);
   font-weight: 500;
+  font-size: var(--font-size-base, 14px);
 }
 
 .question-content {
-  font-size: 15px;
+  font-size: var(--font-size-base, 14px);
   line-height: 1.5;
-  margin-bottom: 10px;
+  margin-bottom: var(--spacing-sm, 8px);
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  color: var(--text-color-primary);
 }
 
 .question-footer {
   display: flex;
   align-items: center;
-  font-size: 12px;
-  color: #969799;
+  font-size: var(--font-size-extra-small, 12px);
+  color: var(--text-color-secondary);
 }
 
-.question-chapter { flex: 1; }
-.question-actions { display: flex; gap: 16px; }
+.question-chapter {
+  flex: 1;
+}
+
+.question-actions {
+  display: flex;
+  gap: var(--spacing-lg, 24px);
+}
 
 /* 弹窗容器 */
 .add-popup {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #f7f8fa;
+  background-color: var(--fill-color);
   touch-action: pan-y;
   -webkit-user-select: none;
   user-select: none;
@@ -1994,22 +2221,24 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  background: #fff;
-  border-bottom: 1px solid #eee;
+  padding: var(--spacing-md, 16px);
+  background-color: var(--fill-color-blank);
+  border-bottom: 1px solid var(--border-color-lighter);
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
 .cancel-btn {
-  color: #666;
-  padding: 4px 8px;
+  color: var(--text-color-secondary);
+  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  font-size: var(--font-size-base, 14px);
 }
 
 .popup-title {
-  font-size: 16px;
+  font-size: var(--font-size-medium, 16px);
   font-weight: 500;
+  color: var(--text-color-primary);
 }
 
 /* 表单滚动区 */
@@ -2017,7 +2246,7 @@ onUnmounted(() => {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  background: #f7f8fa;
+  background-color: var(--fill-color);
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
   overscroll-behavior: contain;
@@ -2025,50 +2254,54 @@ onUnmounted(() => {
 }
 
 .form-section {
-  background: #fff;
-  margin: 10px 0;
-  padding: 12px 16px;
+  background-color: var(--fill-color-blank);
+  margin: var(--spacing-sm, 8px) 0;
+  padding: var(--spacing-md, 16px);
 }
 
 .section-title {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 12px;
+  font-size: var(--font-size-small, 13px);
+  color: var(--text-color-secondary);
+  margin-bottom: var(--spacing-md, 16px);
 }
 
 .required {
-  color: #ee0a24;
+  color: var(--color-danger);
   margin-right: 2px;
 }
 
 /* 类型选择按钮 */
 .type-btns {
   display: flex;
-  gap: 10px;
+  gap: var(--spacing-sm, 8px);
+  flex-wrap: wrap;
 }
 
 .type-btn {
   flex: 1;
+  min-width: 60px;
   padding: 10px 0;
   text-align: center;
-  border: 1px solid #dcdee0;
-  border-radius: 4px;
-  font-size: 14px;
-  color: #666;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-base, 4px);
+  font-size: var(--font-size-base, 14px);
+  color: var(--text-color-regular);
+  cursor: pointer;
+  transition: all var(--transition-duration, 0.3s);
 }
 
-.type-btn.active {
-  background: #1989fa;
-  border-color: #1989fa;
-  color: #fff;
+.type-btn.is-active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--fill-color-blank);
 }
 
 /* 表单项 */
 .form-item {
   display: flex;
   align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #f5f5f5;
+  padding: var(--spacing-md, 16px) 0;
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .form-item:last-child {
@@ -2077,8 +2310,8 @@ onUnmounted(() => {
 
 .item-label {
   width: 80px;
-  color: #333;
-  font-size: 14px;
+  color: var(--text-color-primary);
+  font-size: var(--font-size-base, 14px);
 }
 
 .item-value {
@@ -2086,91 +2319,105 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  color: #333;
-  font-size: 14px;
+  color: var(--text-color-primary);
+  font-size: var(--font-size-base, 14px);
 }
 
-.item-value .placeholder {
-  color: #999;
+.item-value .is-placeholder {
+  color: var(--text-color-placeholder);
 }
 
 .item-value .van-icon {
-  margin-left: 4px;
-  color: #999;
+  margin-left: var(--spacing-xs, 4px);
+  color: var(--text-color-placeholder);
 }
 
 .item-input {
   flex: 1;
   border: none;
   outline: none;
-  font-size: 14px;
+  font-size: var(--font-size-base, 14px);
   text-align: right;
   background: transparent;
   -webkit-user-select: text;
   user-select: text;
   touch-action: manipulation;
+  color: var(--text-color-primary);
+}
+
+.item-input::placeholder {
+  color: var(--text-color-placeholder);
 }
 
 /* 文本框 */
 .textarea-input {
   width: 100%;
-  border: 1px solid #dcdee0;
-  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-base, 4px);
   padding: 10px;
-  font-size: 14px;
+  font-size: var(--font-size-base, 14px);
   resize: none;
   outline: none;
   box-sizing: border-box;
   -webkit-user-select: text;
   user-select: text;
   touch-action: manipulation;
+  color: var(--text-color-primary);
+  background-color: var(--fill-color-blank);
 }
 
 .textarea-input:focus {
-  border-color: #1989fa;
+  border-color: var(--color-primary);
+}
+
+.textarea-input::placeholder {
+  color: var(--text-color-placeholder);
 }
 
 /* 选项 */
 .option-item {
   display: flex;
   align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #f5f5f5;
+  padding: var(--spacing-sm, 8px) 0;
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .option-label {
   width: 30px;
-  color: #1989fa;
+  color: var(--color-primary);
   font-weight: bold;
+  font-size: var(--font-size-base, 14px);
 }
 
 .option-input {
   flex: 1;
   border: none;
   outline: none;
-  font-size: 14px;
+  font-size: var(--font-size-base, 14px);
   background: transparent;
   -webkit-user-select: text;
   user-select: text;
   touch-action: manipulation;
+  color: var(--text-color-primary);
 }
 
 .delete-icon {
-  color: #ee0a24;
-  padding: 4px;
+  color: var(--color-danger);
+  padding: var(--spacing-xs, 4px);
 }
 
 .add-option-btn {
-  padding: 12px 0;
+  padding: var(--spacing-md, 16px) 0;
   text-align: center;
-  color: #1989fa;
-  font-size: 14px;
+  color: var(--color-primary);
+  font-size: var(--font-size-base, 14px);
+  cursor: pointer;
 }
 
 /* 答案按钮 */
 .answer-btns {
   display: flex;
-  gap: 10px;
+  gap: var(--spacing-sm, 8px);
   flex-wrap: wrap;
 }
 
@@ -2180,23 +2427,24 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #dcdee0;
-  border-radius: 4px;
-  font-size: 16px;
-  color: #666;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-base, 4px);
+  font-size: var(--font-size-medium, 16px);
+  color: var(--text-color-regular);
+  cursor: pointer;
+  transition: all var(--transition-duration, 0.3s);
 }
 
-.answer-btn.active {
-  background: #1989fa;
-  border-color: #1989fa;
-  color: #fff;
+.answer-btn.is-active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--fill-color-blank);
 }
 
-/* 判断题答案按钮 */
-.answer-btn.judgment-btn {
+.answer-btn--judgment {
   width: auto;
-  padding: 10px 20px;
-  font-size: 14px;
+  padding: 10px var(--spacing-lg, 24px);
+  font-size: var(--font-size-base, 14px);
 }
 
 /* 详情弹窗 */
@@ -2209,25 +2457,41 @@ onUnmounted(() => {
 .detail-content {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
-  background: #fff;
+  padding: var(--spacing-md, 16px);
+  background-color: var(--fill-color-blank);
 }
 
 .detail-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: var(--spacing-sm, 8px);
+  margin-bottom: var(--spacing-md, 16px);
 }
 
-.detail-section { margin-bottom: 16px; }
-.detail-section .section-title { font-size: 14px; color: #969799; margin-bottom: 8px; }
-.detail-section .section-content { font-size: 15px; line-height: 1.6; }
-.detail-section .section-content.answer { color: #07c160; font-weight: 500; }
+.detail-section {
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+.detail-section .section-title {
+  font-size: var(--font-size-small, 13px);
+  color: var(--text-color-secondary);
+  margin-bottom: var(--spacing-sm, 8px);
+}
+
+.detail-section .section-content {
+  font-size: var(--font-size-base, 14px);
+  line-height: 1.6;
+  color: var(--text-color-primary);
+}
+
+.detail-section .section-content--answer {
+  color: var(--color-success);
+  font-weight: 500;
+}
 
 .detail-section .option-item {
-  padding: 8px 0;
-  border-bottom: 1px solid #eee;
+  padding: var(--spacing-sm, 8px) 0;
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .detail-section .option-item:last-child {
@@ -2239,33 +2503,33 @@ onUnmounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #f7f8fa;
+  background-color: var(--fill-color);
 }
 
 .import-content {
   flex: 1;
-  padding: 20px 16px;
+  padding: var(--spacing-lg, 24px) var(--spacing-md, 16px);
   overflow-y: auto;
 }
 
 .import-desc {
-  background: #fff;
-  padding: 16px;
-  border-radius: 8px;
-  margin-bottom: 16px;
+  background-color: var(--fill-color-blank);
+  padding: var(--spacing-md, 16px);
+  border-radius: var(--border-radius-large, 8px);
+  margin-bottom: var(--spacing-md, 16px);
 }
 
 .import-desc p {
-  font-size: 14px;
-  color: #666;
-  margin: 4px 0;
+  font-size: var(--font-size-base, 14px);
+  color: var(--text-color-regular);
+  margin: var(--spacing-xs, 4px) 0;
 }
 
 .import-buttons {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 0 20px;
+  gap: var(--spacing-md, 16px);
+  padding: 0 var(--spacing-lg, 24px);
 }
 
 .import-uploader {
@@ -2285,42 +2549,42 @@ onUnmounted(() => {
 }
 
 .import-result {
-  margin-top: 20px;
+  margin-top: var(--spacing-lg, 24px);
 }
 
 .result-details {
-  background: #fff;
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 12px;
-  font-size: 13px;
-  color: #666;
+  background-color: var(--fill-color-blank);
+  padding: var(--spacing-md, 16px);
+  border-radius: var(--border-radius-large, 8px);
+  margin-top: var(--spacing-md, 16px);
+  font-size: var(--font-size-small, 13px);
+  color: var(--text-color-regular);
 }
 
 .result-details p {
-  margin: 4px 0;
+  margin: var(--spacing-xs, 4px) 0;
 }
 
 .result-errors {
-  background: #fff5f5;
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 12px;
-  border: 1px solid #ffe4e4;
+  background-color: var(--color-danger-light);
+  padding: var(--spacing-md, 16px);
+  border-radius: var(--border-radius-large, 8px);
+  margin-top: var(--spacing-md, 16px);
+  border: 1px solid var(--border-color-light);
 }
 
 .error-title {
-  font-size: 14px;
+  font-size: var(--font-size-base, 14px);
   font-weight: 500;
-  color: #ee0a24;
-  margin-bottom: 8px;
+  color: var(--color-danger);
+  margin-bottom: var(--spacing-sm, 8px);
 }
 
 .error-item {
-  font-size: 13px;
-  color: #666;
-  padding: 4px 0;
-  border-bottom: 1px solid #ffe4e4;
+  font-size: var(--font-size-small, 13px);
+  color: var(--text-color-regular);
+  padding: var(--spacing-xs, 4px) 0;
+  border-bottom: 1px solid var(--border-color-light);
 }
 
 .error-item:last-child {

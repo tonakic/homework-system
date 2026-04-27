@@ -471,7 +471,7 @@ onMounted(() => {
 /* ========== PC Styles ========== */
 .ranking-pc {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--bg-color);
   padding: 20px;
 }
 
@@ -485,7 +485,7 @@ onMounted(() => {
 .pc-header h2 {
   margin: 0;
   font-size: 24px;
-  color: #303133;
+  color: var(--text-color-primary);
 }
 
 .pc-content {
@@ -505,7 +505,7 @@ onMounted(() => {
 }
 
 .exam-link {
-  color: #409eff;
+  color: var(--color-primary);
   cursor: pointer;
 }
 
@@ -515,7 +515,7 @@ onMounted(() => {
 
 .submit-count {
   font-weight: bold;
-  color: #409eff;
+  color: var(--color-primary);
 }
 
 .detail-header {
@@ -528,7 +528,7 @@ onMounted(() => {
 .detail-header h3 {
   margin: 0;
   font-size: 20px;
-  color: #303133;
+  color: var(--text-color-primary);
 }
 
 .ranking-card {
@@ -550,8 +550,8 @@ onMounted(() => {
   justify-content: center;
   font-weight: bold;
   font-size: 14px;
-  background: #f5f7fa;
-  color: #909399;
+  background: var(--bg-color);
+  color: var(--text-color-secondary);
 }
 
 .rank-badge.gold {
@@ -577,27 +577,27 @@ onMounted(() => {
 }
 
 .score-value.excellent {
-  color: #67c23a;
+  color: var(--color-success);
 }
 
 .score-value.good {
-  color: #409eff;
+  color: var(--color-primary);
 }
 
 .score-value.medium {
-  color: #e6a23c;
+  color: var(--color-warning);
 }
 
 .score-value.pass {
-  color: #909399;
+  color: var(--text-color-secondary);
 }
 
 .score-value.fail {
-  color: #f56c6c;
+  color: var(--color-danger);
 }
 
 .time-value {
-  color: #909399;
+  color: var(--text-color-secondary);
   font-size: 13px;
 }
 
@@ -617,7 +617,7 @@ onMounted(() => {
   align-items: center;
   padding: 12px;
   border-radius: 8px;
-  background: #f5f7fa;
+  background: var(--bg-color);
   transition: all 0.3s;
 }
 
@@ -668,12 +668,12 @@ onMounted(() => {
 .performer-name {
   font-size: 15px;
   font-weight: 500;
-  color: #303133;
+  color: var(--text-color-primary);
 }
 
 .performer-detail {
   font-size: 12px;
-  color: #909399;
+  color: var(--text-color-secondary);
   margin-top: 2px;
 }
 
@@ -684,12 +684,12 @@ onMounted(() => {
 .performer-score .score {
   font-size: 20px;
   font-weight: bold;
-  color: #303133;
+  color: var(--text-color-primary);
 }
 
 .performer-score .unit {
   font-size: 12px;
-  color: #909399;
+  color: var(--text-color-secondary);
   margin-left: 2px;
 }
 
@@ -705,27 +705,27 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
-  background: #f5f7fa;
+  background: var(--bg-color);
   border-radius: 6px;
 }
 
 .summary-item .label {
   font-size: 14px;
-  color: #606266;
+  color: var(--text-color-regular);
 }
 
 .summary-item .value {
   font-size: 16px;
   font-weight: bold;
-  color: #303133;
+  color: var(--text-color-primary);
 }
 
 .summary-item .value.good {
-  color: #67c23a;
+  color: var(--color-success);
 }
 
 .summary-item .value.bad {
-  color: #f56c6c;
+  color: var(--color-danger);
 }
 
 /* Table row highlight */
@@ -744,7 +744,7 @@ onMounted(() => {
 /* ========== Mobile Styles ========== */
 .page {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--bg-color);
 }
 
 .page-content {
@@ -765,7 +765,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #fff;
+  background: var(--fill-color-blank);
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 12px;
@@ -778,7 +778,7 @@ onMounted(() => {
 .exam-title {
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: var(--text-color-primary);
   margin-bottom: 8px;
 }
 
@@ -786,11 +786,11 @@ onMounted(() => {
   display: flex;
   gap: 12px;
   font-size: 12px;
-  color: #999;
+  color: var(--text-color-secondary);
 }
 
 .subject {
-  color: #1989fa;
+  color: var(--color-primary);
 }
 
 .exam-stats {
@@ -806,12 +806,12 @@ onMounted(() => {
 .stat-value {
   font-size: 20px;
   font-weight: bold;
-  color: #1989fa;
+  color: var(--color-primary);
 }
 
 .stat-label {
   font-size: 12px;
-  color: #999;
+  color: var(--text-color-secondary);
 }
 
 /* 排名详情 */
@@ -826,12 +826,12 @@ onMounted(() => {
   padding: 12px 0;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: var(--text-color-primary);
 }
 
 .exam-header .van-icon {
   font-size: 20px;
-  color: #666;
+  color: var(--text-color-regular);
 }
 
 .class-selector {
@@ -842,7 +842,7 @@ onMounted(() => {
   display: flex;
   gap: 12px;
   padding: 12px 0;
-  background: #f5f5f5;
+  background: var(--bg-color);
 }
 
 .ranking-list {
@@ -852,7 +852,7 @@ onMounted(() => {
 .ranking-item {
   display: flex;
   align-items: center;
-  background: #fff;
+  background: var(--fill-color-blank);
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 8px;
@@ -865,12 +865,12 @@ onMounted(() => {
 .student-name, .class-name {
   font-size: 15px;
   font-weight: 500;
-  color: #333;
+  color: var(--text-color-primary);
 }
 
 .student-class, .student-count {
   font-size: 12px;
-  color: #999;
+  color: var(--text-color-secondary);
   margin-top: 2px;
 }
 
@@ -881,12 +881,12 @@ onMounted(() => {
 .score {
   font-size: 18px;
   font-weight: bold;
-  color: #1989fa;
+  color: var(--color-primary);
 }
 
 .time-used, .avg-label {
   font-size: 12px;
-  color: #999;
+  color: var(--text-color-secondary);
   margin-top: 2px;
 }
 </style>

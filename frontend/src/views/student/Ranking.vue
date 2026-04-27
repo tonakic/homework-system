@@ -135,7 +135,7 @@
         <div v-if="!selectedExam" class="exam-list">
           <van-empty v-if="!loading && exams.length === 0" description="暂无参与的考试" />
 
-          <div v-for="exam in exams" :key="exam.id" class="exam-item" @click="selectExam(exam)">
+          <div v-for="exam in exams" :key="exam.id" class="exam-card card" @click="selectExam(exam)">
             <div class="exam-info">
               <div class="exam-title">{{ exam.title }}</div>
               <div class="exam-meta">
@@ -186,10 +186,34 @@
           <div v-else-if="activeTab === 'class'" class="ranking-list">
             <van-empty v-if="classRanking.length === 0" description="暂无排名数据（等待批改完成）" />
 
-            <div v-for="item in classRanking" :key="item.studentId" class="ranking-item" :class="{ 'is-me': item.isMe }">
-              <div class="rank-badge" :class="getRankClass(item.rank)">
-                {{ item.rank }}
+            <!-- 前三名展示区 -->
+            <div v-if="classRanking.length >= 3" class="top-three">
+              <!-- 第二名 -->
+              <div class="podium-item silver" :class="{ 'is-me': classRanking[1]?.isMe }">
+                <div class="podium-avatar">{{ classRanking[1]?.studentName?.charAt(0) }}</div>
+                <div class="podium-name">{{ classRanking[1]?.studentName }}</div>
+                <div class="podium-score">{{ classRanking[1]?.score }}分</div>
+                <div class="podium-rank">🥈</div>
               </div>
+              <!-- 第一名 -->
+              <div class="podium-item gold" :class="{ 'is-me': classRanking[0]?.isMe }">
+                <div class="podium-avatar">{{ classRanking[0]?.studentName?.charAt(0) }}</div>
+                <div class="podium-name">{{ classRanking[0]?.studentName }}</div>
+                <div class="podium-score">{{ classRanking[0]?.score }}分</div>
+                <div class="podium-rank">🥇</div>
+              </div>
+              <!-- 第三名 -->
+              <div class="podium-item bronze" :class="{ 'is-me': classRanking[2]?.isMe }">
+                <div class="podium-avatar">{{ classRanking[2]?.studentName?.charAt(0) }}</div>
+                <div class="podium-name">{{ classRanking[2]?.studentName }}</div>
+                <div class="podium-score">{{ classRanking[2]?.score }}分</div>
+                <div class="podium-rank">🥉</div>
+              </div>
+            </div>
+
+            <!-- 第四名及以后 -->
+            <div v-for="item in classRanking.slice(3)" :key="item.studentId" class="ranking-item" :class="{ 'is-me': item.isMe }">
+              <div class="rank-badge">{{ item.rank }}</div>
               <div class="student-info">
                 <div class="student-name">{{ item.studentName }}<span v-if="item.isMe" class="me-tag">我</span></div>
                 <div class="student-class">{{ item.className }}</div>
@@ -205,10 +229,34 @@
           <div v-else class="ranking-list">
             <van-empty v-if="gradeRanking.length === 0" description="暂无排名数据（等待批改完成）" />
 
-            <div v-for="item in gradeRanking" :key="item.className" class="ranking-item" :class="{ 'is-me': item.isMyClass }">
-              <div class="rank-badge" :class="getRankClass(item.rank)">
-                {{ item.rank }}
+            <!-- 前三名展示区 -->
+            <div v-if="gradeRanking.length >= 3" class="top-three">
+              <!-- 第二名 -->
+              <div class="podium-item silver" :class="{ 'is-me': gradeRanking[1]?.isMyClass }">
+                <div class="podium-avatar">{{ gradeRanking[1]?.className?.slice(-3) }}</div>
+                <div class="podium-name">{{ gradeRanking[1]?.className }}</div>
+                <div class="podium-score">{{ gradeRanking[1]?.avgScore }}分</div>
+                <div class="podium-rank">🥈</div>
               </div>
+              <!-- 第一名 -->
+              <div class="podium-item gold" :class="{ 'is-me': gradeRanking[0]?.isMyClass }">
+                <div class="podium-avatar">{{ gradeRanking[0]?.className?.slice(-3) }}</div>
+                <div class="podium-name">{{ gradeRanking[0]?.className }}</div>
+                <div class="podium-score">{{ gradeRanking[0]?.avgScore }}分</div>
+                <div class="podium-rank">🥇</div>
+              </div>
+              <!-- 第三名 -->
+              <div class="podium-item bronze" :class="{ 'is-me': gradeRanking[2]?.isMyClass }">
+                <div class="podium-avatar">{{ gradeRanking[2]?.className?.slice(-3) }}</div>
+                <div class="podium-name">{{ gradeRanking[2]?.className }}</div>
+                <div class="podium-score">{{ gradeRanking[2]?.avgScore }}分</div>
+                <div class="podium-rank">🥉</div>
+              </div>
+            </div>
+
+            <!-- 第四名及以后 -->
+            <div v-for="item in gradeRanking.slice(3)" :key="item.className" class="ranking-item" :class="{ 'is-me': item.isMyClass }">
+              <div class="rank-badge">{{ item.rank }}</div>
               <div class="class-info">
                 <div class="class-name">{{ item.className }}<span v-if="item.isMyClass" class="me-tag">我的班级</span></div>
                 <div class="student-count">{{ item.studentCount }}人参考</div>
@@ -334,7 +382,7 @@ onMounted(() => {
 /* ==================== PC Styles ==================== */
 .ranking-pc {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--bg-color);
   padding: 20px;
 }
 
@@ -345,15 +393,16 @@ onMounted(() => {
 .pc-header h2 {
   font-size: 24px;
   font-weight: 600;
-  color: #303133;
+  color: var(--text-color-primary);
   margin: 0;
 }
 
 .pc-content {
-  background: #fff;
-  border-radius: 8px;
+  background: var(--fill-color-blank);
+  border-radius: 12px;
   padding: 20px;
   min-height: calc(100vh - 120px);
+  box-shadow: var(--box-shadow-light);
 }
 
 .exam-table-section {
@@ -368,12 +417,13 @@ onMounted(() => {
 
 .exam-title-cell .title {
   font-weight: 500;
+  color: var(--text-color-primary);
 }
 
 .subject-tag {
   font-size: 12px;
-  color: #409eff;
-  background: #ecf5ff;
+  color: var(--color-primary);
+  background: var(--color-primary-light-9);
   padding: 2px 8px;
   border-radius: 4px;
 }
@@ -388,11 +438,11 @@ onMounted(() => {
 .my-score {
   font-size: 18px;
   font-weight: bold;
-  color: #409eff;
+  color: var(--color-primary);
 }
 
 .total-score {
-  color: #909399;
+  color: var(--text-color-secondary);
   font-size: 14px;
 }
 
@@ -415,7 +465,7 @@ onMounted(() => {
 .detail-header h3 {
   font-size: 18px;
   font-weight: 500;
-  color: #303133;
+  color: var(--text-color-primary);
   margin: 0;
 }
 
@@ -440,13 +490,13 @@ onMounted(() => {
 .rank-cell .rank-num {
   font-size: 16px;
   font-weight: 600;
-  color: #606266;
+  color: var(--text-color-secondary);
 }
 
 .score-highlight {
   font-size: 16px;
   font-weight: bold;
-  color: #409eff;
+  color: var(--color-primary);
 }
 
 .me-tag-pc {
@@ -455,19 +505,19 @@ onMounted(() => {
 
 /* Table Row Highlight Styles */
 :deep(.gold-row) {
-  background-color: #fff7e6 !important;
+  background-color: var(--color-warning-light) !important;
 }
 
 :deep(.silver-row) {
-  background-color: #f5f5f5 !important;
+  background-color: var(--fill-color) !important;
 }
 
 :deep(.bronze-row) {
-  background-color: #fdf2e6 !important;
+  background-color: var(--color-warning-light) !important;
 }
 
 :deep(.highlight-row) {
-  background-color: #e8f4ff !important;
+  background-color: var(--color-primary-light-9) !important;
 }
 
 :deep(.el-table__row) {
@@ -475,7 +525,7 @@ onMounted(() => {
 }
 
 :deep(.el-table__row:hover > td) {
-  background-color: #f5f7fa !important;
+  background-color: var(--fill-color) !important;
 }
 
 :deep(.gold-row:hover > td) {
@@ -483,7 +533,7 @@ onMounted(() => {
 }
 
 :deep(.silver-row:hover > td) {
-  background-color: #eeeeee !important;
+  background-color: var(--border-color-lighter) !important;
 }
 
 :deep(.bronze-row:hover > td) {
@@ -491,13 +541,13 @@ onMounted(() => {
 }
 
 :deep(.highlight-row:hover > td) {
-  background-color: #d9ecff !important;
+  background-color: var(--color-primary-light-8) !important;
 }
 
 /* ==================== Mobile Styles ==================== */
 .page {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--bg-color);
 }
 
 .page-content {
@@ -508,14 +558,16 @@ onMounted(() => {
   padding-bottom: 60px;
 }
 
-.exam-item {
+.exam-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #fff;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 12px;
+  cursor: pointer;
+  transition: transform var(--transition-duration) var(--transition-timing-function);
+}
+
+.exam-card:active {
+  transform: scale(0.98);
 }
 
 .exam-info {
@@ -525,7 +577,7 @@ onMounted(() => {
 .exam-title {
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: var(--text-color-primary);
   margin-bottom: 8px;
 }
 
@@ -533,11 +585,11 @@ onMounted(() => {
   display: flex;
   gap: 12px;
   font-size: 12px;
-  color: #999;
+  color: var(--text-color-placeholder);
 }
 
 .subject {
-  color: #1989fa;
+  color: var(--color-primary);
 }
 
 .exam-score {
@@ -546,7 +598,7 @@ onMounted(() => {
 
 .score-label {
   font-size: 12px;
-  color: #999;
+  color: var(--text-color-placeholder);
   margin-bottom: 4px;
 }
 
@@ -556,17 +608,17 @@ onMounted(() => {
 }
 
 .score-value .score {
-  color: #1989fa;
+  color: var(--color-primary);
 }
 
 .score-value .total {
-  color: #999;
+  color: var(--text-color-placeholder);
   font-size: 14px;
 }
 
 .grading-status {
   font-size: 12px;
-  color: #ff976a;
+  color: var(--color-warning);
   margin-top: 4px;
 }
 
@@ -582,19 +634,19 @@ onMounted(() => {
   padding: 12px 0;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: var(--text-color-primary);
 }
 
 .exam-header .van-icon {
   font-size: 20px;
-  color: #666;
+  color: var(--text-color-secondary);
 }
 
 .switch-buttons {
   display: flex;
   gap: 12px;
   padding: 12px 0;
-  background: #f5f5f5;
+  background: var(--bg-color);
 }
 
 .loading-center {
@@ -607,18 +659,126 @@ onMounted(() => {
   padding-top: 12px;
 }
 
+/* 前三名领奖台样式 */
+.top-three {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 16px 8px 24px;
+  margin-bottom: 16px;
+  background: linear-gradient(180deg, var(--color-primary-light-9) 0%, var(--fill-color-blank) 100%);
+  border-radius: 16px;
+}
+
+.podium-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 8px;
+  border-radius: 12px;
+  background: var(--fill-color-blank);
+  box-shadow: var(--box-shadow-light);
+  transition: transform var(--transition-duration) var(--transition-timing-function);
+  min-width: 80px;
+}
+
+.podium-item.gold {
+  order: 2;
+  padding: 16px 12px;
+  background: linear-gradient(180deg, #fffbe6 0%, var(--fill-color-blank) 100%);
+  border: 2px solid #ffd700;
+}
+
+.podium-item.silver {
+  order: 1;
+  background: linear-gradient(180deg, var(--fill-color) 0%, var(--fill-color-blank) 100%);
+  border: 2px solid #c0c0c0;
+}
+
+.podium-item.bronze {
+  order: 3;
+  background: linear-gradient(180deg, var(--color-warning-light) 0%, var(--fill-color-blank) 100%);
+  border: 2px solid #cd7f32;
+}
+
+.podium-item.is-me {
+  box-shadow: 0 0 0 3px var(--color-primary-light-7);
+}
+
+.podium-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--fill-color-blank);
+  margin-bottom: 6px;
+}
+
+.podium-item.gold .podium-avatar {
+  width: 48px;
+  height: 48px;
+  font-size: 18px;
+  background: linear-gradient(135deg, #ffd700, #ffb347);
+}
+
+.podium-item.silver .podium-avatar {
+  background: linear-gradient(135deg, #c0c0c0, #a8a8a8);
+}
+
+.podium-item.bronze .podium-avatar {
+  background: linear-gradient(135deg, #cd7f32, #b8860b);
+}
+
+.podium-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-color-primary);
+  margin-bottom: 2px;
+  max-width: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.podium-score {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--color-primary);
+}
+
+.podium-rank {
+  font-size: 24px;
+  margin-top: 4px;
+}
+
+.podium-item.gold .podium-rank {
+  font-size: 28px;
+}
+
+/* 排名列表项 */
 .ranking-item {
   display: flex;
   align-items: center;
-  background: #fff;
-  border-radius: 8px;
+  background: var(--fill-color-blank);
+  border-radius: 12px;
   padding: 12px;
   margin-bottom: 8px;
+  box-shadow: var(--box-shadow-light);
+  transition: transform var(--transition-duration) var(--transition-timing-function);
+}
+
+.ranking-item:active {
+  transform: scale(0.98);
 }
 
 .ranking-item.is-me {
-  background: #e8f4ff;
-  border: 1px solid #1989fa;
+  background: var(--color-primary-light-9);
+  border: 1px solid var(--color-primary);
 }
 
 .rank-badge {
@@ -630,40 +790,27 @@ onMounted(() => {
   justify-content: center;
   font-weight: bold;
   font-size: 14px;
-  background: #f5f5f5;
-  color: #666;
+  background: var(--fill-color);
+  color: var(--text-color-secondary);
   margin-right: 12px;
-}
-
-.rank-badge.gold {
-  background: linear-gradient(135deg, #ffd700, #ffb347);
-  color: #fff;
-}
-
-.rank-badge.silver {
-  background: linear-gradient(135deg, #c0c0c0, #a8a8a8);
-  color: #fff;
-}
-
-.rank-badge.bronze {
-  background: linear-gradient(135deg, #cd7f32, #b8860b);
-  color: #fff;
+  flex-shrink: 0;
 }
 
 .student-info, .class-info {
   flex: 1;
+  min-width: 0;
 }
 
 .student-name, .class-name {
   font-size: 15px;
   font-weight: 500;
-  color: #333;
+  color: var(--text-color-primary);
 }
 
 .me-tag {
   font-size: 12px;
-  color: #fff;
-  background: #1989fa;
+  color: var(--fill-color-blank);
+  background: var(--color-primary);
   padding: 2px 6px;
   border-radius: 4px;
   margin-left: 8px;
@@ -671,23 +818,88 @@ onMounted(() => {
 
 .student-class, .student-count {
   font-size: 12px;
-  color: #999;
+  color: var(--text-color-placeholder);
   margin-top: 2px;
 }
 
 .score-info {
   text-align: right;
+  flex-shrink: 0;
 }
 
 .score {
   font-size: 18px;
   font-weight: bold;
-  color: #1989fa;
+  color: var(--color-primary);
 }
 
 .time-used, .avg-label {
   font-size: 12px;
-  color: #999;
+  color: var(--text-color-placeholder);
   margin-top: 2px;
+}
+
+/* 移动端响应式优化 */
+@media (max-width: 375px) {
+  .top-three {
+    gap: 6px;
+    padding: 12px 4px 20px;
+  }
+
+  .podium-item {
+    min-width: 70px;
+    padding: 10px 6px;
+  }
+
+  .podium-item.gold {
+    padding: 12px 8px;
+  }
+
+  .podium-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+
+  .podium-item.gold .podium-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+
+  .podium-name {
+    font-size: 12px;
+    max-width: 60px;
+  }
+
+  .podium-score {
+    font-size: 13px;
+  }
+
+  .podium-rank {
+    font-size: 20px;
+  }
+
+  .podium-item.gold .podium-rank {
+    font-size: 24px;
+  }
+
+  .ranking-item {
+    padding: 10px;
+  }
+
+  .rank-badge {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+  }
+
+  .student-name, .class-name {
+    font-size: 14px;
+  }
+
+  .score {
+    font-size: 16px;
+  }
 }
 </style>

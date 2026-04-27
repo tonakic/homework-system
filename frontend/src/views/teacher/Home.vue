@@ -300,7 +300,7 @@ function viewExam(id) {
 <style scoped>
 /* ==================== Mobile Styles ==================== */
 .welcome-card {
-  background: linear-gradient(135deg, #2196f3, #64b5f6);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light-3));
   color: white;
   margin-bottom: 16px;
 }
@@ -322,7 +322,7 @@ function viewExam(id) {
 }
 
 .menu-item {
-  background: white;
+  background: var(--fill-color-blank);
   border-radius: 12px;
   padding: 20px;
   display: flex;
@@ -339,21 +339,21 @@ function viewExam(id) {
 
 .menu-item span {
   font-size: 14px;
-  color: #333;
+  color: var(--text-color-primary);
 }
 
 .menu-item .van-icon {
-  color: #2196f3;
+  color: var(--color-primary);
 }
 
 /* ==================== PC Styles ==================== */
 .home-pc {
   min-height: 100%;
-  background: #f5f7fa;
+  background: var(--bg-color);
 }
 
 .pc-header {
-  background: linear-gradient(135deg, #2196f3 0%, #64b5f6 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light-3) 100%);
   padding: 0;
 }
 
@@ -374,12 +374,12 @@ function viewExam(id) {
 .pc-avatar {
   width: 64px;
   height: 64px;
-  background: white;
+  background: var(--fill-color-blank);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #2196f3;
+  color: var(--color-primary);
   font-size: 28px;
   font-weight: bold;
   margin-right: 20px;
@@ -388,7 +388,7 @@ function viewExam(id) {
 
 .pc-welcome h2 {
   font-size: 24px;
-  color: white;
+  color: var(--fill-color-blank);
   margin-bottom: 6px;
 }
 
@@ -433,23 +433,23 @@ function viewExam(id) {
 }
 
 .pc-stat-icon.students {
-  background: #e3f2fd;
-  color: #2196f3;
+  background: var(--color-primary-light-9);
+  color: var(--color-primary);
 }
 
 .pc-stat-icon.exams {
-  background: #e8f5e9;
-  color: #4caf50;
+  background: var(--color-success-light-9);
+  color: var(--color-success);
 }
 
 .pc-stat-icon.questions {
-  background: #fff3e0;
-  color: #ff9800;
+  background: var(--color-warning-light-9);
+  color: var(--color-warning);
 }
 
 .pc-stat-icon.pending {
-  background: #fce4ec;
-  color: #e91e63;
+  background: var(--color-danger-light-9);
+  color: var(--color-danger);
 }
 
 .pc-stat-detail {
@@ -459,13 +459,13 @@ function viewExam(id) {
 .pc-stat-value {
   font-size: 28px;
   font-weight: 700;
-  color: #303133;
+  color: var(--text-color-primary);
   line-height: 1.2;
 }
 
 .pc-stat-label {
   font-size: 13px;
-  color: #909399;
+  color: var(--text-color-secondary);
   margin-top: 4px;
 }
 
@@ -503,18 +503,18 @@ function viewExam(id) {
 }
 
 .pc-action-icon.students-action {
-  background: #e3f2fd;
-  color: #2196f3;
+  background: var(--color-primary-light-9);
+  color: var(--color-primary);
 }
 
 .pc-action-icon.questions-action {
-  background: #fff3e0;
-  color: #ff9800;
+  background: var(--color-warning-light-9);
+  color: var(--color-warning);
 }
 
 .pc-action-icon.exams-action {
-  background: #e8f5e9;
-  color: #4caf50;
+  background: var(--color-success-light-9);
+  color: var(--color-success);
 }
 
 .pc-action-icon.grading-action {
@@ -524,13 +524,13 @@ function viewExam(id) {
 
 .pc-action-item h3 {
   font-size: 16px;
-  color: #303133;
+  color: var(--text-color-primary);
   margin-bottom: 6px;
 }
 
 .pc-action-item p {
   font-size: 13px;
-  color: #909399;
+  color: var(--text-color-secondary);
 }
 
 /* 表格卡片 */
@@ -540,7 +540,7 @@ function viewExam(id) {
 
 .pc-table-card :deep(.el-card__header) {
   padding: 16px 20px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .pc-table-card :deep(.el-card__body) {
@@ -555,7 +555,7 @@ function viewExam(id) {
 
 .pc-table-header h3 {
   font-size: 17px;
-  color: #303133;
+  color: var(--text-color-primary);
   font-weight: 600;
 }
 
@@ -568,11 +568,11 @@ function viewExam(id) {
 }
 
 .pc-exam-table :deep(.el-table__row:hover) {
-  background-color: #fafafa;
+  background-color: var(--color-primary-light-9);
 }
 
 .pc-time {
-  color: #909399;
+  color: var(--text-color-secondary);
   font-size: 13px;
 }
 </style>

@@ -2,16 +2,16 @@
   <div class="page">
     <!-- PC版本 -->
     <div v-if="isPC" class="feedbacks-pc">
-      <div class="pc-header">
-        <h2 class="page-title">反馈管理</h2>
-      </div>
+      <header class="pc-header">
+        <h1 class="page-title">反馈管理</h1>
+      </header>
 
       <!-- 筛选条件 -->
-      <el-card class="pc-card" shadow="never">
-        <template #header>
-          <span class="card-title">筛选条件</span>
-        </template>
-        <el-form :inline="true" class="filter-form-pc">
+      <section class="pc-card">
+        <header class="card-header">
+          <h2 class="card-title">筛选条件</h2>
+        </header>
+        <el-form :inline="true" class="filter-form">
           <el-form-item label="状态">
             <el-select v-model="filterStatus" placeholder="全部状态" clearable @change="onRefresh">
               <el-option label="全部状态" value="" />
@@ -21,21 +21,22 @@
             </el-select>
           </el-form-item>
         </el-form>
-      </el-card>
+      </section>
 
       <!-- 反馈列表 -->
-      <el-card class="pc-card" shadow="never">
-        <template #header>
-          <span class="card-title">反馈列表</span>
-        </template>
+      <section class="pc-card">
+        <header class="card-header">
+          <h2 class="card-title">反馈列表</h2>
+        </header>
         <el-table
           :data="feedbacks"
           border
           stripe
           v-loading="loading"
+          class="feedback-table"
         >
-          <el-table-column prop="id" label="ID" width="80" />
-          <el-table-column prop="user_type" label="用户类型" width="100">
+          <el-table-column prop="id" label="ID" width="80" align="center" />
+          <el-table-column prop="user_type" label="用户类型" width="100" align="center">
             <template #default="{ row }">
               <el-tag :type="getUserTypeTagType(row.user_type)" size="small">
                 {{ getUserTypeName(row.user_type) }}
@@ -58,7 +59,7 @@
               </el-popover>
             </template>
           </el-table-column>
-          <el-table-column prop="status" label="状态" width="100">
+          <el-table-column prop="status" label="状态" width="100" align="center">
             <template #default="{ row }">
               <el-tag :type="getStatusTagType(row.status)">
                 {{ getStatusName(row.status) }}
@@ -74,14 +75,16 @@
           <el-table-column prop="created_at" label="提交时间" width="180">
             <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
           </el-table-column>
-          <el-table-column label="操作" width="180" fixed="right">
+          <el-table-column label="操作" width="180" fixed="right" align="center">
             <template #default="{ row }">
-              <el-button type="primary" link size="small" @click="openProcessDialog(row)">
-                处理
-              </el-button>
-              <el-button type="danger" link size="small" @click="confirmDelete(row)">
-                删除
-              </el-button>
+              <div class="action-buttons">
+                <el-button type="primary" link size="small" @click="openProcessDialog(row)">
+                  处理
+                </el-button>
+                <el-button type="danger" link size="small" @click="confirmDelete(row)">
+                  删除
+                </el-button>
+              </div>
             </template>
           </el-table-column>
         </el-table>
@@ -91,15 +94,15 @@
           :total="total"
           :page-sizes="[20, 50, 100]"
           layout="total, sizes, prev, pager, next, jumper"
-          class="pagination-pc"
+          class="pagination"
           @current-change="handlePageChange"
           @size-change="handleSizeChange"
         />
-      </el-card>
+      </section>
     </div>
 
     <!-- 移动端版本 -->
-    <div v-else>
+    <div v-else class="feedbacks-mobile">
       <van-nav-bar title="反馈管理" left-arrow @click-left="$router.back()">
         <template #right>
           <van-icon name="filter-o" size="20" @click="showFilterPopup = true" />
@@ -110,13 +113,13 @@
         <!-- 筛选弹出层 -->
         <van-popup v-model:show="showFilterPopup" position="bottom" round>
           <div class="filter-popup">
-            <div class="filter-popup-header">
+            <header class="filter-popup-header">
               <span class="filter-popup-title">筛选条件</span>
-              <span class="filter-popup-clear" @click="clearFilter">清除</span>
-            </div>
+              <button class="filter-popup-clear" @click="clearFilter">清除</button>
+            </header>
             <div class="filter-popup-content">
               <div class="filter-item">
-                <span class="filter-label">状态</span>
+                <label class="filter-label">状态</label>
                 <van-radio-group v-model="filterStatus" direction="horizontal">
                   <van-radio name="">全部</van-radio>
                   <van-radio name="pending">待处理</van-radio>
@@ -125,9 +128,9 @@
                 </van-radio-group>
               </div>
             </div>
-            <div class="filter-popup-footer">
+            <footer class="filter-popup-footer">
               <van-button block type="primary" @click="applyFilter">确定</van-button>
-            </div>
+            </footer>
           </div>
         </van-popup>
 
@@ -135,8 +138,13 @@
         <div class="feedback-list">
           <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
             <van-list v-model:loading="loading" :finished="finished" finished-text="没有更多了" @load="loadFeedbacks">
-              <div v-for="feedback in feedbacks" :key="feedback.id" class="feedback-item" @click="openProcessDialog(feedback)">
-                <div class="feedback-header">
+              <article
+                v-for="feedback in feedbacks"
+                :key="feedback.id"
+                class="feedback-item"
+                @click="openProcessDialog(feedback)"
+              >
+                <header class="feedback-item-header">
                   <div class="feedback-user">
                     <van-tag :type="getUserTypeTagType(feedback.user_type)" size="small">
                       {{ getUserTypeName(feedback.user_type) }}
@@ -146,15 +154,15 @@
                   <van-tag :type="getStatusTagType(feedback.status)" size="small">
                     {{ getStatusName(feedback.status) }}
                   </van-tag>
-                </div>
-                <div class="feedback-title">{{ feedback.title }}</div>
-                <div class="feedback-content">{{ truncateText(feedback.content, 50) }}</div>
+                </header>
+                <h3 class="feedback-title">{{ feedback.title }}</h3>
+                <p class="feedback-content">{{ truncateText(feedback.content, 50) }}</p>
                 <div v-if="feedback.admin_reply" class="feedback-reply">
                   <span class="reply-label">回复：</span>
                   {{ truncateText(feedback.admin_reply, 30) }}
                 </div>
-                <div class="feedback-time">{{ formatTime(feedback.created_at) }}</div>
-              </div>
+                <time class="feedback-time">{{ formatTime(feedback.created_at) }}</time>
+              </article>
             </van-list>
           </van-pull-refresh>
         </div>
@@ -167,6 +175,7 @@
       title="处理反馈"
       width="500px"
       :close-on-click-modal="false"
+      class="process-dialog"
     >
       <el-form :model="processForm" label-width="80px" :rules="processRules" ref="processFormRef">
         <el-form-item label="用户信息">
@@ -208,32 +217,32 @@
       :style="{ height: '80%' }"
     >
       <div class="mobile-process-popup">
-        <div class="mobile-process-header">
+        <header class="mobile-process-header">
           <span class="mobile-process-title">处理反馈</span>
           <van-icon name="cross" size="20" @click="mobileProcessVisible = false" />
-        </div>
+        </header>
         <div class="mobile-process-content">
           <div class="mobile-process-item">
-            <span class="mobile-process-label">用户信息</span>
+            <label class="mobile-process-label">用户信息</label>
             <span>{{ currentFeedback?.user_name }} ({{ getUserTypeName(currentFeedback?.user_type) }})</span>
           </div>
           <div class="mobile-process-item">
-            <span class="mobile-process-label">标题</span>
+            <label class="mobile-process-label">标题</label>
             <span>{{ currentFeedback?.title }}</span>
           </div>
           <div class="mobile-process-item">
-            <span class="mobile-process-label">内容</span>
+            <label class="mobile-process-label">内容</label>
             <div class="mobile-process-content-text">{{ currentFeedback?.content }}</div>
           </div>
           <div class="mobile-process-item">
-            <span class="mobile-process-label">状态</span>
+            <label class="mobile-process-label">状态</label>
             <van-radio-group v-model="processForm.status" direction="horizontal">
               <van-radio name="in_progress">处理中</van-radio>
               <van-radio name="resolved">已处理</van-radio>
             </van-radio-group>
           </div>
           <div class="mobile-process-item">
-            <span class="mobile-process-label">回复</span>
+            <label class="mobile-process-label">回复</label>
             <van-field
               v-model="processForm.admin_reply"
               type="textarea"
@@ -243,9 +252,9 @@
             />
           </div>
         </div>
-        <div class="mobile-process-footer">
+        <footer class="mobile-process-footer">
           <van-button block type="primary" :loading="submitting" @click="submitProcess">保存</van-button>
-        </div>
+        </footer>
       </div>
     </van-popup>
   </div>
@@ -585,9 +594,13 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* ==========================================
+   设计系统变量引用
+   ========================================== */
+
 /* ========== PC端样式 ========== */
 .feedbacks-pc {
-  padding: 20px;
+  padding: var(--spacing-lg, 24px);
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -596,167 +609,214 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-lg, 24px);
 }
 
 .page-title {
   font-size: 24px;
   font-weight: 600;
-  color: #303133;
+  color: var(--text-color-primary);
   margin: 0;
 }
 
 .pc-card {
-  margin-bottom: 20px;
+  background: var(--fill-color-blank);
+  border-radius: var(--border-radius-large, 8px);
+  margin-bottom: var(--spacing-lg, 24px);
+  box-shadow: var(--box-shadow-light, 0 2px 8px 0 rgba(0, 0, 0, 0.06));
+}
+
+.card-header {
+  padding: var(--spacing-md, 16px);
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .card-title {
   font-size: 16px;
   font-weight: 500;
-  color: #303133;
+  color: var(--text-color-primary);
+  margin: 0;
 }
 
 /* PC端筛选表单 */
-.filter-form-pc {
+.filter-form {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: var(--spacing-md, 16px);
+  padding: var(--spacing-md, 16px);
+}
+
+/* PC端表格 */
+.feedback-table {
+  width: 100%;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-xs, 4px);
 }
 
 /* PC端内容预览 */
 .content-preview {
-  color: #409eff;
+  color: var(--color-primary);
   cursor: pointer;
+  transition: opacity var(--transition-duration, 0.3s);
 }
 
 .content-preview:hover {
+  opacity: 0.8;
   text-decoration: underline;
 }
 
 .reply-text {
-  color: #67c23a;
+  color: var(--color-success);
 }
 
 .no-data {
-  color: #c0c4cc;
+  color: var(--text-color-disabled);
 }
 
 /* PC端分页 */
-.pagination-pc {
-  margin-top: 20px;
+.pagination {
+  margin-top: var(--spacing-lg, 24px);
+  padding: var(--spacing-md, 16px);
   display: flex;
   justify-content: flex-end;
 }
 
 /* 对话框内容 */
 .dialog-content {
-  background: #f5f7fa;
-  padding: 12px;
-  border-radius: 4px;
-  line-height: 1.6;
+  background: var(--fill-color);
+  padding: var(--spacing-sm, 8px) var(--spacing-md, 16px);
+  border-radius: var(--border-radius-base, 4px);
+  line-height: var(--line-height-large, 1.6);
   white-space: pre-wrap;
   word-break: break-all;
+  color: var(--text-color-regular);
 }
 
 /* ========== 移动端样式 ========== */
-.page-content {
-  padding-bottom: 20px;
+.feedbacks-mobile .page-content {
+  padding-bottom: var(--spacing-lg, 24px);
+  background: var(--bg-color-page);
+  min-height: calc(100vh - var(--header-height, 56px));
 }
 
 /* 筛选弹出层 */
 .filter-popup {
-  background: #fff;
+  background: var(--fill-color-blank);
 }
 
 .filter-popup-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
-  border-bottom: 1px solid #eee;
+  padding: var(--spacing-md, 16px);
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .filter-popup-title {
   font-size: 16px;
   font-weight: 500;
+  color: var(--text-color-primary);
 }
 
 .filter-popup-clear {
-  color: #969799;
+  background: none;
+  border: none;
+  color: var(--text-color-secondary);
   font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  transition: color var(--transition-duration, 0.3s);
+}
+
+.filter-popup-clear:hover {
+  color: var(--color-primary);
 }
 
 .filter-popup-content {
-  padding: 16px;
+  padding: var(--spacing-md, 16px);
 }
 
 .filter-item {
-  margin-bottom: 16px;
+  margin-bottom: var(--spacing-md, 16px);
 }
 
 .filter-label {
   display: block;
   font-size: 14px;
-  color: #646566;
-  margin-bottom: 8px;
+  color: var(--text-color-regular);
+  margin-bottom: var(--spacing-sm, 8px);
 }
 
 .filter-popup-footer {
-  padding: 12px 16px;
-  border-top: 1px solid #eee;
+  padding: var(--spacing-sm, 8px) var(--spacing-md, 16px);
+  border-top: 1px solid var(--border-color-lighter);
 }
 
 /* 反馈列表 */
 .feedback-list {
-  padding: 12px;
+  padding: var(--spacing-sm, 8px) var(--spacing-md, 16px);
 }
 
 .feedback-item {
-  background: #fff;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 10px;
+  background: var(--fill-color-blank);
+  border-radius: var(--border-radius-large, 8px);
+  padding: var(--spacing-md, 16px);
+  margin-bottom: var(--spacing-sm, 8px);
+  box-shadow: var(--box-shadow-lighter, 0 1px 4px 0 rgba(0, 0, 0, 0.04));
+  cursor: pointer;
+  transition: transform var(--transition-duration, 0.3s),
+              box-shadow var(--transition-duration, 0.3s);
 }
 
-.feedback-header {
+.feedback-item:active {
+  transform: scale(0.98);
+}
+
+.feedback-item-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: var(--spacing-sm, 8px);
 }
 
 .feedback-user {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-sm, 8px);
 }
 
 .user-name {
   font-size: 14px;
   font-weight: 500;
+  color: var(--text-color-primary);
 }
 
 .feedback-title {
   font-size: 15px;
   font-weight: 500;
-  color: #323233;
-  margin-bottom: 6px;
+  color: var(--text-color-primary);
+  margin: 0 0 var(--spacing-xs, 4px) 0;
+  line-height: 1.4;
 }
 
 .feedback-content {
   font-size: 13px;
-  color: #646566;
-  margin-bottom: 8px;
-  line-height: 1.5;
+  color: var(--text-color-regular);
+  margin: 0 0 var(--spacing-sm, 8px) 0;
+  line-height: var(--line-height-base, 1.5);
 }
 
 .feedback-reply {
   font-size: 13px;
-  color: #67c23a;
-  background: #f0f9eb;
-  padding: 8px;
-  border-radius: 4px;
-  margin-bottom: 8px;
+  color: var(--color-success);
+  background: var(--color-success-light);
+  padding: var(--spacing-sm, 8px);
+  border-radius: var(--border-radius-base, 4px);
+  margin-bottom: var(--spacing-sm, 8px);
 }
 
 .reply-label {
@@ -764,8 +824,10 @@ onMounted(() => {
 }
 
 .feedback-time {
+  display: block;
   font-size: 12px;
-  color: #969799;
+  color: var(--text-color-secondary);
+  font-style: normal;
 }
 
 /* 移动端处理弹出层 */
@@ -773,49 +835,69 @@ onMounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
+  background: var(--fill-color-blank);
 }
 
 .mobile-process-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
-  border-bottom: 1px solid #eee;
+  padding: var(--spacing-md, 16px);
+  border-bottom: 1px solid var(--border-color-lighter);
+  flex-shrink: 0;
 }
 
 .mobile-process-title {
   font-size: 16px;
   font-weight: 500;
+  color: var(--text-color-primary);
 }
 
 .mobile-process-content {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
+  padding: var(--spacing-md, 16px);
 }
 
 .mobile-process-item {
-  margin-bottom: 16px;
+  margin-bottom: var(--spacing-md, 16px);
 }
 
 .mobile-process-label {
   display: block;
   font-size: 13px;
-  color: #969799;
-  margin-bottom: 6px;
+  color: var(--text-color-secondary);
+  margin-bottom: var(--spacing-xs, 4px);
 }
 
 .mobile-process-content-text {
-  background: #f7f8fa;
-  padding: 12px;
-  border-radius: 8px;
-  line-height: 1.6;
+  background: var(--fill-color);
+  padding: var(--spacing-md, 16px);
+  border-radius: var(--border-radius-large, 8px);
+  line-height: var(--line-height-large, 1.6);
   white-space: pre-wrap;
   word-break: break-all;
+  color: var(--text-color-regular);
 }
 
 .mobile-process-footer {
-  padding: 12px 16px;
-  border-top: 1px solid #eee;
+  padding: var(--spacing-sm, 8px) var(--spacing-md, 16px);
+  border-top: 1px solid var(--border-color-lighter);
+  flex-shrink: 0;
+}
+
+/* ========== 响应式调整 ========== */
+@media (max-width: 767px) {
+  .feedbacks-pc {
+    padding: var(--spacing-md, 16px);
+  }
+
+  .pc-header {
+    margin-bottom: var(--spacing-md, 16px);
+  }
+
+  .page-title {
+    font-size: 20px;
+  }
 }
 </style>

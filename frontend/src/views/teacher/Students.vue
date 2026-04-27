@@ -2,123 +2,137 @@
   <div class="page">
     <!-- PC版本 -->
     <div v-if="isPC" class="students-pc">
-      <div class="pc-header">
-        <h2>学生管理</h2>
-        <div class="header-actions">
-          <el-button type="primary" @click="openAddPopup">
-            <el-icon><Plus /></el-icon>
-            新增学生
-          </el-button>
-          <el-button @click="openImportPopup">
-            <el-icon><Upload /></el-icon>
-            批量导入
-          </el-button>
+      <div class="pc-container">
+        <!-- 页面标题 -->
+        <div class="page-header">
+          <h1 class="page-title">学生管理</h1>
+          <p class="page-subtitle">管理学生信息、班级分配和账号状态</p>
+        </div>
+
+        <!-- 工具栏 -->
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <el-button type="primary" class="create-btn" @click="openAddPopup">
+              <el-icon><Plus /></el-icon>
+              新增学生
+            </el-button>
+            <el-button class="import-btn" @click="openImportPopup">
+              <el-icon><Upload /></el-icon>
+              批量导入
+            </el-button>
+          </div>
+        </div>
+
+        <!-- 搜索筛选区域 -->
+        <div class="filter-card">
+          <div class="filter-row">
+            <el-input
+              v-model="searchKeyword"
+              placeholder="搜索学号或姓名"
+              clearable
+              class="search-input"
+              @clear="handlePCSearch"
+              @keyup.enter="handlePCSearch"
+            >
+              <template #prefix>
+                <el-icon><Search /></el-icon>
+              </template>
+            </el-input>
+            <el-select
+              v-model="filterGrade"
+              placeholder="选择年级"
+              clearable
+              class="filter-select"
+              @change="handleGradeChange"
+            >
+              <el-option
+                v-for="grade in gradeList"
+                :key="grade"
+                :label="grade"
+                :value="grade"
+              />
+            </el-select>
+            <el-select
+              v-model="filterClass"
+              placeholder="选择班级"
+              clearable
+              class="filter-select"
+              @change="handlePCSearch"
+            >
+              <el-option
+                v-for="cls in classOptions"
+                :key="cls"
+                :label="cls"
+                :value="cls"
+              />
+            </el-select>
+            <el-select
+              v-model="filterStatus"
+              placeholder="选择状态"
+              clearable
+              class="filter-select filter-select-sm"
+              @change="handlePCSearch"
+            >
+              <el-option label="正常" value="active" />
+              <el-option label="停用" value="inactive" />
+            </el-select>
+          </div>
+        </div>
+
+        <!-- 学生列表 -->
+        <div class="table-card">
+          <el-table
+            :data="students"
+            stripe
+            class="student-table"
+            v-loading="loading"
+          >
+            <el-table-column prop="student_no" label="学号" width="120" />
+            <el-table-column prop="name" label="姓名" width="120">
+              <template #default="{ row }">
+                <span class="student-name">{{ row.name }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="性别" width="80">
+              <template #default="{ row }">
+                <span class="gender-text">{{ row.gender || '未设置' }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="grade" label="年级" width="100" />
+            <el-table-column prop="class_name" label="班级" width="100" />
+            <el-table-column label="状态" width="100">
+              <template #default="{ row }">
+                <span class="status-badge" :class="row.status === 'active' ? 'status-active' : 'status-inactive'">
+                  {{ row.status === 'active' ? '正常' : '停用' }}
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="phone" label="联系电话" width="140" />
+            <el-table-column label="操作" fixed="right" width="200">
+              <template #default="{ row }">
+                <div class="action-buttons">
+                  <el-button type="primary" link size="small" @click="editStudent(row)">编辑</el-button>
+                  <el-button type="warning" link size="small" @click="resetPassword(row)">重置密码</el-button>
+                  <el-button type="danger" link size="small" @click="deleteStudent(row)">删除</el-button>
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <!-- 分页 -->
+          <div class="pagination-wrapper">
+            <el-pagination
+              v-model:current-page="currentPage"
+              v-model:page-size="pageSize"
+              :page-sizes="[10, 20, 50, 100]"
+              :total="totalStudents"
+              layout="total, sizes, prev, pager, next, jumper"
+              @size-change="handlePageSizeChange"
+              @current-change="loadStudents"
+            />
+          </div>
         </div>
       </div>
-
-      <!-- 搜索筛选区域 -->
-      <el-card class="filter-card">
-        <div class="filter-row">
-          <el-input
-            v-model="searchKeyword"
-            placeholder="搜索学号或姓名"
-            clearable
-            style="width: 200px"
-            @clear="handlePCSearch"
-            @keyup.enter="handlePCSearch"
-          >
-            <template #prefix>
-              <el-icon><Search /></el-icon>
-            </template>
-          </el-input>
-          <el-select
-            v-model="filterGrade"
-            placeholder="选择年级"
-            clearable
-            style="width: 150px"
-            @change="handleGradeChange"
-          >
-            <el-option
-              v-for="grade in gradeList"
-              :key="grade"
-              :label="grade"
-              :value="grade"
-            />
-          </el-select>
-          <el-select
-            v-model="filterClass"
-            placeholder="选择班级"
-            clearable
-            style="width: 150px"
-            @change="handlePCSearch"
-          >
-            <el-option
-              v-for="cls in classOptions"
-              :key="cls"
-              :label="cls"
-              :value="cls"
-            />
-          </el-select>
-          <el-select
-            v-model="filterStatus"
-            placeholder="选择状态"
-            clearable
-            style="width: 120px"
-            @change="handlePCSearch"
-          >
-            <el-option label="正常" value="active" />
-            <el-option label="停用" value="inactive" />
-          </el-select>
-        </div>
-      </el-card>
-
-      <!-- 学生列表 -->
-      <el-card class="table-card">
-        <el-table
-          :data="students"
-          stripe
-          style="width: 100%"
-          v-loading="loading"
-        >
-          <el-table-column prop="student_no" label="学号" width="120" />
-          <el-table-column prop="name" label="姓名" width="120" />
-          <el-table-column label="性别" width="80">
-            <template #default="{ row }">
-              {{ row.gender || '未设置' }}
-            </template>
-          </el-table-column>
-          <el-table-column prop="grade" label="年级" width="100" />
-          <el-table-column prop="class_name" label="班级" width="100" />
-          <el-table-column label="状态" width="100">
-            <template #default="{ row }">
-              <el-tag :type="row.status === 'active' ? 'success' : 'danger'" size="small">
-                {{ row.status === 'active' ? '正常' : '停用' }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="phone" label="联系电话" width="140" />
-          <el-table-column label="操作" fixed="right" width="200">
-            <template #default="{ row }">
-              <el-button type="primary" link size="small" @click="editStudent(row)">编辑</el-button>
-              <el-button type="warning" link size="small" @click="resetPassword(row)">重置密码</el-button>
-              <el-button type="danger" link size="small" @click="deleteStudent(row)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-
-        <!-- 分页 -->
-        <div class="pagination-wrapper">
-          <el-pagination
-            v-model:current-page="currentPage"
-            v-model:page-size="pageSize"
-            :page-sizes="[10, 20, 50, 100]"
-            :total="totalStudents"
-            layout="total, sizes, prev, pager, next, jumper"
-            @size-change="handlePageSizeChange"
-            @current-change="loadStudents"
-          />
-        </div>
-      </el-card>
 
       <!-- 新增/编辑学生弹窗 -->
       <el-dialog
@@ -126,8 +140,9 @@
         :title="editingStudent ? '编辑学生' : '新增学生'"
         width="500px"
         :close-on-click-modal="false"
+        class="student-dialog"
       >
-        <el-form :model="studentForm" label-width="80px">
+        <el-form :model="studentForm" label-width="80px" class="student-form">
           <el-form-item label="学号" required>
             <el-input
               v-model="studentForm.student_no"
@@ -184,10 +199,12 @@
       </el-dialog>
 
       <!-- 批量导入弹窗 -->
-      <el-dialog v-model="showImportPopup" title="批量导入" width="500px">
-        <div class="import-content-pc">
-          <p>支持导入 Excel 格式的学生信息文件（.xlsx）</p>
-          <p>默认密码为 123456</p>
+      <el-dialog v-model="showImportPopup" title="批量导入" width="500px" class="import-dialog">
+        <div class="import-content">
+          <div class="import-desc">
+            <p>支持导入 Excel 格式的学生信息文件（.xlsx）</p>
+            <p>默认密码为 123456</p>
+          </div>
           <div class="import-actions">
             <el-upload
               :show-file-list="false"
@@ -204,13 +221,13 @@
               下载模板
             </el-button>
           </div>
-          <div v-if="importResult" class="import-result-pc">
+          <div v-if="importResult" class="import-result">
             <el-alert
               :title="importResult.message"
               :type="importResult.success ? 'success' : 'error'"
               show-icon
             />
-            <div v-if="importResult.details && importResult.details.length > 0" class="result-details-pc">
+            <div v-if="importResult.details && importResult.details.length > 0" class="result-details">
               <p v-for="(detail, idx) in importResult.details" :key="idx">第{{ detail.row }}行: {{ detail.reason }}</p>
             </div>
           </div>
@@ -222,8 +239,8 @@
     <div v-else>
       <van-nav-bar title="学生管理" left-arrow @click-left="$router.back()">
         <template #right>
-          <van-icon name="description" size="20" style="margin-right: 12px;" @click="openImportPopup" />
-          <van-icon name="plus" size="20" @click="openAddPopup" />
+          <van-icon name="description" size="20" class="nav-icon" @click="openImportPopup" />
+          <van-icon name="plus" size="20" class="nav-icon" @click="openAddPopup" />
         </template>
       </van-nav-bar>
 
@@ -303,25 +320,27 @@
                 v-for="student in students"
                 :key="student.id"
                 is-link
+                class="student-cell"
                 @click="showStudentDetail(student)"
               >
                 <template #title>
                   <div class="student-info">
                     <span class="student-name">{{ student.name }}</span>
-                    <van-tag v-if="student.status === 'active'" type="success" size="small">正常</van-tag>
-                    <van-tag v-else type="danger" size="small">停用</van-tag>
+                    <span class="status-tag" :class="student.status === 'active' ? 'tag-success' : 'tag-danger'">
+                      {{ student.status === 'active' ? '正常' : '停用' }}
+                    </span>
                   </div>
                 </template>
                 <template #label>
                   <div class="student-meta">
-                    <span>{{ student.student_no }}</span>
-                    <span>{{ student.grade }}{{ student.class_name }}</span>
+                    <span class="meta-item">{{ student.student_no }}</span>
+                    <span class="meta-item">{{ student.grade }}{{ student.class_name }}</span>
                   </div>
                 </template>
                 <template #right-icon>
                   <div class="action-icons" @click.stop>
-                    <van-icon name="edit" @click="editStudent(student)" />
-                    <van-icon name="replay" @click="resetPassword(student)" />
+                    <van-icon name="edit" class="action-icon" @click="editStudent(student)" />
+                    <van-icon name="replay" class="action-icon" @click="resetPassword(student)" />
                   </div>
                 </template>
               </van-cell>
@@ -335,7 +354,7 @@
         v-model:show="showAddPopup"
         position="bottom"
         round
-        style="height: 80%"
+        class="form-popup"
       >
         <div class="add-popup">
           <div class="popup-header">
@@ -404,7 +423,7 @@
               />
             </div>
 
-            <div v-if="!editingStudent" class="form-tip">
+            <div v-if="!editingStudent" class="form-tip-mobile">
               <van-notice-bar>新增学生默认密码为123456</van-notice-bar>
             </div>
           </div>
@@ -430,7 +449,7 @@
       </van-popup>
 
       <!-- 学生详情弹窗 -->
-      <van-popup v-model:show="showDetailPopup" position="bottom" round style="height: 60%">
+      <van-popup v-model:show="showDetailPopup" position="bottom" round class="detail-popup-wrapper">
         <div class="detail-popup" v-if="currentStudent">
           <div class="popup-header">
             <span class="cancel-btn" @click="showDetailPopup = false">关闭</span>
@@ -462,7 +481,7 @@
         v-model:show="showImportPopup"
         position="bottom"
         round
-        style="height: 50%"
+        class="import-popup-wrapper"
         :lock-scroll="true"
       >
         <div class="import-popup">
@@ -471,7 +490,7 @@
             <span class="popup-title">批量导入</span>
             <span></span>
           </div>
-          <div class="import-content">
+          <div class="import-content-mobile">
             <div class="import-desc">
               <p>支持导入 Excel 格式的学生信息文件（.xlsx）</p>
               <p>默认密码为 123456，示例行不会导入</p>
@@ -488,11 +507,11 @@
                 模板下载
               </van-button>
             </div>
-            <div v-if="importResult" class="import-result">
-              <van-notice-bar :color="importResult.success ? '#07c160' : '#ee0a24'" background="#f7f8fa">
+            <div v-if="importResult" class="import-result-mobile">
+              <van-notice-bar :color="importResult.success ? 'var(--color-success)' : 'var(--color-danger)'" background="var(--fill-color)">
                 {{ importResult.message }}
               </van-notice-bar>
-              <div v-if="importResult.details && importResult.details.length > 0" class="result-details">
+              <div v-if="importResult.details && importResult.details.length > 0" class="result-details-mobile">
                 <p v-for="(detail, idx) in importResult.details" :key="idx">第{{ detail.row }}行: {{ detail.reason }}</p>
               </div>
             </div>
@@ -1078,108 +1097,219 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* PC端样式 */
+/* ==================== PC端样式 ==================== */
 .students-pc {
-  padding: 20px;
+  min-height: 100%;
+  background-color: var(--bg-color);
 }
 
-.pc-header {
+.pc-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg) var(--spacing-xl);
+}
+
+/* 页面标题 */
+.page-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.page-title {
+  font-size: var(--font-size-extra-large);
+  font-weight: 600;
+  color: var(--text-color-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.page-subtitle {
+  font-size: var(--font-size-small);
+  color: var(--text-color-secondary);
+}
+
+/* 工具栏 */
+.toolbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
 }
 
-.pc-header h2 {
-  margin: 0;
-  font-size: 20px;
-}
-
-.header-actions {
+.toolbar-left {
   display: flex;
-  gap: 10px;
+  gap: var(--spacing-sm);
 }
 
+.create-btn,
+.import-btn {
+  border-radius: var(--border-radius-base);
+}
+
+/* 筛选卡片 */
 .filter-card {
-  margin-bottom: 20px;
+  background-color: var(--fill-color-blank);
+  border-radius: var(--border-radius-large);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  box-shadow: var(--box-shadow-light);
 }
 
 .filter-row {
   display: flex;
-  gap: 16px;
+  gap: var(--spacing-md);
   align-items: center;
 }
 
-.table-card {
-  margin-bottom: 20px;
+.search-input {
+  width: 200px;
 }
 
+.filter-select {
+  width: 150px;
+}
+
+.filter-select-sm {
+  width: 120px;
+}
+
+/* 表格卡片 */
+.table-card {
+  background-color: var(--fill-color-blank);
+  border-radius: var(--border-radius-large);
+  padding: var(--spacing-md);
+  box-shadow: var(--box-shadow-light);
+}
+
+.student-table {
+  width: 100%;
+}
+
+.student-name {
+  font-weight: 500;
+  color: var(--text-color-primary);
+}
+
+.gender-text {
+  color: var(--text-color-regular);
+}
+
+/* 状态徽章 */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--border-radius-small);
+  font-size: var(--font-size-extra-small);
+  font-weight: 500;
+}
+
+.status-active {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.status-inactive {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+/* 操作按钮 */
+.action-buttons {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+/* 分页 */
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
-  padding-top: 16px;
+  padding-top: var(--spacing-md);
+}
+
+/* 弹窗样式 */
+.student-dialog :deep(.el-dialog__body) {
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.student-form :deep(.el-form-item) {
+  margin-bottom: var(--spacing-md);
 }
 
 .form-tip {
-  color: #909399;
-  font-size: 12px;
+  color: var(--text-color-secondary);
+  font-size: var(--font-size-extra-small);
 }
 
-.import-content-pc {
-  padding: 10px 0;
+/* 导入弹窗 */
+.import-dialog :deep(.el-dialog__body) {
+  padding: var(--spacing-md) var(--spacing-lg);
 }
 
-.import-content-pc p {
-  margin: 8px 0;
-  color: #606266;
+.import-content {
+  padding: var(--spacing-sm) 0;
+}
+
+.import-desc {
+  margin-bottom: var(--spacing-md);
+}
+
+.import-desc p {
+  margin: var(--spacing-xs) 0;
+  color: var(--text-color-regular);
+  font-size: var(--font-size-small);
 }
 
 .import-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 20px;
+  gap: var(--spacing-sm);
 }
 
-.import-result-pc {
-  margin-top: 20px;
+.import-result {
+  margin-top: var(--spacing-md);
 }
 
-.result-details-pc {
-  margin-top: 12px;
-  padding: 12px;
-  background: #f5f7fa;
-  border-radius: 4px;
+.result-details {
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background-color: var(--fill-color);
+  border-radius: var(--border-radius-base);
   max-height: 150px;
   overflow-y: auto;
 }
 
-.result-details-pc p {
+.result-details p {
   margin: 4px 0;
-  font-size: 13px;
-  color: #606266;
+  font-size: var(--font-size-small);
+  color: var(--text-color-regular);
 }
 
-/* 移动端样式 */
+/* ==================== 移动端样式 ==================== */
 .page-content {
-  padding-bottom: 20px;
+  padding-bottom: var(--spacing-lg);
+  background-color: var(--bg-color);
 }
 
+.nav-icon {
+  margin-left: var(--spacing-sm);
+  color: var(--text-color-primary);
+}
+
+/* 筛选区域 */
 .filter-section {
-  background: #fff;
-  margin-bottom: 10px;
+  background: var(--fill-color-blank);
+  margin-bottom: var(--spacing-sm);
   display: flex;
   align-items: center;
-  padding: 8px 12px;
-  gap: 10px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  gap: var(--spacing-sm);
 }
 
 .filter-buttons {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-xs);
 }
 
 .filter-buttons :deep(.van-button) {
-  padding: 0 12px;
+  padding: 0 var(--spacing-sm);
 }
 
 .filter-buttons :deep(.van-icon) {
@@ -1192,89 +1322,129 @@ onMounted(() => {
 }
 
 .search-box :deep(.van-search) {
-  padding: 8px 0;
+  padding: var(--spacing-sm) 0;
 }
 
 .search-box :deep(.van-search__content) {
-  background: #f7f8fa;
+  background: var(--fill-color);
 }
 
+/* 学生列表 */
 .student-list {
-  padding: 0 12px;
+  padding: 0 var(--spacing-md);
+}
+
+.student-cell {
+  margin-bottom: var(--spacing-xs);
+  border-radius: var(--border-radius-base);
 }
 
 .student-info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-xs);
 }
 
 .student-name {
-  font-size: 15px;
+  font-size: var(--font-size-base);
   font-weight: 500;
+  color: var(--text-color-primary);
+}
+
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: var(--border-radius-small);
+  font-size: var(--font-size-extra-small);
+  font-weight: 500;
+}
+
+.tag-success {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.tag-danger {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
 }
 
 .student-meta {
   display: flex;
-  gap: 12px;
+  gap: var(--spacing-sm);
   margin-top: 4px;
-  color: #666;
-  font-size: 13px;
+  color: var(--text-color-secondary);
+  font-size: var(--font-size-small);
+}
+
+.meta-item {
+  color: var(--text-color-secondary);
 }
 
 .action-icons {
   display: flex;
-  gap: 16px;
+  gap: var(--spacing-md);
 }
 
-.action-icons .van-icon {
-  color: #1989fa;
+.action-icon {
+  color: var(--color-primary);
   font-size: 18px;
 }
 
 /* 弹窗样式 */
+.form-popup {
+  height: 80%;
+}
+
 .add-popup {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #f7f8fa;
+  background: var(--fill-color);
 }
 
 .popup-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  background: #fff;
-  border-bottom: 1px solid #eee;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--fill-color-blank);
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .cancel-btn {
-  color: #666;
-  padding: 4px 8px;
+  color: var(--text-color-secondary);
+  padding: 4px var(--spacing-xs);
+  cursor: pointer;
 }
 
 .popup-title {
-  font-size: 16px;
+  font-size: var(--font-size-medium);
   font-weight: 500;
+  color: var(--text-color-primary);
 }
 
 .form-scroll {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 20px;
+  padding-bottom: var(--spacing-md);
 }
 
 .form-section {
-  background: #fff;
-  margin-top: 10px;
+  background: var(--fill-color-blank);
+  margin-top: var(--spacing-sm);
 }
 
-.form-tip {
-  padding: 10px 16px;
+.form-tip-mobile {
+  padding: var(--spacing-sm) var(--spacing-md);
 }
 
 /* 详情弹窗 */
+.detail-popup-wrapper {
+  height: 60%;
+}
+
 .detail-popup {
   height: 100%;
   display: flex;
@@ -1284,49 +1454,53 @@ onMounted(() => {
 .detail-content {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
-  background: #f7f8fa;
+  padding: var(--spacing-md);
+  background: var(--fill-color);
 }
 
 .detail-actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 20px;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
 }
 
 /* 批量导入弹窗 */
+.import-popup-wrapper {
+  height: 50%;
+}
+
 .import-popup {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #f7f8fa;
+  background: var(--fill-color);
 }
 
-.import-content {
+.import-content-mobile {
   flex: 1;
-  padding: 20px 16px;
+  padding: var(--spacing-md);
   overflow-y: auto;
 }
 
 .import-desc {
-  background: #fff;
-  padding: 16px;
-  border-radius: 8px;
-  margin-bottom: 16px;
+  background: var(--fill-color-blank);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-large);
+  margin-bottom: var(--spacing-md);
 }
 
 .import-desc p {
-  font-size: 14px;
-  color: #666;
+  font-size: var(--font-size-small);
+  color: var(--text-color-secondary);
   margin: 4px 0;
 }
 
 .import-buttons {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 0 20px;
+  gap: var(--spacing-sm);
+  padding: 0 var(--spacing-md);
 }
 
 .import-uploader {
@@ -1345,22 +1519,38 @@ onMounted(() => {
   width: 100%;
 }
 
-.import-result {
-  margin-top: 20px;
+.import-result-mobile {
+  margin-top: var(--spacing-md);
 }
 
-.result-details {
-  background: #fff;
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 12px;
-  font-size: 13px;
-  color: #666;
+.result-details-mobile {
+  background: var(--fill-color-blank);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-base);
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-small);
+  color: var(--text-color-secondary);
   max-height: 150px;
   overflow-y: auto;
 }
 
-.result-details p {
+.result-details-mobile p {
   margin: 4px 0;
+}
+
+/* ==================== 响应式设计 ==================== */
+@media (max-width: 767px) {
+  .pc-container {
+    padding: var(--spacing-md);
+  }
+
+  .filter-row {
+    flex-wrap: wrap;
+  }
+
+  .search-input,
+  .filter-select {
+    width: 100%;
+  }
 }
 </style>

@@ -1,0 +1,69 @@
+// ==========================================
+// 样式主入口文件
+// ==========================================
+
+// 1. 变量定义
+@import './variables.scss';
+
+// 2. Element Plus 样式覆盖
+@import './element-ui.scss';
+
+// 3. 公共样式
+@import './common.scss';
+
+// 4. 动画效果
+@import './animations.scss';
+
+// 5. 布局样式
+@import './layouts/pc.scss';
+@import './layouts/mobile.scss';
+
+// ==========================================
+// 全局重置样式（保留原有的兼容性）
+// ==========================================
+
+// Toast 样式覆盖 - 修复白色背景+白色文字问题
+.van-toast {
+  color: #333 !important;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.van-toast .van-toast__text {
+  color: #333 !important;
+}
+
+.van-toast .van-toast__icon {
+  color: inherit;
+}
+
+/* 成功类型 Toast */
+.van-toast--success {
+  color: #fff !important;
+  background-color: var(--color-success) !important;
+  border-color: #43a047;
+}
+
+.van-toast--success .van-toast__text {
+  color: #fff !important;
+}
+
+/* 失败类型 Toast */
+.van-toast--fail {
+  color: #fff !important;
+  background-color: var(--color-danger) !important;
+  border-color: #e53935;
+}
+
+.van-toast--fail .van-toast__text {
+  color: #fff !important;
+}
+
+/* 加载类型 Toast */
+.van-toast--loading {
+  color: #333 !important;
+}
+
+.van-toast--loading .van-toast__text {
+  color: #333 !important;
+}

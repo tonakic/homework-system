@@ -1,0 +1,616 @@
+// ==========================================
+// 移动端布局样式
+// ==========================================
+
+// ==========================================
+// 移动端布局容器
+// ==========================================
+.mobile-layout {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-color);
+  display: flex;
+  flex-direction: column;
+}
+
+// ==========================================
+// 页面内容区域
+// ==========================================
+.mobile-page-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  
+  // 有底部导航栏时的样式
+  &.with-tabbar {
+    padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+// ==========================================
+// 顶部导航栏
+// ==========================================
+.mobile-header {
+  height: 44px;
+  background-color: var(--fill-color-blank);
+  border-bottom: 1px solid var(--border-color-lighter);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    .back-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-color-primary);
+      cursor: pointer;
+      
+      &:active {
+        background-color: var(--fill-color);
+      }
+    }
+  }
+  
+  .header-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-color-primary);
+    text-align: center;
+    flex: 1;
+  }
+  
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+// ==========================================
+// 底部导航栏
+// ==========================================
+.mobile-tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--tabbar-height) + env(safe-area-inset-bottom, 0px));
+  background-color: var(--fill-color-blank);
+  border-top: 1px solid var(--border-color-lighter);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  z-index: 100;
+  
+  .tabbar-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 0;
+    color: var(--text-color-secondary);
+    transition: color var(--transition-duration);
+    cursor: pointer;
+    
+    .tabbar-icon {
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+    
+    .tabbar-label {
+      font-size: 12px;
+    }
+    
+    &.is-active {
+      color: var(--color-primary);
+      
+      .tabbar-icon {
+        font-weight: 600;
+      }
+    }
+    
+    &:active {
+      background-color: var(--fill-color);
+    }
+  }
+}
+
+// ==========================================
+// 移动端卡片样式
+// ==========================================
+.mobile-card {
+  background-color: var(--fill-color-blank);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px;
+  box-shadow: var(--box-shadow-light);
+  
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-color-primary);
+    }
+    
+    .card-extra {
+      font-size: 12px;
+      color: var(--text-color-secondary);
+    }
+  }
+  
+  .card-body {
+    font-size: 14px;
+    color: var(--text-color-regular);
+  }
+}
+
+// ==========================================
+// 移动端列表项
+// ==========================================
+.mobile-list {
+  padding: 12px;
+  
+  .list-item {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background-color: var(--fill-color-blank);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    
+    &:active {
+      background-color: var(--fill-color);
+    }
+    
+    .item-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+      font-size: 24px;
+      
+      &.icon-primary {
+        background-color: var(--color-primary-light-9);
+        color: var(--color-primary);
+      }
+      
+      &.icon-success {
+        background-color: var(--color-success-light);
+        color: var(--color-success);
+      }
+      
+      &.icon-warning {
+        background-color: var(--color-warning-light);
+        color: var(--color-warning);
+      }
+      
+      &.icon-danger {
+        background-color: var(--color-danger-light);
+        color: var(--color-danger);
+      }
+    }
+    
+    .item-content {
+      flex: 1;
+      min-width: 0;
+      
+      .item-title {
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--text-color-primary);
+        margin-bottom: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      
+      .item-desc {
+        font-size: 13px;
+        color: var(--text-color-secondary);
+      }
+    }
+    
+    .item-extra {
+      flex-shrink: 0;
+      margin-left: 12px;
+      text-align: right;
+      
+      .item-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-color-primary);
+      }
+      
+      .item-tag {
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+      }
+    }
+    
+    .item-arrow {
+      color: var(--text-color-placeholder);
+      margin-left: 8px;
+    }
+  }
+}
+
+// ==========================================
+// 移动端登录页
+// ==========================================
+.mobile-login {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-color);
+  
+  .login-header {
+    height: 180px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light-5));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    
+    .login-logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background-color: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+    
+    .login-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+    
+    .login-subtitle {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.9);
+      margin-top: 8px;
+    }
+  }
+  
+  .login-body {
+    flex: 1;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    
+    .login-form-wrapper {
+      background-color: var(--fill-color-blank);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: var(--box-shadow-light);
+      
+      .form-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-color-primary);
+        text-align: center;
+        margin-bottom: 20px;
+      }
+    }
+    
+    .login-footer {
+      text-align: center;
+      margin-top: 24px;
+      
+      .footer-text {
+        font-size: 12px;
+        color: var(--text-color-placeholder);
+      }
+    }
+  }
+}
+
+// ==========================================
+// 移动端答题页
+// ==========================================
+.mobile-exam {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  
+  .exam-header {
+    height: 44px;
+    background-color: var(--fill-color-blank);
+    border-bottom: 1px solid var(--border-color-lighter);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    
+    .exam-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-color-primary);
+    }
+    
+    .exam-timer {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      
+      .timer-icon {
+        font-size: 16px;
+        color: var(--color-warning);
+      }
+      
+      .timer-value {
+        font-size: 16px;
+        font-weight: 600;
+        font-family: 'Courier New', monospace;
+        
+        &.warning {
+          color: var(--color-danger);
+        }
+      }
+    }
+  }
+  
+  .exam-question {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    
+    .question-card {
+      background-color: var(--fill-color-blank);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      
+      .question-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        
+        .question-number {
+          font-size: 14px;
+          font-weight: 600;
+          color: var(--color-primary);
+        }
+        
+        .question-type {
+          padding: 2px 8px;
+          border-radius: 4px;
+          font-size: 12px;
+          background-color: var(--color-primary-light-9);
+          color: var(--color-primary);
+        }
+      }
+      
+      .question-content {
+        font-size: 14px;
+        line-height: 1.8;
+        color: var(--text-color-primary);
+        
+        img {
+          max-width: 100%;
+          border-radius: 8px;
+          margin: 8px 0;
+        }
+      }
+    }
+    
+    .answer-area {
+      background-color: var(--fill-color-blank);
+      border-radius: 12px;
+      padding: 16px;
+      
+      // 答题区域样式
+    }
+  }
+  
+  .exam-footer {
+    height: auto;
+    background-color: var(--fill-color-blank);
+    border-top: 1px solid var(--border-color-lighter);
+    padding: 12px 16px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    
+    .footer-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      
+      .nav-btns {
+        display: flex;
+        gap: 8px;
+      }
+      
+      .progress-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        
+        .progress-text {
+          font-size: 14px;
+          color: var(--text-color-secondary);
+        }
+      }
+    }
+    
+    .answer-nav {
+      margin-top: 12px;
+      padding: 12px;
+      background-color: var(--fill-color);
+      border-radius: 8px;
+      
+      .nav-title {
+        font-size: 13px;
+        color: var(--text-color-secondary);
+        margin-bottom: 8px;
+      }
+      
+      .nav-grid {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        gap: 6px;
+        
+        .grid-item {
+          height: 28px;
+          border-radius: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          background-color: var(--fill-color-blank);
+          border: 1px solid var(--border-color-lighter);
+          
+          &.is-current {
+            border-color: var(--color-primary);
+            background-color: var(--color-primary);
+            color: #fff;
+          }
+          
+          &.is-done {
+            background-color: var(--color-success-light);
+            border-color: var(--color-success);
+            color: var(--color-success);
+          }
+        }
+      }
+    }
+  }
+}
+
+// ==========================================
+// Vant 组件样式覆盖
+// ==========================================
+
+// Tabbar 样式增强
+.van-tabbar {
+  background-color: var(--fill-color-blank);
+  border-top: 1px solid var(--border-color-lighter);
+  
+  .van-tabbar-item {
+    color: var(--text-color-secondary);
+    
+    &--active {
+      color: var(--color-primary);
+      
+      .van-tabbar-item__icon {
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// NavBar 样式增强
+.van-nav-bar {
+  background-color: var(--fill-color-blank);
+  border-bottom: 1px solid var(--border-color-lighter);
+  
+  .van-nav-bar__title {
+    font-weight: 600;
+    color: var(--text-color-primary);
+  }
+  
+  .van-nav-bar__text {
+    color: var(--color-primary);
+  }
+}
+
+// Cell 样式增强
+.van-cell {
+  background-color: var(--fill-color-blank);
+  
+  &::after {
+    border-bottom-color: var(--border-color-lighter);
+  }
+  
+  .van-cell__title {
+    color: var(--text-color-primary);
+    font-weight: 500;
+  }
+  
+  .van-cell__value {
+    color: var(--text-color-secondary);
+  }
+}
+
+// Card 样式增强
+.van-card {
+  background-color: var(--fill-color-blank);
+  border-radius: 12px;
+  margin: 12px;
+  
+  .van-card__header {
+    padding: 16px;
+  }
+  
+  .van-card__title {
+    font-weight: 600;
+    color: var(--text-color-primary);
+  }
+}
+
+// Dialog 样式增强
+.van-dialog {
+  border-radius: 12px;
+  overflow: hidden;
+  
+  .van-dialog__header {
+    padding: 16px;
+    font-weight: 600;
+  }
+  
+  .van-dialog__content {
+    padding: 16px;
+  }
+  
+  .van-dialog__footer {
+    border-top: 1px solid var(--border-color-lighter);
+  }
+}
+
+// Popup 样式增强
+.van-popup {
+  border-radius: 12px 12px 0 0;
+  
+  &--center {
+    border-radius: 12px;
+  }
+}
+
+// Toast 样式（已在全局样式覆盖）
+.van-toast {
+  border-radius: 8px;
+}

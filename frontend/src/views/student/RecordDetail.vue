@@ -2,151 +2,234 @@
   <div class="record-detail page">
     <!-- PC Version -->
     <div v-if="isPC" class="record-detail-pc">
-      <el-card class="header-card">
-        <template #header>
-          <div class="pc-header">
-            <el-button text @click="$router.back()">
-              <el-icon><ArrowLeft /></el-icon>
-              返回
-            </el-button>
-            <h2 class="pc-title">答题详情</h2>
-          </div>
-        </template>
-      </el-card>
+      <div class="pc-header">
+        <el-button text @click="$router.back()" class="back-btn">
+          <el-icon><ArrowLeft /></el-icon>
+          返回
+        </el-button>
+        <h1 class="pc-title">答题详情</h1>
+      </div>
 
-      <el-card v-if="loading" class="content-card">
-        <div class="pc-loading">
-          <el-icon class="is-loading" :size="32"><Loading /></el-icon>
-          <span>加载中...</span>
-        </div>
-      </el-card>
+      <div v-if="loading" class="pc-loading">
+        <el-icon class="is-loading" :size="32"><Loading /></el-icon>
+        <span>加载中...</span>
+      </div>
 
       <template v-else-if="record">
-        <el-card class="info-card">
-          <template #header>
-            <div class="card-title">{{ record.title }}</div>
-          </template>
-          <el-descriptions :column="4" border>
-            <el-descriptions-item label="科目">{{ record.subject }}</el-descriptions-item>
-            <el-descriptions-item label="得分">
-              <span class="pc-score" :class="getScoreClass">{{ record.totalScore ?? '--' }}/{{ examTotalScore }}</span>
-            </el-descriptions-item>
-            <el-descriptions-item label="提交时间">{{ formatTime(record.submitTime) }}</el-descriptions-item>
-            <el-descriptions-item label="用时">{{ formatDuration(record.timeUsed) }}</el-descriptions-item>
-          </el-descriptions>
-        </el-card>
-
-        <el-card class="questions-card">
-          <template #header>
-            <div class="card-title">答题详情</div>
-          </template>
-          <div v-for="(q, idx) in questions" :key="q.id" class="pc-question-item">
-            <div class="pc-question-header">
-              <span class="pc-q-num">第{{ idx + 1 }}题</span>
-              <el-tag :type="getElTypeTag(q.questionType)" size="small">{{ getTypeName(q.questionType) }}</el-tag>
-              <span class="pc-q-score">{{ q.score ?? 0 }}分</span>
-              <el-icon v-if="q.isCorrect" color="#67c23a" :size="18"><CircleCheck /></el-icon>
-              <el-icon v-else color="#f56c6c" :size="18"><CircleClose /></el-icon>
+        <!-- 考试信息卡片 -->
+        <div class="info-card">
+          <div class="info-card-header">
+            <h2 class="exam-title">{{ record.title }}</h2>
+          </div>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">科目</span>
+              <span class="info-value">{{ record.subject }}</span>
             </div>
-            <div class="pc-question-content">{{ q.content }}</div>
-            <div v-if="q.options && (q.questionType === 'choice' || q.questionType === 'multiple')" class="pc-question-options">
-              <div v-for="(opt, optIdx) in q.options" :key="optIdx" class="pc-opt-item" :class="getOptionClass(q, optIdx)">
-                {{ optionLetters[optIdx] }}. {{ opt }}
-              </div>
+            <div class="info-item">
+              <span class="info-label">得分</span>
+              <span class="info-value score" :class="getScoreClass">
+                {{ record.totalScore ?? '--' }}/{{ examTotalScore }}
+              </span>
             </div>
-            <div class="pc-answer-section">
-              <div class="pc-answer-row">
-                <span class="pc-answer-label">你的答案：</span>
-                <span class="pc-answer-value" :class="{ 'is-correct': q.isCorrect, 'is-wrong': !q.isCorrect }">{{ formatStudentAnswer(q) }}</span>
-              </div>
+            <div class="info-item">
+              <span class="info-label">提交时间</span>
+              <span class="info-value">{{ formatTime(record.submitTime) }}</span>
             </div>
-            <div class="pc-answer-section correct">
-              <div class="pc-answer-row">
-                <span class="pc-answer-label">正确答案：</span>
-                <span class="pc-answer-value is-correct">{{ formatCorrectAnswer(q.correctAnswer, q.questionType) }}</span>
-              </div>
-            </div>
-            <div v-if="q.analysis" class="pc-analysis">
-              <span class="pc-analysis-label">解析：</span>
-              <span>{{ q.analysis }}</span>
-            </div>
-            <div v-if="q.aiComment" class="pc-ai-comment">
-              <span class="pc-ai-label">AI评语：</span>
-              <span>{{ q.aiComment }}</span>
+            <div class="info-item">
+              <span class="info-label">用时</span>
+              <span class="info-value">{{ formatDuration(record.timeUsed) }}</span>
             </div>
           </div>
-        </el-card>
+        </div>
+
+        <!-- 答题详情 -->
+        <div class="questions-section">
+          <div class="section-header">
+            <h3 class="section-title">答题详情</h3>
+            <span class="question-count">共 {{ questions.length }} 题</span>
+          </div>
+
+          <div v-for="(q, idx) in questions" :key="q.id" class="question-item">
+            <!-- 题目头部 -->
+            <div class="question-header">
+              <div class="question-meta">
+                <span class="question-num">第{{ idx + 1 }}题</span>
+                <el-tag :type="getElTypeTag(q.questionType)" size="small">
+                  {{ getTypeName(q.questionType) }}
+                </el-tag>
+              </div>
+              <div class="question-score-wrapper">
+                <span class="question-score">{{ q.score ?? 0 }}分</span>
+                <el-icon v-if="q.isCorrect" class="result-icon correct">
+                  <CircleCheck />
+                </el-icon>
+                <el-icon v-else class="result-icon wrong">
+                  <CircleClose />
+                </el-icon>
+              </div>
+            </div>
+
+            <!-- 题目内容 -->
+            <div class="question-content">{{ q.content }}</div>
+
+            <!-- 选项（选择题/多选题） -->
+            <div v-if="q.options && (q.questionType === 'choice' || q.questionType === 'multiple')" class="options-list">
+              <div
+                v-for="(opt, optIdx) in q.options"
+                :key="optIdx"
+                class="option-item"
+                :class="getOptionClass(q, optIdx)"
+              >
+                <span class="option-letter">{{ optionLetters[optIdx] }}</span>
+                <span class="option-text">{{ opt }}</span>
+              </div>
+            </div>
+
+            <!-- 答案对比区域 -->
+            <div class="answer-compare">
+              <div class="answer-row student-answer">
+                <span class="answer-label">你的答案</span>
+                <span class="answer-value" :class="{ correct: q.isCorrect, wrong: !q.isCorrect }">
+                  {{ formatStudentAnswer(q) }}
+                </span>
+              </div>
+              <div class="answer-row correct-answer">
+                <span class="answer-label">正确答案</span>
+                <span class="answer-value correct">
+                  {{ formatCorrectAnswer(q.correctAnswer, q.questionType) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- 解析 -->
+            <div v-if="q.analysis" class="analysis-section">
+              <div class="analysis-header">
+                <span class="analysis-icon">💡</span>
+                <span class="analysis-title">解析</span>
+              </div>
+              <div class="analysis-content">{{ q.analysis }}</div>
+            </div>
+
+            <!-- AI评语 -->
+            <div v-if="q.aiComment" class="ai-comment-section">
+              <div class="ai-comment-header">
+                <span class="ai-icon">🤖</span>
+                <span class="ai-title">AI评语</span>
+              </div>
+              <div class="ai-comment-content">{{ q.aiComment }}</div>
+            </div>
+          </div>
+        </div>
       </template>
 
       <el-empty v-else description="记录不存在" />
     </div>
 
     <!-- Mobile Version -->
-    <div v-else>
+    <div v-else class="record-detail-mobile">
       <van-nav-bar title="答题详情" left-arrow @click-left="$router.back()" />
 
       <div class="page-content">
         <van-loading v-if="loading" class="loading-center" />
 
         <template v-else-if="record">
-          <div class="card">
-            <h2 class="title">{{ record.title }}</h2>
+          <!-- 考试信息卡片 -->
+          <div class="info-card">
+            <h2 class="exam-title">{{ record.title }}</h2>
             <div class="info-grid">
               <div class="info-item">
-                <span class="label">科目</span>
-                <span class="value">{{ record.subject }}</span>
+                <span class="info-label">科目</span>
+                <span class="info-value">{{ record.subject }}</span>
               </div>
               <div class="info-item">
-                <span class="label">得分</span>
-                <span class="value score" :class="getScoreClass">{{ record.totalScore ?? '--' }}/{{ examTotalScore }}</span>
+                <span class="info-label">得分</span>
+                <span class="info-value score" :class="getScoreClass">
+                  {{ record.totalScore ?? '--' }}/{{ examTotalScore }}
+                </span>
               </div>
               <div class="info-item">
-                <span class="label">提交时间</span>
-                <span class="value">{{ formatTime(record.submitTime) }}</span>
+                <span class="info-label">提交时间</span>
+                <span class="info-value">{{ formatTime(record.submitTime) }}</span>
               </div>
               <div class="info-item">
-                <span class="label">用时</span>
-                <span class="value">{{ formatDuration(record.timeUsed) }}</span>
+                <span class="info-label">用时</span>
+                <span class="info-value">{{ formatDuration(record.timeUsed) }}</span>
               </div>
             </div>
           </div>
 
+          <!-- 答题详情 -->
           <div class="questions-section">
-            <h3>答题详情</h3>
-            <div v-for="(q, idx) in questions" :key="q.id" class="question-card card">
+            <div class="section-header">
+              <h3 class="section-title">答题详情</h3>
+              <span class="question-count">共 {{ questions.length }} 题</span>
+            </div>
+
+            <div v-for="(q, idx) in questions" :key="q.id" class="question-card">
+              <!-- 题目头部 -->
               <div class="question-header">
-                <span class="q-num">{{ idx + 1 }}.</span>
-                <van-tag :type="getTypeTag(q.questionType)" size="small">{{ getTypeName(q.questionType) }}</van-tag>
-                <span class="q-score">{{ q.score ?? 0 }}分</span>
-                <van-icon v-if="q.isCorrect" name="success" color="#4caf50" />
-                <van-icon v-else name="cross" color="#f44336" />
+                <div class="question-meta">
+                  <span class="question-num">{{ idx + 1 }}.</span>
+                  <van-tag :type="getTypeTag(q.questionType)" size="small">
+                    {{ getTypeName(q.questionType) }}
+                  </van-tag>
+                </div>
+                <div class="question-score-wrapper">
+                  <span class="question-score">{{ q.score ?? 0 }}分</span>
+                  <van-icon v-if="q.isCorrect" name="success" class="result-icon correct" />
+                  <van-icon v-else name="cross" class="result-icon wrong" />
+                </div>
               </div>
+
+              <!-- 题目内容 -->
               <div class="question-content">{{ q.content }}</div>
-              <div v-if="q.options && (q.questionType === 'choice' || q.questionType === 'multiple')" class="question-options">
-                <div v-for="(opt, optIdx) in q.options" :key="optIdx" class="opt-item" :class="getOptionClass(q, optIdx)">
-                  {{ optionLetters[optIdx] }}. {{ opt }}
+
+              <!-- 选项（选择题/多选题） -->
+              <div v-if="q.options && (q.questionType === 'choice' || q.questionType === 'multiple')" class="options-list">
+                <div
+                  v-for="(opt, optIdx) in q.options"
+                  :key="optIdx"
+                  class="option-item"
+                  :class="getOptionClass(q, optIdx)"
+                >
+                  <span class="option-letter">{{ optionLetters[optIdx] }}</span>
+                  <span class="option-text">{{ opt }}</span>
                 </div>
               </div>
-              <div class="answer-section">
-                <div class="answer-item">
-                  <span class="label">你的答案：</span>
-                  <span class="value" :class="{ correct: q.isCorrect, wrong: !q.isCorrect }">{{ formatStudentAnswer(q) }}</span>
+
+              <!-- 答案对比区域 -->
+              <div class="answer-compare">
+                <div class="answer-row student-answer">
+                  <span class="answer-label">你的答案</span>
+                  <span class="answer-value" :class="{ correct: q.isCorrect, wrong: !q.isCorrect }">
+                    {{ formatStudentAnswer(q) }}
+                  </span>
+                </div>
+                <div class="answer-row correct-answer">
+                  <span class="answer-label">正确答案</span>
+                  <span class="answer-value correct">
+                    {{ formatCorrectAnswer(q.correctAnswer, q.questionType) }}
+                  </span>
                 </div>
               </div>
-              <div class="answer-section correct-answer">
-                <div class="answer-item">
-                  <span class="label">正确答案：</span>
-                  <span class="value correct">{{ formatCorrectAnswer(q.correctAnswer, q.questionType) }}</span>
+
+              <!-- 解析 -->
+              <div v-if="q.analysis" class="analysis-section">
+                <div class="analysis-header">
+                  <span class="analysis-icon">💡</span>
+                  <span class="analysis-title">解析</span>
                 </div>
+                <div class="analysis-content">{{ q.analysis }}</div>
               </div>
-              <div v-if="q.analysis" class="analysis">
-                <span class="label">解析：</span>
-                <span>{{ q.analysis }}</span>
-              </div>
-              <!-- AI批改评语 -->
-              <div v-if="q.aiComment" class="ai-comment">
-                <span class="label">AI评语：</span>
-                <span>{{ q.aiComment }}</span>
+
+              <!-- AI评语 -->
+              <div v-if="q.aiComment" class="ai-comment-section">
+                <div class="ai-comment-header">
+                  <span class="ai-icon">🤖</span>
+                  <span class="ai-title">AI评语</span>
+                </div>
+                <div class="ai-comment-content">{{ q.aiComment }}</div>
               </div>
             </div>
           </div>
@@ -336,192 +419,44 @@ function parseStudentAnswer(ans) {
 </script>
 
 <style scoped>
-/* Mobile Styles */
-.loading-center {
-  display: flex;
-  justify-content: center;
-  padding: 40px;
+/* ==================== CSS 变量引用 ==================== */
+.record-detail {
+  min-height: 100%;
+  background-color: var(--bg-color);
 }
 
-.title {
-  font-size: 18px;
-  margin-bottom: 16px;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-
-.info-item {
-  background: #f9f9f9;
-  padding: 12px;
-  border-radius: 8px;
-}
-
-.info-item .label {
-  display: block;
-  font-size: 12px;
-  color: #999;
-  margin-bottom: 4px;
-}
-
-.info-item .value {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.info-item .score.good { color: #4caf50; }
-.info-item .score.medium { color: #ff9800; }
-.info-item .score.poor { color: #f44336; }
-
-.info-item .status.graded { color: #4caf50; }
-.info-item .status.submitted { color: #ff9800; }
-
-.questions-section {
-  margin-top: 16px;
-}
-
-.questions-section h3 {
-  font-size: 16px;
-  margin-bottom: 12px;
-}
-
-.question-card {
-  margin-bottom: 12px;
-}
-
-.question-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.q-num {
-  font-weight: bold;
-}
-
-.q-score {
-  margin-left: auto;
-  color: #ff9800;
-  font-weight: bold;
-}
-
-.question-content {
-  font-size: 15px;
-  line-height: 1.6;
-  margin-bottom: 12px;
-}
-
-.question-options {
-  margin-bottom: 12px;
-}
-
-.opt-item {
-  padding: 8px 12px;
-  margin-bottom: 6px;
-  background: #f5f5f5;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-.opt-item.correct {
-  background: #e8f5e9;
-  color: #4caf50;
-  border: 1px solid #4caf50;
-}
-
-.opt-item.correct-answer {
-  background: #e8f5e9;
-  border: 1px solid #4caf50;
-}
-
-.opt-item.wrong {
-  background: #ffebee;
-  color: #f44336;
-  border: 1px solid #f44336;
-}
-
-.answer-section {
-  padding: 12px;
-  background: #f9f9f9;
-  border-radius: 8px;
-  margin-bottom: 8px;
-}
-
-.answer-section.correct-answer {
-  background: #e8f5e9;
-  margin-bottom: 12px;
-}
-
-.answer-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.answer-item .label {
-  color: #666;
-  font-size: 14px;
-  flex-shrink: 0;
-}
-
-.answer-item .value {
-  font-weight: 500;
-  word-break: break-all;
-}
-
-.answer-item .value.correct { color: #4caf50; }
-.answer-item .value.wrong { color: #f44336; }
-
-.analysis {
-  padding: 12px;
-  background: #e3f2fd;
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-.analysis .label {
-  color: #1976d2;
-  font-weight: 500;
-}
-
-.ai-comment {
-  padding: 12px;
-  background: #fff3e0;
-  border-radius: 8px;
-  font-size: 14px;
-  margin-top: 12px;
-  border-left: 3px solid #ff9800;
-}
-
-.ai-comment .label {
-  color: #ff9800;
-  font-weight: 500;
-}
-
-/* PC Styles */
+/* ==================== PC端样式 ==================== */
 .record-detail-pc {
+  min-height: 100%;
+  background-color: var(--bg-color);
+  padding: var(--spacing-lg);
   max-width: 1000px;
   margin: 0 auto;
-  padding: 20px;
-}
-
-.header-card {
-  margin-bottom: 20px;
 }
 
 .pc-header {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--text-color-secondary);
+  transition: color var(--transition-duration) var(--transition-timing-function);
+}
+
+.back-btn:hover {
+  color: var(--color-primary);
 }
 
 .pc-title {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
+  color: var(--text-color-primary);
   margin: 0;
 }
 
@@ -531,159 +466,459 @@ function parseStudentAnswer(ans) {
   align-items: center;
   justify-content: center;
   padding: 60px;
-  gap: 12px;
-  color: #909399;
+  gap: var(--spacing-md);
+  color: var(--text-color-secondary);
+  background-color: var(--fill-color-blank);
+  border-radius: var(--border-radius-large);
 }
 
-.content-card {
-  margin-bottom: 20px;
-}
-
+/* 信息卡片 */
 .info-card {
-  margin-bottom: 20px;
+  background-color: var(--fill-color-blank);
+  border-radius: var(--border-radius-large);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--box-shadow-light);
 }
 
-.card-title {
-  font-size: 16px;
+.info-card-header {
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color-lighter);
+}
+
+.exam-title {
+  font-size: var(--font-size-large);
   font-weight: 600;
+  color: var(--text-color-primary);
+  margin: 0;
 }
 
-.pc-score {
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-md);
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.info-label {
+  font-size: var(--font-size-extra-small);
+  color: var(--text-color-secondary);
+}
+
+.info-value {
+  font-size: var(--font-size-medium);
+  font-weight: 500;
+  color: var(--text-color-primary);
+}
+
+.info-value.score.good {
+  color: var(--color-success);
+}
+
+.info-value.score.medium {
+  color: var(--color-warning);
+}
+
+.info-value.score.poor {
+  color: var(--color-danger);
+}
+
+/* 答题详情区域 */
+.questions-section {
+  background-color: var(--fill-color-blank);
+  border-radius: var(--border-radius-large);
+  padding: var(--spacing-lg);
+  box-shadow: var(--box-shadow-light);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color-lighter);
+}
+
+.section-title {
+  font-size: var(--font-size-medium);
   font-weight: 600;
-  font-size: 16px;
+  color: var(--text-color-primary);
+  margin: 0;
 }
 
-.pc-score.good { color: #67c23a; }
-.pc-score.medium { color: #e6a23c; }
-.pc-score.poor { color: #f56c6c; }
-
-.questions-card {
-  margin-bottom: 20px;
+.question-count {
+  font-size: var(--font-size-small);
+  color: var(--text-color-secondary);
 }
 
-.pc-question-item {
-  padding: 20px;
-  border-bottom: 1px solid #ebeef5;
+/* 题目卡片 */
+.question-item {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
-.pc-question-item:last-child {
+.question-item:last-child {
   border-bottom: none;
 }
 
-.pc-question-header {
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.question-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: var(--spacing-sm);
 }
 
-.pc-q-num {
+.question-num {
   font-weight: 600;
-  font-size: 16px;
-  color: #303133;
+  font-size: var(--font-size-medium);
+  color: var(--text-color-primary);
 }
 
-.pc-q-score {
-  margin-left: auto;
-  color: #e6a23c;
+.question-score-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.question-score {
   font-weight: 600;
+  color: var(--color-warning);
 }
 
-.pc-question-content {
-  font-size: 15px;
+.result-icon {
+  font-size: 18px;
+}
+
+.result-icon.correct {
+  color: var(--color-success);
+}
+
+.result-icon.wrong {
+  color: var(--color-danger);
+}
+
+.question-content {
+  font-size: var(--font-size-base);
   line-height: 1.8;
-  color: #303133;
-  margin-bottom: 16px;
+  color: var(--text-color-primary);
+  margin-bottom: var(--spacing-md);
 }
 
-.pc-question-options {
-  margin-bottom: 16px;
+/* 选项列表 */
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
 }
 
-.pc-opt-item {
-  padding: 10px 16px;
-  margin-bottom: 8px;
-  background: #f5f7fa;
-  border-radius: 6px;
-  font-size: 14px;
-  color: #606266;
-}
-
-.pc-opt-item.correct {
-  background: #f0f9eb;
-  color: #67c23a;
-  border: 1px solid #67c23a;
-}
-
-.pc-opt-item.correct-answer {
-  background: #f0f9eb;
-  border: 1px solid #67c23a;
-}
-
-.pc-opt-item.wrong {
-  background: #fef0f0;
-  color: #f56c6c;
-  border: 1px solid #f56c6c;
-}
-
-.pc-answer-section {
-  padding: 12px 16px;
-  background: #f5f7fa;
-  border-radius: 6px;
-  margin-bottom: 10px;
-}
-
-.pc-answer-section.correct {
-  background: #f0f9eb;
-  margin-bottom: 16px;
-}
-
-.pc-answer-row {
+.option-item {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--fill-color);
+  border-radius: var(--border-radius-base);
+  border: 1px solid transparent;
+  transition: all var(--transition-duration) var(--transition-timing-function);
 }
 
-.pc-answer-label {
-  color: #909399;
-  font-size: 14px;
+.option-item.correct {
+  background-color: var(--color-success-light);
+  border-color: var(--color-success);
+}
+
+.option-item.correct .option-letter,
+.option-item.correct .option-text {
+  color: var(--color-success);
+}
+
+.option-item.correct-answer {
+  background-color: var(--color-success-light);
+  border-color: var(--color-success);
+}
+
+.option-item.wrong {
+  background-color: var(--color-danger-light);
+  border-color: var(--color-danger);
+}
+
+.option-item.wrong .option-letter,
+.option-item.wrong .option-text {
+  color: var(--color-danger);
+}
+
+.option-letter {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--border-color);
+  border-radius: 50%;
+  font-size: var(--font-size-extra-small);
+  font-weight: 600;
   flex-shrink: 0;
 }
 
-.pc-answer-value {
+.option-text {
+  font-size: var(--font-size-base);
+  color: var(--text-color-regular);
+  line-height: 1.5;
+}
+
+/* 答案对比区域 */
+.answer-compare {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.answer-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--fill-color);
+  border-radius: var(--border-radius-base);
+}
+
+.answer-row.correct-answer {
+  background-color: var(--color-success-light);
+}
+
+.answer-label {
+  font-size: var(--font-size-base);
+  color: var(--text-color-secondary);
+  flex-shrink: 0;
+  min-width: 70px;
+}
+
+.answer-value {
+  font-size: var(--font-size-base);
   font-weight: 500;
-  font-size: 14px;
+  color: var(--text-color-primary);
   word-break: break-all;
 }
 
-.pc-answer-value.is-correct { color: #67c23a; }
-.pc-answer-value.is-wrong { color: #f56c6c; }
-
-.pc-analysis {
-  padding: 12px 16px;
-  background: #ecf5ff;
-  border-radius: 6px;
-  font-size: 14px;
-  color: #409eff;
-  margin-top: 12px;
+.answer-value.correct {
+  color: var(--color-success);
 }
 
-.pc-analysis-label {
+.answer-value.wrong {
+  color: var(--color-danger);
+}
+
+/* 解析区域 */
+.analysis-section {
+  padding: var(--spacing-md);
+  background-color: var(--color-primary-light-9);
+  border-radius: var(--border-radius-base);
+  margin-bottom: var(--spacing-sm);
+}
+
+.analysis-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+}
+
+.analysis-icon {
+  font-size: 16px;
+}
+
+.analysis-title {
+  font-size: var(--font-size-base);
   font-weight: 600;
-  color: #409eff;
+  color: var(--color-primary);
 }
 
-.pc-ai-comment {
-  padding: 12px 16px;
-  background: #fdf6ec;
-  border-radius: 6px;
-  font-size: 14px;
-  margin-top: 12px;
-  border-left: 3px solid #e6a23c;
+.analysis-content {
+  font-size: var(--font-size-base);
+  color: var(--text-color-regular);
+  line-height: 1.6;
 }
 
-.pc-ai-label {
+/* AI评语区域 */
+.ai-comment-section {
+  padding: var(--spacing-md);
+  background-color: var(--color-warning-light);
+  border-radius: var(--border-radius-base);
+  border-left: 3px solid var(--color-warning);
+}
+
+.ai-comment-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+}
+
+.ai-icon {
+  font-size: 16px;
+}
+
+.ai-title {
+  font-size: var(--font-size-base);
   font-weight: 600;
-  color: #e6a23c;
+  color: var(--color-warning);
+}
+
+.ai-comment-content {
+  font-size: var(--font-size-base);
+  color: var(--text-color-regular);
+  line-height: 1.6;
+}
+
+/* ==================== 移动端样式 ==================== */
+.record-detail-mobile {
+  min-height: 100%;
+  background-color: var(--bg-color);
+}
+
+.page-content {
+  padding: var(--spacing-sm);
+}
+
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+/* 移动端信息卡片 */
+.record-detail-mobile .info-card {
+  padding: var(--spacing-md);
+}
+
+.record-detail-mobile .exam-title {
+  font-size: var(--font-size-medium);
+  margin-bottom: var(--spacing-md);
+}
+
+.record-detail-mobile .info-grid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.record-detail-mobile .info-item {
+  background-color: var(--fill-color);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-base);
+}
+
+/* 移动端答题详情 */
+.record-detail-mobile .questions-section {
+  padding: 0;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.record-detail-mobile .section-header {
+  padding: var(--spacing-sm) 0;
+  margin-bottom: var(--spacing-sm);
+  background-color: transparent;
+  border-bottom: none;
+}
+
+.question-card {
+  background-color: var(--fill-color-blank);
+  border-radius: var(--border-radius-large);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  box-shadow: var(--box-shadow-light);
+}
+
+.record-detail-mobile .question-header {
+  margin-bottom: var(--spacing-sm);
+}
+
+.record-detail-mobile .question-num {
+  font-size: var(--font-size-base);
+}
+
+.record-detail-mobile .question-content {
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-sm);
+}
+
+.record-detail-mobile .options-list {
+  margin-bottom: var(--spacing-sm);
+}
+
+.record-detail-mobile .option-item {
+  padding: var(--spacing-sm);
+  font-size: var(--font-size-small);
+}
+
+.record-detail-mobile .answer-compare {
+  margin-bottom: var(--spacing-sm);
+}
+
+.record-detail-mobile .answer-row {
+  padding: var(--spacing-sm);
+}
+
+.record-detail-mobile .answer-label {
+  font-size: var(--font-size-small);
+  min-width: 60px;
+}
+
+.record-detail-mobile .answer-value {
+  font-size: var(--font-size-small);
+}
+
+.record-detail-mobile .analysis-section,
+.record-detail-mobile .ai-comment-section {
+  padding: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+  margin-bottom: 0;
+}
+
+.record-detail-mobile .analysis-title,
+.record-detail-mobile .ai-title {
+  font-size: var(--font-size-small);
+}
+
+.record-detail-mobile .analysis-content,
+.record-detail-mobile .ai-comment-content {
+  font-size: var(--font-size-small);
+}
+
+/* ==================== 响应式优化 ==================== */
+@media (max-width: 768px) {
+  .record-detail-pc .info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 375px) {
+  .record-detail-mobile .exam-title {
+    font-size: var(--font-size-base);
+  }
+
+  .record-detail-mobile .info-value {
+    font-size: var(--font-size-base);
+  }
+
+  .record-detail-mobile .question-content {
+    font-size: var(--font-size-small);
+  }
 }
 </style>

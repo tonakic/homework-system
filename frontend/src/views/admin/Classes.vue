@@ -2,7 +2,7 @@
   <!-- PC 版本 -->
   <div v-if="isPC" class="classes-pc">
     <div class="pc-header">
-      <h2>班级管理</h2>
+      <h2 class="pc-title">班级管理</h2>
       <el-button type="primary" @click="openAddPopup">
         <el-icon><Plus /></el-icon>
         新增班级
@@ -10,38 +10,30 @@
     </div>
 
     <div class="pc-content">
-      <!-- 统计数据 -->
-      <el-row :gutter="20" class="pc-stats-row">
-        <el-col :span="12">
-          <el-card shadow="hover" class="pc-stat-card">
-            <div class="pc-stat-item">
-              <div class="pc-stat-icon classes-icon">
-                <el-icon :size="28"><School /></el-icon>
-              </div>
-              <div class="pc-stat-detail">
-                <div class="pc-stat-value">{{ totalClasses }}</div>
-                <div class="pc-stat-label">班级总数</div>
-              </div>
-            </div>
-          </el-card>
-        </el-col>
-        <el-col :span="12">
-          <el-card shadow="hover" class="pc-stat-card">
-            <div class="pc-stat-item">
-              <div class="pc-stat-icon students-icon">
-                <el-icon :size="28"><User /></el-icon>
-              </div>
-              <div class="pc-stat-detail">
-                <div class="pc-stat-value">{{ totalStudents }}</div>
-                <div class="pc-stat-label">学生总数</div>
-              </div>
-            </div>
-          </el-card>
-        </el-col>
-      </el-row>
+      <!-- 统计卡片 -->
+      <div class="pc-stats-grid">
+        <div class="stat-card stat-primary">
+          <div class="stat-icon">
+            <el-icon :size="32"><School /></el-icon>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value">{{ totalClasses }}</div>
+            <div class="stat-label">班级总数</div>
+          </div>
+        </div>
+        <div class="stat-card stat-success">
+          <div class="stat-icon">
+            <el-icon :size="32"><User /></el-icon>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value">{{ totalStudents }}</div>
+            <div class="stat-label">学生总数</div>
+          </div>
+        </div>
+      </div>
 
       <!-- 筛选区域 -->
-      <el-card shadow="hover" class="pc-filter-card">
+      <div class="pc-filter-card">
         <el-select
           v-model="selectedGrade"
           placeholder="选择年级"
@@ -56,16 +48,16 @@
             :value="grade"
           />
         </el-select>
-      </el-card>
+      </div>
 
       <!-- 班级列表 -->
-      <el-card shadow="hover" class="pc-table-card">
+      <div class="pc-table-card">
         <el-table :data="classStats" style="width: 100%" v-loading="loading">
           <el-table-column prop="class_name" label="班级名称" min-width="150" />
           <el-table-column prop="grade" label="年级" width="120" />
           <el-table-column prop="student_count" label="学生人数" width="120" align="center">
             <template #default="{ row }">
-              <el-tag type="primary" size="small">{{ row.student_count }}人</el-tag>
+              <span class="student-count-badge">{{ row.student_count }}人</span>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="200" align="center">
@@ -86,7 +78,7 @@
             @current-change="handlePageChange"
           />
         </div>
-      </el-card>
+      </div>
     </div>
 
     <!-- 新增/编辑班级弹窗 -->
@@ -95,6 +87,7 @@
       :title="editingClass ? '编辑班级' : '新增班级'"
       width="500px"
       destroy-on-close
+      class="class-dialog"
     >
       <el-form :model="classForm" label-width="80px">
         <el-form-item label="年级" required>
@@ -123,21 +116,34 @@
       :title="currentClass ? currentClass.class_name + ' 详情' : '班级详情'"
       width="600px"
       destroy-on-close
+      class="class-dialog"
     >
       <div v-if="currentClass" class="pc-detail-content">
-        <el-descriptions :column="2" border>
-          <el-descriptions-item label="班级名称">{{ currentClass.class_name }}</el-descriptions-item>
-          <el-descriptions-item label="年级">{{ currentClass.grade }}</el-descriptions-item>
-          <el-descriptions-item label="学生人数">{{ currentClass.student_count }}人</el-descriptions-item>
-        </el-descriptions>
+        <div class="detail-info-grid">
+          <div class="detail-info-item">
+            <span class="detail-label">班级名称</span>
+            <span class="detail-value">{{ currentClass.class_name }}</span>
+          </div>
+          <div class="detail-info-item">
+            <span class="detail-label">年级</span>
+            <span class="detail-value">{{ currentClass.grade }}</span>
+          </div>
+          <div class="detail-info-item">
+            <span class="detail-label">学生人数</span>
+            <span class="detail-value highlight">{{ currentClass.student_count }}人</span>
+          </div>
+        </div>
 
         <div class="pc-students-section">
-          <h4>班级学生</h4>
+          <h4 class="section-title">班级学生</h4>
           <el-table :data="currentClassStudents" style="width: 100%" max-height="300">
             <el-table-column prop="student_no" label="学号" width="120" />
             <el-table-column prop="name" label="姓名" />
           </el-table>
-          <div v-if="currentClassStudents.length === 0" class="pc-empty-tip">暂无学生</div>
+          <div v-if="currentClassStudents.length === 0" class="empty-state">
+            <el-icon :size="48"><School /></el-icon>
+            <p>暂无学生</p>
+          </div>
         </div>
       </div>
     </el-dialog>
@@ -158,6 +164,7 @@
           <span class="stat-value">{{ totalClasses }}</span>
           <span class="stat-label">班级总数</span>
         </div>
+        <div class="stat-divider"></div>
         <div class="stat-item">
           <span class="stat-value">{{ totalStudents }}</span>
           <span class="stat-label">学生总数</span>
@@ -189,21 +196,33 @@
 
       <!-- 班级列表 -->
       <div class="class-list">
-        <div v-for="(item, index) in classStats" :key="item.class_name" class="class-card" @click="showClassDetail(item)">
-          <div class="class-header">
-            <span class="class-name">{{ item.class_name }}</span>
-            <van-tag type="primary" size="small">{{ item.student_count }}人</van-tag>
+        <div 
+          v-for="(item, index) in classStats" 
+          :key="item.class_name" 
+          class="class-card"
+          @click="showClassDetail(item)"
+        >
+          <div class="class-card-header">
+            <div class="class-icon">
+              <el-icon><School /></el-icon>
+            </div>
+            <div class="class-info">
+              <span class="class-name">{{ item.class_name }}</span>
+              <span class="class-grade">{{ item.grade }}</span>
+            </div>
+            <div class="class-student-count">
+              <span class="count-number">{{ item.student_count }}</span>
+              <span class="count-label">人</span>
+            </div>
           </div>
-          <div class="class-info">
-            <span>年级: {{ item.grade }}</span>
-          </div>
-          <div class="class-actions" @click.stop>
+          <div class="class-card-actions" @click.stop>
             <van-button size="mini" type="primary" plain @click="editClass(item)">编辑</van-button>
             <van-button size="mini" type="danger" plain @click="deleteClass(item)">删除</van-button>
           </div>
         </div>
-        <div v-if="classStats.length === 0" class="empty-tip">
-          暂无班级数据
+        <div v-if="classStats.length === 0" class="empty-state">
+          <el-icon :size="48"><School /></el-icon>
+          <p>暂无班级数据</p>
         </div>
       </div>
     </div>
@@ -248,16 +267,28 @@
           <span></span>
         </div>
         <div class="detail-content">
-          <van-cell-group>
+          <div class="detail-stats">
+            <div class="detail-stat-item">
+              <span class="detail-stat-value">{{ currentClass.student_count }}</span>
+              <span class="detail-stat-label">学生人数</span>
+            </div>
+          </div>
+          <van-cell-group inset>
             <van-cell title="班级名称" :value="currentClass.class_name" />
             <van-cell title="年级" :value="currentClass.grade" />
-            <van-cell title="学生人数" :value="currentClass.student_count + '人'" />
           </van-cell-group>
           <div class="detail-section">
             <div class="section-title">班级学生</div>
             <div class="student-list">
-              <van-cell v-for="student in currentClassStudents" :key="student.id" :title="student.name" :label="student.student_no" />
-              <div v-if="currentClassStudents.length === 0" class="empty-tip">暂无学生</div>
+              <van-cell 
+                v-for="student in currentClassStudents" 
+                :key="student.id" 
+                :title="student.name" 
+                :label="student.student_no" 
+              />
+              <div v-if="currentClassStudents.length === 0" class="empty-state small">
+                <p>暂无学生</p>
+              </div>
             </div>
           </div>
         </div>
@@ -491,22 +522,22 @@ onMounted(() => {
 <style scoped>
 /* ========== PC 样式 ========== */
 .classes-pc {
-  padding: 24px;
+  padding: var(--spacing-lg, 24px);
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--bg-color);
 }
 
 .pc-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-lg, 24px);
 }
 
-.pc-header h2 {
+.pc-title {
   font-size: 24px;
   font-weight: 600;
-  color: #303133;
+  color: var(--text-color-primary);
   margin: 0;
 }
 
@@ -515,99 +546,193 @@ onMounted(() => {
   margin: 0 auto;
 }
 
-.pc-stats-row {
-  margin-bottom: 20px;
+/* 统计卡片网格 */
+.pc-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md, 16px);
+  margin-bottom: var(--spacing-md, 16px);
 }
 
-.pc-stat-card {
-  border-radius: 12px;
-}
-
-.pc-stat-item {
+.stat-card {
+  background: var(--fill-color-blank);
+  border-radius: var(--border-radius-large, 8px);
+  padding: var(--spacing-lg, 24px);
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--spacing-md, 16px);
+  box-shadow: var(--box-shadow-light, 0 2px 8px 0 rgba(0, 0, 0, 0.06));
+  transition: all var(--transition-duration, 0.3s) var(--transition-timing-function, cubic-bezier(0.4, 0, 0.2, 1));
+  position: relative;
+  overflow: hidden;
 }
 
-.pc-stat-icon {
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+}
+
+.stat-card.stat-primary::before {
+  background: linear-gradient(180deg, var(--color-primary), var(--color-primary-light-3));
+}
+
+.stat-card.stat-success::before {
+  background: linear-gradient(180deg, var(--color-success), #85ce61);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow);
+}
+
+.stat-icon {
   width: 56px;
   height: 56px;
-  border-radius: 12px;
+  border-radius: var(--border-radius-large, 8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  flex-shrink: 0;
 }
 
-.pc-stat-icon.classes-icon {
-  background: linear-gradient(135deg, #409eff, #79bbff);
+.stat-card.stat-primary .stat-icon {
+  background: linear-gradient(135deg, var(--color-primary-light-9), var(--color-primary-light-7));
+  color: var(--color-primary);
 }
 
-.pc-stat-icon.students-icon {
-  background: linear-gradient(135deg, #67c23a, #95d475);
+.stat-card.stat-success .stat-icon {
+  background: linear-gradient(135deg, var(--color-success-light), #d1f0c8);
+  color: var(--color-success);
 }
 
-.pc-stat-detail {
+.stat-body {
   flex: 1;
 }
 
-.pc-stat-value {
-  font-size: 28px;
-  font-weight: 600;
-  color: #303133;
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-color-primary);
+  line-height: 1.2;
 }
 
-.pc-stat-label {
-  font-size: 14px;
-  color: #909399;
+.stat-label {
+  font-size: var(--font-size-small, 13px);
+  color: var(--text-color-secondary);
   margin-top: 4px;
 }
 
+/* 筛选卡片 */
 .pc-filter-card {
-  margin-bottom: 20px;
-  border-radius: 12px;
+  background: var(--fill-color-blank);
+  border-radius: var(--border-radius-large, 8px);
+  padding: var(--spacing-md, 16px);
+  margin-bottom: var(--spacing-md, 16px);
+  box-shadow: var(--box-shadow-light, 0 2px 8px 0 rgba(0, 0, 0, 0.06));
 }
 
+/* 表格卡片 */
 .pc-table-card {
-  border-radius: 12px;
+  background: var(--fill-color-blank);
+  border-radius: var(--border-radius-large, 8px);
+  padding: var(--spacing-md, 16px);
+  box-shadow: var(--box-shadow-light, 0 2px 8px 0 rgba(0, 0, 0, 0.06));
+}
+
+.student-count-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--border-radius-round, 20px);
+  background: var(--color-primary-light-9);
+  color: var(--color-primary);
+  font-size: var(--font-size-small, 13px);
+  font-weight: 500;
 }
 
 .pc-pagination {
   display: flex;
   justify-content: flex-end;
-  margin-top: 20px;
+  margin-top: var(--spacing-md, 16px);
 }
 
+/* 详情弹窗内容 */
 .pc-detail-content {
-  padding: 10px 0;
+  padding: var(--spacing-sm, 8px) 0;
+}
+
+.detail-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-md, 16px);
+  padding: var(--spacing-md, 16px);
+  background: var(--fill-color);
+  border-radius: var(--border-radius-large, 8px);
+  margin-bottom: var(--spacing-lg, 24px);
+}
+
+.detail-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-label {
+  font-size: var(--font-size-extra-small, 12px);
+  color: var(--text-color-secondary);
+}
+
+.detail-value {
+  font-size: var(--font-size-medium, 16px);
+  font-weight: 500;
+  color: var(--text-color-primary);
+}
+
+.detail-value.highlight {
+  color: var(--color-primary);
 }
 
 .pc-students-section {
-  margin-top: 24px;
+  margin-top: var(--spacing-lg, 24px);
 }
 
-.pc-students-section h4 {
-  font-size: 16px;
+.section-title {
+  font-size: var(--font-size-medium, 16px);
   font-weight: 500;
-  color: #303133;
-  margin-bottom: 12px;
+  color: var(--text-color-primary);
+  margin-bottom: var(--spacing-sm, 8px);
+  padding-bottom: var(--spacing-sm, 8px);
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
-.pc-empty-tip {
-  text-align: center;
-  color: #909399;
-  padding: 20px;
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl, 32px) var(--spacing-md, 16px);
+  color: var(--text-color-secondary);
+}
+
+.empty-state p {
+  margin-top: var(--spacing-sm, 8px);
+  font-size: var(--font-size-small, 13px);
 }
 
 /* ========== 移动端样式 ========== */
 .page-content {
-  padding-bottom: 20px;
+  padding-bottom: var(--spacing-lg, 20px);
 }
 
 .stats-section {
   display: flex;
-  background: #fff;
-  padding: 16px;
+  align-items: center;
+  background: var(--fill-color-blank);
+  padding: var(--spacing-md, 16px);
   margin-bottom: 10px;
 }
 
@@ -616,32 +741,40 @@ onMounted(() => {
   text-align: center;
 }
 
+.stat-divider {
+  width: 1px;
+  height: 40px;
+  background: var(--border-color-lighter);
+  margin: 0 var(--spacing-md, 16px);
+}
+
 .stat-value {
-  font-size: 24px;
-  font-weight: bold;
-  color: #1989fa;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1.2;
 }
 
 .stat-label {
-  font-size: 12px;
-  color: #666;
+  font-size: var(--font-size-extra-small, 12px);
+  color: var(--text-color-secondary);
   margin-top: 4px;
   display: block;
 }
 
 .filter-section {
-  background: #fff;
+  background: var(--fill-color-blank);
   margin-bottom: 10px;
-  padding: 8px 12px;
+  padding: var(--spacing-sm, 8px) var(--spacing-sm, 12px);
 }
 
 .filter-buttons {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-sm, 8px);
 }
 
 .filter-buttons :deep(.van-button) {
-  padding: 0 12px;
+  padding: 0 var(--spacing-sm, 12px);
 }
 
 .filter-buttons :deep(.van-icon) {
@@ -649,43 +782,95 @@ onMounted(() => {
 }
 
 .class-list {
-  padding: 0 12px;
+  padding: 0 var(--spacing-sm, 12px);
 }
 
 .class-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 12px 16px;
+  background: var(--fill-color-blank);
+  border-radius: var(--border-radius-large, 8px);
+  padding: var(--spacing-md, 16px);
   margin-bottom: 10px;
+  box-shadow: var(--box-shadow-lighter, 0 1px 4px 0 rgba(0, 0, 0, 0.04));
+  transition: all var(--transition-duration, 0.3s) var(--transition-timing-function, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
-.class-header {
+.class-card:active {
+  transform: scale(0.98);
+}
+
+.class-card-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  gap: var(--spacing-sm, 12px);
+  margin-bottom: var(--spacing-sm, 8px);
 }
 
-.class-name {
-  font-size: 16px;
-  font-weight: 500;
+.class-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--border-radius-large, 8px);
+  background: linear-gradient(135deg, var(--color-primary-light-9), var(--color-primary-light-7));
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
 }
 
 .class-info {
-  font-size: 13px;
-  color: #666;
-  margin-bottom: 10px;
+  flex: 1;
+  min-width: 0;
 }
 
-.class-actions {
+.class-name {
+  font-size: var(--font-size-medium, 16px);
+  font-weight: 500;
+  color: var(--text-color-primary);
+  display: block;
+}
+
+.class-grade {
+  font-size: var(--font-size-extra-small, 12px);
+  color: var(--text-color-secondary);
+  margin-top: 2px;
+  display: block;
+}
+
+.class-student-count {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-xs, 8px) var(--spacing-sm, 12px);
+  background: var(--color-primary-light-9);
+  border-radius: var(--border-radius-base, 4px);
 }
 
-.empty-tip {
-  text-align: center;
-  color: #999;
-  padding: 40px 20px;
+.count-number {
+  font-size: var(--font-size-large, 18px);
+  font-weight: 600;
+  color: var(--color-primary);
+  line-height: 1;
+}
+
+.count-label {
+  font-size: var(--font-size-extra-small, 12px);
+  color: var(--color-primary);
+}
+
+.class-card-actions {
+  display: flex;
+  gap: var(--spacing-sm, 8px);
+  padding-top: var(--spacing-sm, 8px);
+  border-top: 1px solid var(--border-color-lighter);
+}
+
+.empty-state.small {
+  padding: var(--spacing-lg, 24px);
+}
+
+.empty-state.small p {
+  margin-top: 0;
 }
 
 /* 弹窗 */
@@ -693,31 +878,33 @@ onMounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #f7f8fa;
+  background: var(--bg-color);
 }
 
 .popup-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  background: #fff;
-  border-bottom: 1px solid #eee;
+  padding: var(--spacing-sm, 12px) var(--spacing-md, 16px);
+  background: var(--fill-color-blank);
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .cancel-btn {
-  color: #666;
-  padding: 4px 8px;
+  color: var(--text-color-secondary);
+  padding: 4px var(--spacing-sm, 8px);
+  font-size: var(--font-size-base, 14px);
 }
 
 .popup-title {
-  font-size: 16px;
+  font-size: var(--font-size-medium, 16px);
   font-weight: 500;
+  color: var(--text-color-primary);
 }
 
 .form-content {
   flex: 1;
-  padding: 10px 0;
+  padding: var(--spacing-sm, 10px) 0;
 }
 
 /* 详情弹窗 */
@@ -730,23 +917,41 @@ onMounted(() => {
 .detail-content {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
-  background: #f7f8fa;
+  padding: var(--spacing-md, 16px);
+  background: var(--bg-color);
+}
+
+.detail-stats {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+.detail-stat-item {
+  text-align: center;
+  padding: var(--spacing-md, 16px) var(--spacing-xl, 32px);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light-3));
+  border-radius: var(--border-radius-large, 8px);
+  color: #ffffff;
+}
+
+.detail-stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.detail-stat-label {
+  font-size: var(--font-size-small, 13px);
+  opacity: 0.9;
+  margin-top: 4px;
 }
 
 .detail-section {
-  background: #fff;
-  border-radius: 8px;
-  margin-top: 12px;
-  padding: 12px 16px;
-}
-
-.section-title {
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 10px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #eee;
+  background: var(--fill-color-blank);
+  border-radius: var(--border-radius-large, 8px);
+  margin-top: var(--spacing-sm, 12px);
+  padding: var(--spacing-sm, 12px) var(--spacing-md, 16px);
 }
 
 .student-list {

@@ -80,7 +80,7 @@
       <!-- 快捷入口 -->
       <el-row :gutter="20" class="pc-actions-row">
         <el-col :span="8">
-          <el-card shadow="hover" class="pc-action-card" @click="goToPending">
+          <el-card shadow="hover" class="pc-action-card hover-lift" @click="goToPending">
             <div class="pc-action-item">
               <div class="pc-action-icon pending-action">
                 <el-icon :size="32"><EditPen /></el-icon>
@@ -91,7 +91,7 @@
           </el-card>
         </el-col>
         <el-col :span="8">
-          <el-card shadow="hover" class="pc-action-card" @click="goToRecords">
+          <el-card shadow="hover" class="pc-action-card hover-lift" @click="goToRecords">
             <div class="pc-action-item">
               <div class="pc-action-icon records-action">
                 <el-icon :size="32"><Document /></el-icon>
@@ -102,7 +102,7 @@
           </el-card>
         </el-col>
         <el-col :span="8">
-          <el-card shadow="hover" class="pc-action-card" @click="goToRecords">
+          <el-card shadow="hover" class="pc-action-card hover-lift" @click="goToRecords">
             <div class="pc-action-item">
               <div class="pc-action-icon stats-action">
                 <el-icon :size="32"><DataAnalysis /></el-icon>
@@ -180,7 +180,7 @@
 
     <div class="page-content">
       <!-- 待答题卡片 -->
-      <div class="card" @click="goToPending">
+      <div class="card card-hoverable" @click="goToPending">
         <div class="card-icon pending">
           <svg viewBox="0 0 24 24" fill="none">
             <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
@@ -358,10 +358,11 @@ function getStatusText(status) {
 /* ==================== 移动端样式 ==================== */
 .page {
   min-height: 100%;
+  background-color: var(--bg-color);
 }
 
 .header {
-  background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light-3));
   padding: 20px;
   padding-top: calc(20px + env(safe-area-inset-top, 0px));
   color: white;
@@ -379,12 +380,12 @@ function getStatusText(status) {
 .avatar {
   width: 50px;
   height: 50px;
-  background: white;
+  background: var(--fill-color-blank);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ff9800;
+  color: var(--color-primary);
   font-size: 24px;
   font-weight: bold;
   margin-right: 16px;
@@ -422,23 +423,6 @@ function getStatusText(status) {
     font-size: 12px;
   }
 
-  .card {
-    padding: 12px;
-  }
-
-  .card-icon {
-    width: 36px;
-    height: 36px;
-  }
-
-  .card-content h3 {
-    font-size: 14px;
-  }
-
-  .card-content p {
-    font-size: 12px;
-  }
-
   .stats-grid {
     gap: 8px;
   }
@@ -457,14 +441,15 @@ function getStatusText(status) {
 }
 
 .card {
-  background: white;
+  background-color: var(--fill-color-blank);
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 16px;
   display: flex;
   align-items: center;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: all var(--transition-duration) var(--transition-timing-function);
+  box-shadow: var(--box-shadow-light);
 }
 
 .card:active {
@@ -482,8 +467,8 @@ function getStatusText(status) {
 }
 
 .card-icon.pending {
-  background: #fff3e0;
-  color: #ff9800;
+  background-color: var(--color-primary-light-9);
+  color: var(--color-primary);
 }
 
 .card-icon svg {
@@ -498,15 +483,16 @@ function getStatusText(status) {
 .card-content h3 {
   font-size: 16px;
   margin-bottom: 4px;
+  color: var(--text-color-primary);
 }
 
 .card-content p {
   font-size: 14px;
-  color: #666;
+  color: var(--text-color-secondary);
 }
 
 .card-arrow {
-  color: #ccc;
+  color: var(--text-color-placeholder);
 }
 
 .stats-grid {
@@ -517,28 +503,30 @@ function getStatusText(status) {
 }
 
 .stat-card {
-  background: white;
+  background-color: var(--fill-color-blank);
   border-radius: 12px;
   padding: 16px;
   text-align: center;
+  box-shadow: var(--box-shadow-light);
 }
 
 .stat-value {
   font-size: 24px;
   font-weight: bold;
-  color: #ff9800;
+  color: var(--color-primary);
 }
 
 .stat-label {
   font-size: 12px;
-  color: #666;
+  color: var(--text-color-secondary);
   margin-top: 4px;
 }
 
 .section {
-  background: white;
+  background-color: var(--fill-color-blank);
   border-radius: 12px;
   padding: 16px;
+  box-shadow: var(--box-shadow-light);
 }
 
 .section-header {
@@ -550,11 +538,12 @@ function getStatusText(status) {
 
 .section-header h3 {
   font-size: 16px;
+  color: var(--text-color-primary);
 }
 
 .section-header a {
   font-size: 14px;
-  color: #ff9800;
+  color: var(--color-primary);
   cursor: pointer;
 }
 
@@ -562,12 +551,17 @@ function getStatusText(status) {
   display: flex;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-color-lighter);
   cursor: pointer;
+  transition: background-color var(--transition-duration);
 }
 
 .recent-item:last-child {
   border-bottom: none;
+}
+
+.recent-item:active {
+  background-color: var(--fill-color);
 }
 
 .recent-icon {
@@ -583,23 +577,23 @@ function getStatusText(status) {
 }
 
 .recent-icon.语文 {
-  background: #e3f2fd;
-  color: #1976d2;
+  background-color: var(--color-primary-light-9);
+  color: var(--color-primary);
 }
 
 .recent-icon.数学 {
-  background: #e8f5e9;
-  color: #388e3c;
+  background-color: var(--color-success-light);
+  color: var(--color-success);
 }
 
 .recent-icon.英语 {
-  background: #fce4ec;
-  color: #c2185b;
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
 }
 
 .recent-icon.科学 {
-  background: #fff3e0;
-  color: #f57c00;
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
 }
 
 .recent-info {
@@ -609,11 +603,12 @@ function getStatusText(status) {
 .recent-title {
   font-size: 14px;
   margin-bottom: 4px;
+  color: var(--text-color-primary);
 }
 
 .recent-meta {
   font-size: 12px;
-  color: #999;
+  color: var(--text-color-secondary);
 }
 
 .recent-meta span {
@@ -626,15 +621,15 @@ function getStatusText(status) {
 }
 
 .recent-score.good {
-  color: #4caf50;
+  color: var(--color-success);
 }
 
 .recent-score.medium {
-  color: #ff9800;
+  color: var(--color-warning);
 }
 
 .recent-score.poor {
-  color: #f44336;
+  color: var(--color-danger);
 }
 
 .recent-right {
@@ -651,29 +646,29 @@ function getStatusText(status) {
 }
 
 .recent-status.graded {
-  background: #e8f5e9;
-  color: #4caf50;
+  background-color: var(--color-success-light);
+  color: var(--color-success);
 }
 
 .recent-status.pending {
-  background: #fff3e0;
-  color: #ff9800;
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
 }
 
 .empty-state {
   padding: 24px;
   text-align: center;
-  color: #999;
+  color: var(--text-color-secondary);
 }
 
 /* ==================== PC 端样式 ==================== */
 .home-pc {
   min-height: 100%;
-  background: #f5f7fa;
+  background-color: var(--bg-color);
 }
 
 .pc-header {
-  background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light-3));
   padding: 0;
 }
 
@@ -694,12 +689,12 @@ function getStatusText(status) {
 .pc-avatar {
   width: 64px;
   height: 64px;
-  background: white;
+  background: var(--fill-color-blank);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ff9800;
+  color: var(--color-primary);
   font-size: 28px;
   font-weight: bold;
   margin-right: 20px;
@@ -728,7 +723,7 @@ function getStatusText(status) {
   color: white;
   font-size: 15px;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background var(--transition-duration);
 }
 
 .pc-pending-banner:hover {
@@ -771,23 +766,23 @@ function getStatusText(status) {
 }
 
 .pc-stat-icon.completed {
-  background: #e8f5e9;
-  color: #4caf50;
+  background-color: var(--color-success-light);
+  color: var(--color-success);
 }
 
 .pc-stat-icon.avg-score {
-  background: #e3f2fd;
-  color: #1976d2;
+  background-color: var(--color-primary-light-9);
+  color: var(--color-primary);
 }
 
 .pc-stat-icon.correct-rate {
-  background: #fce4ec;
-  color: #e91e63;
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
 }
 
 .pc-stat-icon.pending-count {
-  background: #fff3e0;
-  color: #ff9800;
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
 }
 
 .pc-stat-detail {
@@ -797,13 +792,13 @@ function getStatusText(status) {
 .pc-stat-value {
   font-size: 28px;
   font-weight: 700;
-  color: #303133;
+  color: var(--text-color-primary);
   line-height: 1.2;
 }
 
 .pc-stat-label {
   font-size: 13px;
-  color: #909399;
+  color: var(--text-color-secondary);
   margin-top: 4px;
 }
 
@@ -815,11 +810,6 @@ function getStatusText(status) {
 .pc-action-card {
   border-radius: 12px;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.pc-action-card:hover {
-  transform: translateY(-2px);
 }
 
 .pc-action-card :deep(.el-card__body) {
@@ -841,29 +831,29 @@ function getStatusText(status) {
 }
 
 .pc-action-icon.pending-action {
-  background: #fff3e0;
-  color: #ff9800;
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
 }
 
 .pc-action-icon.records-action {
-  background: #e3f2fd;
-  color: #1976d2;
+  background-color: var(--color-primary-light-9);
+  color: var(--color-primary);
 }
 
 .pc-action-icon.stats-action {
-  background: #f3e5f5;
-  color: #9c27b0;
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
 }
 
 .pc-action-item h3 {
   font-size: 16px;
-  color: #303133;
+  color: var(--text-color-primary);
   margin-bottom: 6px;
 }
 
 .pc-action-item p {
   font-size: 13px;
-  color: #909399;
+  color: var(--text-color-secondary);
 }
 
 /* 表格卡片 */
@@ -873,7 +863,7 @@ function getStatusText(status) {
 
 .pc-table-card :deep(.el-card__header) {
   padding: 16px 20px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .pc-table-card :deep(.el-card__body) {
@@ -888,7 +878,7 @@ function getStatusText(status) {
 
 .pc-table-header h3 {
   font-size: 17px;
-  color: #303133;
+  color: var(--text-color-primary);
   font-weight: 600;
 }
 
@@ -897,15 +887,15 @@ function getStatusText(status) {
 }
 
 .pc-exam-table :deep(.el-table__row) {
-  transition: background-color 0.15s;
+  transition: background-color var(--transition-duration);
 }
 
 .pc-exam-table :deep(.el-table__row:hover) {
-  background-color: #fafafa;
+  background-color: var(--color-primary-light-9);
 }
 
 .pc-time {
-  color: #909399;
+  color: var(--text-color-secondary);
   font-size: 13px;
 }
 
@@ -915,18 +905,18 @@ function getStatusText(status) {
 }
 
 .pc-score.good {
-  color: #4caf50;
+  color: var(--color-success);
 }
 
 .pc-score.medium {
-  color: #ff9800;
+  color: var(--color-warning);
 }
 
 .pc-score.poor {
-  color: #f44336;
+  color: var(--color-danger);
 }
 
 .pc-score-pending {
-  color: #c0c4cc;
+  color: var(--text-color-disabled);
 }
 </style>

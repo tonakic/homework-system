@@ -865,7 +865,7 @@ onMounted(() => {
 .page-title {
   font-size: 24px;
   font-weight: 600;
-  color: #303133;
+  color: var(--text-color-primary);
   margin: 0;
 }
 
@@ -881,7 +881,7 @@ onMounted(() => {
 .card-title {
   font-size: 16px;
   font-weight: 500;
-  color: #303133;
+  color: var(--text-color-primary);
 }
 
 /* PC端筛选表单 */
@@ -908,7 +908,7 @@ onMounted(() => {
 }
 
 .no-data {
-  color: #c0c4cc;
+  color: var(--text-color-placeholder);
 }
 
 /* PC端分页 */
@@ -924,12 +924,12 @@ onMounted(() => {
 }
 
 .cancel-btn {
-  color: #1989fa;
+  color: var(--color-primary);
   font-size: 14px;
 }
 
 .filter-section {
-  background: #fff;
+  background: var(--fill-color-blank);
   padding: 10px 12px;
   margin-bottom: 10px;
 }
@@ -963,7 +963,7 @@ onMounted(() => {
 }
 
 .search-row :deep(.van-search__content) {
-  background: #f7f8fa;
+  background: var(--bg-color);
 }
 
 .date-tags {
@@ -977,7 +977,7 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 16px 16px 12px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .date-picker-title {
@@ -986,7 +986,7 @@ onMounted(() => {
 }
 
 .date-picker-clear {
-  color: #969799;
+  color: var(--text-color-secondary);
   font-size: 14px;
 }
 
@@ -995,12 +995,12 @@ onMounted(() => {
   align-items: center;
   padding: 16px;
   gap: 12px;
-  background: #f7f8fa;
+  background: var(--bg-color);
 }
 
 .date-input {
   flex: 1;
-  background: #fff;
+  background: var(--fill-color-blank);
   border-radius: 8px;
   padding: 10px 12px;
   text-align: center;
@@ -1009,33 +1009,33 @@ onMounted(() => {
 }
 
 .date-input.active {
-  border-color: #1989fa;
+  border-color: var(--color-primary);
 }
 
 .date-label {
   display: block;
   font-size: 12px;
-  color: #969799;
+  color: var(--text-color-secondary);
   margin-bottom: 4px;
 }
 
 .date-value {
   font-size: 15px;
-  color: #323233;
+  color: var(--text-color-primary);
 }
 
 .date-value.placeholder {
-  color: #c8c9cc;
+  color: var(--text-color-placeholder);
 }
 
 .date-separator {
-  color: #969799;
+  color: var(--text-color-secondary);
   font-size: 14px;
 }
 
 .date-picker-footer {
   padding: 12px 16px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border-color-lighter);
 }
 
 .log-list {
@@ -1043,7 +1043,7 @@ onMounted(() => {
 }
 
 .log-item {
-  background: #fff;
+  background: var(--fill-color-blank);
   border-radius: 8px;
   padding: 12px 16px;
   margin-bottom: 10px;
@@ -1054,7 +1054,7 @@ onMounted(() => {
 }
 
 .log-item.selected {
-  background: #f0f9ff;
+  background: var(--color-primary-light-9);
 }
 
 .log-checkbox {
@@ -1084,7 +1084,7 @@ onMounted(() => {
 
 .log-time {
   font-size: 12px;
-  color: #999;
+  color: var(--text-color-secondary);
 }
 
 .log-content {
@@ -1095,23 +1095,23 @@ onMounted(() => {
 
 .log-action {
   font-size: 14px;
-  color: #1989fa;
+  color: var(--color-primary);
 }
 
 .log-target {
   font-size: 13px;
-  color: #07c160;
+  color: var(--color-success);
   margin-left: 8px;
 }
 
 .log-detail {
   font-size: 13px;
-  color: #666;
+  color: var(--text-color-regular);
 }
 
 .log-ip {
   font-size: 12px;
-  color: #999;
+  color: var(--text-color-secondary);
   margin-top: 8px;
 }
 
@@ -1120,7 +1120,7 @@ onMounted(() => {
   bottom: 0;
   left: 0;
   right: 0;
-  background: #fff;
+  background: var(--fill-color-blank);
   padding: 12px 16px;
   display: flex;
   align-items: center;
@@ -1132,6 +1132,6 @@ onMounted(() => {
 .selected-count {
   flex: 1;
   font-size: 14px;
-  color: #666;
+  color: var(--text-color-regular);
 }
 </style>

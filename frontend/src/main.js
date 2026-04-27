@@ -9,8 +9,8 @@ import 'vant/lib/index.css';
 // 引入Element Plus样式
 import 'element-plus/dist/index.css';
 
-// 引入全局样式
-import './styles/index.css';
+// 引入全局样式（SCSS版本）
+import './styles/index.scss';
 
 // 引入Vant组件（按需引入通过unplugin自动处理）
 import {

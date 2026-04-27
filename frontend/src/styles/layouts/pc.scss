@@ -1,0 +1,807 @@
+// ==========================================
+// PC端布局样式 - 借鉴 xmky-exam 设计风格
+// ==========================================
+
+// ==========================================
+// 整体布局容器
+// ==========================================
+.pc-layout {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-color);
+}
+
+// ==========================================
+// 顶部导航栏
+// ==========================================
+.pc-header {
+  height: var(--header-height);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light-3));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: relative;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  
+  // 品牌区域
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background-color: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 20px;
+    }
+    
+    .brand-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+    
+    .brand-badge {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      background-color: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+  }
+  
+  // 用户信息区域
+  .header-user {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all var(--transition-duration);
+      
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+      }
+    }
+    
+    .user-name {
+      color: #fff;
+      font-size: 14px;
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .user-dropdown {
+      color: #fff;
+      cursor: pointer;
+      
+      .el-dropdown-link {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #fff;
+        cursor: pointer;
+        
+        &:hover {
+          opacity: 0.8;
+        }
+      }
+    }
+  }
+}
+
+// ==========================================
+// 主体区域（侧边栏 + 内容）
+// ==========================================
+.pc-body {
+  display: flex;
+  height: calc(100vh - var(--header-height));
+  overflow: hidden;
+}
+
+// ==========================================
+// 侧边栏
+// ==========================================
+.pc-sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--fill-color-blank);
+  border-right: 1px solid var(--border-color-lighter);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width var(--transition-duration) var(--transition-timing-function);
+  
+  // 折叠状态
+  &.is-collapsed {
+    width: var(--sidebar-collapsed-width);
+  }
+  
+  // 菜单容器
+  .sidebar-menu {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--border-color-light);
+      border-radius: 2px;
+    }
+  }
+  
+  // 菜单项
+  .menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: var(--text-color-regular);
+    cursor: pointer;
+    transition: all var(--transition-duration);
+    border-left: 3px solid transparent;
+    
+    .menu-icon {
+      font-size: 18px;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    
+    .menu-title {
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    &:hover {
+      background-color: var(--color-primary-light-9);
+      color: var(--color-primary);
+    }
+    
+    &.is-active {
+      background-color: var(--color-primary-light-9);
+      color: var(--color-primary);
+      border-left-color: var(--color-primary);
+      font-weight: 500;
+    }
+  }
+  
+  // 折叠按钮
+  .sidebar-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border-color-lighter);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    .collapse-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background-color: var(--fill-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--transition-duration);
+      
+      &:hover {
+        background-color: var(--color-primary-light-9);
+        color: var(--color-primary);
+      }
+    }
+  }
+}
+
+// ==========================================
+// 主内容区域
+// ==========================================
+.pc-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--bg-color);
+  
+  // 内容头部（面包屑等）
+  .main-header {
+    padding: 12px 20px;
+    background-color: var(--fill-color-blank);
+    border-bottom: 1px solid var(--border-color-lighter);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+    .breadcrumb-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--text-color-secondary);
+      
+      .breadcrumb-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        
+        &:not(:last-child)::after {
+          content: '/';
+          margin-left: 8px;
+          color: var(--border-color);
+        }
+        
+        &:last-child {
+          color: var(--text-color-primary);
+          font-weight: 500;
+        }
+      }
+    }
+    
+    .header-tools {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+  }
+  
+  // 内容主体
+  .main-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--border-color-light);
+      border-radius: 3px;
+    }
+    
+    // 内容容器（有最大宽度限制）
+    .content-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    // 全宽内容容器
+    .content-full {
+      width: 100%;
+    }
+  }
+}
+
+// ==========================================
+// 页面标题区域
+// ==========================================
+.page-header {
+  margin-bottom: 20px;
+  
+  .page-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-color-primary);
+    margin-bottom: 8px;
+  }
+  
+  .page-desc {
+    font-size: 14px;
+    color: var(--text-color-secondary);
+  }
+}
+
+// ==========================================
+// 标签页布局
+// ==========================================
+.tabs-container {
+  background-color: var(--fill-color-blank);
+  border-radius: 8px;
+  
+  .tabs-header {
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border-color-lighter);
+  }
+  
+  .tabs-content {
+    padding: 16px;
+  }
+}
+
+// ==========================================
+// 登录页专用布局
+// ==========================================
+.login-layout {
+  height: 100vh;
+  display: flex;
+  background-color: var(--bg-color);
+  
+  // 左侧品牌区域
+  .login-brand {
+    width: 50%;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light-5));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    
+    // 背景装饰
+    &::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    }
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -150px;
+      left: -150px;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    }
+    
+    .brand-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 16px;
+      background-color: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      margin-bottom: 24px;
+    }
+    
+    .brand-title {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+    
+    .brand-subtitle {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+    
+    // 功能特性展示
+    .brand-features {
+      margin-top: 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      
+      .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        
+        .feature-icon {
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          background-color: rgba(255, 255, 255, 0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .feature-text {
+          font-size: 14px;
+        }
+      }
+    }
+  }
+  
+  // 右侧登录区域
+  .login-form-wrapper {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    
+    .login-form-container {
+      width: 100%;
+      max-width: 400px;
+      
+      .login-header {
+        text-align: center;
+        margin-bottom: 32px;
+        
+        .login-title {
+          font-size: 24px;
+          font-weight: 600;
+          color: var(--text-color-primary);
+          margin-bottom: 8px;
+        }
+        
+        .login-desc {
+          font-size: 14px;
+          color: var(--text-color-secondary);
+        }
+      }
+      
+      .login-form {
+        // 表单样式
+      }
+      
+      .login-footer {
+        text-align: center;
+        margin-top: 24px;
+        
+        .footer-text {
+          font-size: 12px;
+          color: var(--text-color-placeholder);
+        }
+      }
+    }
+  }
+  
+  // 移动端适配
+  @media (max-width: 767px) {
+    flex-direction: column;
+    
+    .login-brand {
+      width: 100%;
+      height: 200px;
+      padding: 24px;
+      
+      .brand-features {
+        display: none;
+      }
+    }
+    
+    .login-form-wrapper {
+      width: 100%;
+      flex: 1;
+      padding: 20px;
+    }
+  }
+}
+
+// ==========================================
+// 答题页专用布局
+// ==========================================
+.exam-layout {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--fill-color-light);
+  
+  // 答题页顶栏
+  .exam-header {
+    height: var(--header-height);
+    background-color: var(--fill-color-blank);
+    border-bottom: 1px solid var(--border-color-lighter);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    
+    .exam-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-color-primary);
+    }
+    
+    .exam-timer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      .timer-icon {
+        font-size: 18px;
+        color: var(--color-warning);
+      }
+      
+      .timer-value {
+        font-size: 18px;
+        font-weight: 600;
+        font-family: 'Courier New', monospace;
+        color: var(--text-color-primary);
+        
+        &.warning {
+          color: var(--color-danger);
+        }
+      }
+    }
+    
+    .exam-actions {
+      display: flex;
+      gap: 12px;
+    }
+  }
+  
+  // 答题主体区域
+  .exam-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    
+    // 题目区域
+    .question-area {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      
+      .question-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: var(--fill-color-blank);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: var(--box-shadow-light);
+      }
+      
+      .question-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        
+        .question-number {
+          font-size: 16px;
+          font-weight: 600;
+          color: var(--color-primary);
+        }
+        
+        .question-type {
+          padding: 4px 12px;
+          border-radius: 4px;
+          font-size: 12px;
+          background-color: var(--color-primary-light-9);
+          color: var(--color-primary);
+        }
+      }
+      
+      .question-content {
+        font-size: 15px;
+        line-height: 1.8;
+        color: var(--text-color-primary);
+        margin-bottom: 24px;
+        
+        // 题干中的图片
+        img {
+          max-width: 100%;
+          border-radius: 8px;
+          margin: 12px 0;
+        }
+        
+        // 题干中的代码块
+        pre {
+          background-color: var(--fill-color);
+          padding: 12px 16px;
+          border-radius: 8px;
+          overflow-x: auto;
+          font-family: 'Courier New', monospace;
+        }
+      }
+      
+      .answer-area {
+        // 答题区域样式
+      }
+    }
+    
+    // 答题卡侧边栏
+    .answer-card {
+      width: 280px;
+      background-color: var(--fill-color-blank);
+      border-left: 1px solid var(--border-color-lighter);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      
+      .answer-card-header {
+        padding: 16px;
+        border-bottom: 1px solid var(--border-color-lighter);
+        
+        .progress-info {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 12px;
+          
+          .progress-label {
+            font-size: 14px;
+            color: var(--text-color-secondary);
+          }
+          
+          .progress-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-color-primary);
+          }
+        }
+        
+        .progress-bar {
+          height: 8px;
+          border-radius: 4px;
+          background-color: var(--fill-color);
+          overflow: hidden;
+          
+          .progress-inner {
+            height: 100%;
+            border-radius: 4px;
+            background-color: var(--color-primary);
+            transition: width var(--transition-duration);
+          }
+        }
+      }
+      
+      .answer-card-body {
+        flex: 1;
+        padding: 16px;
+        overflow-y: auto;
+        
+        .question-grid {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 8px;
+          
+          .grid-item {
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all var(--transition-duration);
+            border: 1px solid var(--border-color-lighter);
+            
+            &:hover {
+              border-color: var(--color-primary);
+              color: var(--color-primary);
+            }
+            
+            &.is-current {
+              border-color: var(--color-primary);
+              background-color: var(--color-primary);
+              color: #fff;
+            }
+            
+            &.is-done {
+              background-color: var(--color-success-light);
+              border-color: var(--color-success);
+              color: var(--color-success);
+            }
+            
+            &.is-marked {
+              background-color: var(--color-warning-light);
+              border-color: var(--color-warning);
+              color: var(--color-warning);
+            }
+          }
+        }
+      }
+      
+      .answer-card-footer {
+        padding: 16px;
+        border-top: 1px solid var(--border-color-lighter);
+        
+        .submit-btn {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+// ==========================================
+// 响应式适配
+// ==========================================
+@media (max-width: 991px) {
+  .login-layout {
+    .login-brand {
+      width: 40%;
+    }
+    
+    .login-form-wrapper {
+      width: 60%;
+    }
+  }
+  
+  .exam-layout {
+    .exam-body {
+      .answer-card {
+        width: 200px;
+      }
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .login-layout {
+    flex-direction: column;
+    
+    .login-brand {
+      width: 100%;
+      height: 180px;
+      
+      .brand-title {
+        font-size: 22px;
+      }
+      
+      .brand-subtitle {
+        font-size: 14px;
+      }
+      
+      .brand-features {
+        display: none;
+      }
+    }
+    
+    .login-form-wrapper {
+      width: 100%;
+      flex: 1;
+      padding: 24px;
+    }
+  }
+  
+  .exam-layout {
+    .exam-body {
+      flex-direction: column;
+      
+      .question-area {
+        padding: 16px;
+        
+        .question-wrapper {
+          padding: 16px;
+        }
+      }
+      
+      .answer-card {
+        width: 100%;
+        height: auto;
+        max-height: 200px;
+        border-left: none;
+        border-top: 1px solid var(--border-color-lighter);
+        
+        .answer-card-body {
+          padding: 12px;
+          
+          .question-grid {
+            grid-template-columns: repeat(8, 1fr);
+          }
+        }
+      }
+    }
+  }
+}

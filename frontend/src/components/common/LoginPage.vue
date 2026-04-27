@@ -2,42 +2,35 @@
   <!-- PC端：左右分栏布局 -->
   <div v-if="isPC" class="login-pc">
     <!-- 左侧品牌区域 -->
-    <div class="login-brand teacher">
+    <div class="login-brand" :style="brandStyle">
       <div class="brand-content">
         <div class="brand-logo">
-          <!-- 教师：站在讲台前的人物侧写 -->
-          <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="40" cy="40" r="38" fill="currentColor" opacity="0.2"/>
-            <rect x="12" y="55" width="56" height="8" rx="2" fill="white"/>
-            <rect x="16" y="50" width="48" height="6" rx="1" fill="currentColor" opacity="0.3"/>
-            <ellipse cx="42" cy="30" rx="7" ry="8" fill="white"/>
-            <path d="M32 45 Q32 38 42 38 Q52 38 52 45 L52 55 L32 55 Z" fill="white"/>
-            <path d="M52 42 L58 35 L60 35" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/>
-            <rect x="58" y="18" width="10" height="14" rx="1" fill="white" opacity="0.9"/>
-          </svg>
+          <slot name="logo">
+            <el-icon><School /></el-icon>
+          </slot>
         </div>
         <h1 class="brand-title">创新小学作业系统</h1>
-        <p class="brand-subtitle">智能教学管理平台</p>
+        <p class="brand-subtitle">让学习更高效，让教学更轻松</p>
         
         <!-- 功能特性展示 -->
         <div class="brand-features">
           <div class="feature-item">
             <div class="feature-icon">
-              <el-icon><Collection /></el-icon>
+              <el-icon><Document /></el-icon>
             </div>
-            <span>题库智能管理</span>
+            <span>智能题库管理</span>
           </div>
           <div class="feature-item">
             <div class="feature-icon">
               <el-icon><EditPen /></el-icon>
             </div>
-            <span>作业一键布置</span>
+            <span>AI辅助批改</span>
           </div>
           <div class="feature-item">
             <div class="feature-icon">
               <el-icon><DataAnalysis /></el-icon>
             </div>
-            <span>AI辅助批改</span>
+            <span>数据统计分析</span>
           </div>
         </div>
       </div>
@@ -47,8 +40,8 @@
     <div class="login-form-wrapper">
       <div class="login-form-container">
         <div class="login-header">
-          <h2 class="login-title">教师登录</h2>
-          <p class="login-desc">请输入工号和密码登录系统</p>
+          <h2 class="login-title">{{ title }}</h2>
+          <p class="login-desc">{{ subtitle }}</p>
         </div>
         
         <el-form
@@ -61,7 +54,7 @@
           <el-form-item prop="account">
             <el-input
               v-model="loginForm.account"
-              placeholder="请输入工号"
+              :placeholder="accountPlaceholder"
               size="large"
               prefix-icon="User"
             />
@@ -97,40 +90,35 @@
         
         <!-- 其他登录入口 -->
         <div class="login-links">
-          <span class="links-label">其他身份：</span>
-          <a @click="goToStudent">学生登录</a>
-          <a @click="goToAdmin">管理员登录</a>
+          <span class="links-label">其他登录：</span>
+          <a v-for="link in otherLinks" :key="link.path" @click="goTo(link.path)">
+            {{ link.label }}
+          </a>
         </div>
       </div>
     </div>
   </div>
   
-  <!-- 移动端 -->
-  <div v-else class="login-mobile teacher">
+  <!-- 移动端：全屏卡片布局 -->
+  <div v-else class="login-mobile" :style="mobileBgStyle">
     <div class="mobile-header">
       <div class="mobile-logo">
-        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="40" cy="40" r="38" fill="currentColor" opacity="0.2"/>
-          <rect x="12" y="55" width="56" height="8" rx="2" fill="white"/>
-          <rect x="16" y="50" width="48" height="6" rx="1" fill="currentColor" opacity="0.3"/>
-          <ellipse cx="42" cy="30" rx="7" ry="8" fill="white"/>
-          <path d="M32 45 Q32 38 42 38 Q52 38 52 45 L52 55 L32 55 Z" fill="white"/>
-          <path d="M52 42 L58 35 L60 35" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/>
-          <rect x="58" y="18" width="10" height="14" rx="1" fill="white" opacity="0.9"/>
-        </svg>
+        <slot name="logo">
+          <el-icon><School /></el-icon>
+        </slot>
       </div>
       <h1 class="mobile-title">创新小学作业系统</h1>
-      <p class="mobile-subtitle">教师登录</p>
+      <p class="mobile-subtitle">{{ title }}</p>
     </div>
     
-    <van-form @submit="handleLogin" class="mobile-form">
+    <van-form @submit="handleLoginMobile" class="mobile-form">
       <van-cell-group inset>
         <van-field
           v-model="account"
-          name="account"
-          label="工号"
-          placeholder="请输入工号"
-          :rules="[{ required: true, message: '请输入工号' }]"
+          :name="accountField"
+          :label="accountLabel"
+          :placeholder="accountPlaceholder"
+          :rules="[{ required: true, message: `请输入${accountLabel}` }]"
         />
         <van-field
           v-model="password"
@@ -162,15 +150,16 @@
     </van-form>
     
     <div class="mobile-links">
-      <a @click="goToStudent">学生登录</a>
-      <span class="link-divider">|</span>
-      <a @click="goToAdmin">管理员登录</a>
+      <a v-for="(link, index) in otherLinks" :key="link.path">
+        <span v-if="index > 0" class="link-divider">|</span>
+        <span @click="goTo(link.path)">{{ link.label }}</span>
+      </a>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { showSuccessToast, showFailToast } from 'vant';
 import { ElMessage } from 'element-plus';
@@ -178,30 +167,105 @@ import { login } from '@/api/auth';
 import { useUserStore } from '@/store/user';
 import { useDevice } from '@/composables/useDevice';
 
+const props = defineProps({
+  // 用户类型：student, teacher, admin
+  userType: {
+    type: String,
+    required: true
+  },
+  // 页面标题
+  title: {
+    type: String,
+    default: '用户登录'
+  },
+  // 副标题
+  subtitle: {
+    type: String,
+    default: ''
+  },
+  // 账号字段名
+  accountField: {
+    type: String,
+    default: 'account'
+  },
+  // 账号标签
+  accountLabel: {
+    type: String,
+    default: '账号'
+  },
+  // 账号占位符
+  accountPlaceholder: {
+    type: String,
+    default: '请输入账号'
+  },
+  // 品牌区域颜色
+  brandColor: {
+    type: String,
+    default: '#409eff'
+  },
+  // 其他登录链接
+  otherLinks: {
+    type: Array,
+    default: () => []
+  },
+  // 登录成功后的跳转路径
+  successRoute: {
+    type: String,
+    default: '/home'
+  },
+  // 首次登录跳转路径
+  firstLoginRoute: {
+    type: String,
+    default: '/profile?action=changePassword'
+  }
+});
+
 const router = useRouter();
 const userStore = useUserStore();
 const { isPC } = useDevice();
 
-// 移动端表单
-const account = ref('');
-const password = ref('');
-const remember = ref(false);
-const loading = ref(false);
-
-// PC端表单
+// 表单数据
 const formRef = ref(null);
 const loginForm = reactive({
   account: '',
   password: ''
 });
+const account = ref('');
+const password = ref('');
+const remember = ref(false);
+const loading = ref(false);
 
 // 表单验证规则
 const formRules = {
-  account: [{ required: true, message: '请输入工号', trigger: 'blur' }],
+  account: [{ required: true, message: `请输入${props.accountLabel}`, trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
 };
 
-// 通用登录逻辑
+// 品牌区域样式
+const brandStyle = computed(() => ({
+  background: `linear-gradient(135deg, ${props.brandColor}, ${adjustColor(props.brandColor, 30)})`
+}));
+
+// 移动端背景样式
+const mobileBgStyle = computed(() => ({
+  background: `linear-gradient(135deg, ${props.brandColor}, ${adjustColor(props.brandColor, 30)})`
+}));
+
+// 颜色调整函数
+function adjustColor(color, percent) {
+  const num = parseInt(color.replace('#', ''), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = (num >> 16) + amt;
+  const G = (num >> 8 & 0x00FF) + amt;
+  const B = (num & 0x0000FF) + amt;
+  return '#' + (0x1000000 +
+    (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+    (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+    (B < 255 ? B < 1 ? 0 : B : 255)
+  ).toString(16).slice(1);
+}
+
+// 登录逻辑
 async function performLogin(accountValue, passwordValue, rememberValue, showMessage) {
   if (!accountValue || !passwordValue) {
     showMessage('请填写完整信息', 'error');
@@ -211,16 +275,17 @@ async function performLogin(accountValue, passwordValue, rememberValue, showMess
   loading.value = true;
 
   try {
-    const res = await login('teacher', accountValue, passwordValue, rememberValue);
+    const res = await login(props.userType, accountValue, passwordValue, rememberValue);
 
     if (res.code === 0) {
       userStore.setUserData(res.data);
       showMessage('登录成功', 'success');
 
+      // 检查是否首次登录
       if (res.data.userInfo.firstLogin) {
-        router.push('/teacher/profile?action=changePassword');
+        router.push(props.firstLoginRoute);
       } else {
-        router.push('/teacher/home');
+        router.push(props.successRoute);
       }
       return true;
     } else {
@@ -235,20 +300,10 @@ async function performLogin(accountValue, passwordValue, rememberValue, showMess
   }
 }
 
-async function handleLogin() {
-  await performLogin(
-    account.value,
-    password.value,
-    remember.value,
-    (msg, type) => {
-      if (type === 'success') showSuccessToast(msg);
-      else showFailToast(msg);
-    }
-  );
-}
-
+// PC端登录
 async function handleLoginPC() {
   if (!formRef.value) return;
+  
   try {
     await formRef.value.validate();
   } catch {
@@ -260,18 +315,34 @@ async function handleLoginPC() {
     loginForm.password,
     remember.value,
     (msg, type) => {
-      if (type === 'success') ElMessage.success(msg);
-      else ElMessage.error(msg);
+      if (type === 'success') {
+        ElMessage.success(msg);
+      } else {
+        ElMessage.error(msg);
+      }
     }
   );
 }
 
-function goToStudent() {
-  router.push('/student/login');
+// 移动端登录
+async function handleLoginMobile() {
+  await performLogin(
+    account.value,
+    password.value,
+    remember.value,
+    (msg, type) => {
+      if (type === 'success') {
+        showSuccessToast(msg);
+      } else {
+        showFailToast(msg);
+      }
+    }
+  );
 }
 
-function goToAdmin() {
-  router.push('/admin/login');
+// 跳转
+function goTo(path) {
+  router.push(path);
 }
 </script>
 
@@ -285,17 +356,12 @@ function goToAdmin() {
 
 .login-brand {
   width: 50%;
-  background: linear-gradient(135deg, #2196f3, #64b5f6);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
   position: relative;
   overflow: hidden;
-}
-
-.login-brand.teacher {
-  background: linear-gradient(135deg, #1976d2, #42a5f5);
 }
 
 .login-brand::before {
@@ -306,7 +372,7 @@ function goToAdmin() {
   width: 300px;
   height: 300px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
 }
 
 .login-brand::after {
@@ -330,13 +396,13 @@ function goToAdmin() {
 .brand-logo {
   width: 80px;
   height: 80px;
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
   margin: 0 auto 24px;
-}
-
-.brand-logo svg {
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
 }
 
 .brand-title {
@@ -406,36 +472,64 @@ function goToAdmin() {
   color: var(--text-color-secondary);
 }
 
-.login-form :deep(.el-input__wrapper) { border-radius: 8px; }
-.login-form :deep(.el-form-item) { margin-bottom: 20px; }
-.form-options { margin-bottom: 20px; }
-.login-btn { width: 100%; height: 44px; border-radius: 8px; font-size: 16px; }
+.login-form {
+  :deep(.el-input__wrapper) {
+    border-radius: 8px;
+  }
+  
+  :deep(.el-form-item) {
+    margin-bottom: 20px;
+  }
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.login-btn {
+  width: 100%;
+  height: 44px;
+  border-radius: 8px;
+  font-size: 16px;
+}
 
 .login-links {
   text-align: center;
   margin-top: 24px;
   padding-top: 24px;
   border-top: 1px solid var(--border-color-lighter);
+  
+  .links-label {
+    font-size: 14px;
+    color: var(--text-color-secondary);
+    margin-right: 8px;
+  }
+  
+  a {
+    color: var(--color-primary);
+    cursor: pointer;
+    margin: 0 8px;
+    font-size: 14px;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
-.login-links .links-label { font-size: 14px; color: var(--text-color-secondary); margin-right: 8px; }
-.login-links a { color: var(--color-primary); cursor: pointer; margin: 0 8px; font-size: 14px; }
-.login-links a:hover { text-decoration: underline; }
 
 /* ===================== 移动端样式 ===================== */
 .login-mobile {
   min-height: 100vh;
   min-height: 100dvh;
-  background: linear-gradient(135deg, #2196f3, #64b5f6);
   display: flex;
   flex-direction: column;
   padding: 60px 20px 20px;
   padding-top: max(60px, env(safe-area-inset-top, 60px));
   padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
   box-sizing: border-box;
-}
-
-.login-mobile.teacher {
-  background: linear-gradient(135deg, #1976d2, #42a5f5);
 }
 
 .mobile-header {
@@ -445,10 +539,28 @@ function goToAdmin() {
   flex-shrink: 0;
 }
 
-.mobile-logo { width: 72px; height: 72px; margin: 0 auto 16px; }
-.mobile-logo svg { width: 100%; height: 100%; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15)); }
-.mobile-title { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
-.mobile-subtitle { font-size: 14px; opacity: 0.9; }
+.mobile-logo {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  margin: 0 auto 16px;
+}
+
+.mobile-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.mobile-subtitle {
+  font-size: 14px;
+  opacity: 0.9;
+}
 
 .mobile-form {
   background: white;
@@ -459,12 +571,24 @@ function goToAdmin() {
   width: 100%;
   max-width: 400px;
   margin: 0 auto;
+  
+  :deep(.van-cell-group) {
+    margin: 0;
+  }
+  
+  :deep(.van-cell) {
+    padding: 12px 16px;
+  }
+  
+  :deep(.van-field__label) {
+    width: 70px;
+  }
 }
-.mobile-form :deep(.van-cell-group) { margin: 0; }
-.mobile-form :deep(.van-cell) { padding: 12px 16px; }
-.mobile-form :deep(.van-field__label) { width: 70px; }
 
-.mobile-actions { margin-top: 20px; padding: 0 4px; }
+.mobile-actions {
+  margin-top: 20px;
+  padding: 0 4px;
+}
 
 .mobile-links {
   margin-top: auto;
@@ -472,38 +596,76 @@ function goToAdmin() {
   text-align: center;
   color: white;
   flex-shrink: 0;
+  
+  a {
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .link-divider {
+    margin: 0 12px;
+    opacity: 0.6;
+  }
 }
-.mobile-links a { color: white; cursor: pointer; font-size: 14px; }
-.mobile-links .link-divider { margin: 0 12px; opacity: 0.6; }
 
 /* ===================== 响应式适配 ===================== */
 @media (max-width: 991px) {
-  .login-pc .login-brand { width: 40%; }
-  .login-pc .login-form-wrapper { width: 60%; }
+  .login-pc {
+    .login-brand {
+      width: 40%;
+    }
+    
+    .login-form-wrapper {
+      width: 60%;
+    }
+  }
 }
 
 @media (max-width: 767px) {
   .login-pc {
     flex-direction: column;
-  }
-  .login-pc .login-brand {
-    width: 100%;
-    height: 200px;
-    padding: 24px;
-  }
-  .login-pc .login-brand .brand-subtitle,
-  .login-pc .login-brand .brand-features { display: none; }
-  .login-pc .login-form-wrapper {
-    width: 100%;
-    flex: 1;
-    padding: 20px;
+    
+    .login-brand {
+      width: 100%;
+      height: 200px;
+      padding: 24px;
+      
+      .brand-subtitle {
+        display: none;
+      }
+      
+      .brand-features {
+        display: none;
+      }
+    }
+    
+    .login-form-wrapper {
+      width: 100%;
+      flex: 1;
+      padding: 20px;
+    }
   }
 }
 
 @media (max-width: 375px) {
-  .login-mobile { padding: 40px 16px 16px; }
-  .mobile-logo { width: 60px; height: 60px; }
-  .mobile-title { font-size: 20px; }
-  .mobile-form { padding: 16px; border-radius: 12px; }
+  .login-mobile {
+    padding: 40px 16px 16px;
+  }
+  
+  .mobile-logo {
+    width: 60px;
+    height: 60px;
+    font-size: 32px;
+  }
+  
+  .mobile-title {
+    font-size: 20px;
+  }
+  
+  .mobile-form {
+    padding: 16px;
+    border-radius: 12px;
+  }
 }
 </style>

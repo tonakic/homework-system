@@ -168,7 +168,7 @@
             <el-button @click="downloadTemplate">模板下载</el-button>
           </div>
           <div v-if="importResult" class="import-result">
-            <p :style="{ color: importResult.success ? '#67c23a' : '#f56c6c' }">{{ importResult.message }}</p>
+            <p :style="{ color: importResult.success ? 'var(--color-success)' : 'var(--color-danger)' }">{{ importResult.message }}</p>
             <div v-if="importResult.details && importResult.details.length > 0" class="result-details">
               <p v-for="(detail, idx) in importResult.details" :key="idx">第{{ detail.row }}行: {{ detail.reason }}</p>
             </div>
@@ -1035,7 +1035,7 @@ onMounted(() => {
 }
 
 .filter-section {
-  background: #fff;
+  background: var(--fill-color-blank);
   padding: 10px 12px;
   margin-bottom: 10px;
 }
@@ -1069,11 +1069,11 @@ onMounted(() => {
 }
 
 .search-row :deep(.van-search__content) {
-  background: #f7f8fa;
+  background: var(--bg-color);
 }
 
 .search-box :deep(.van-search__content) {
-  background: #f7f8fa;
+  background: var(--bg-color);
 }
 
 .student-list {
@@ -1095,7 +1095,7 @@ onMounted(() => {
   display: flex;
   gap: 12px;
   margin-top: 4px;
-  color: #666;
+  color: var(--text-color-regular);
   font-size: 13px;
 }
 
@@ -1105,7 +1105,7 @@ onMounted(() => {
 }
 
 .action-icons .van-icon {
-  color: #1989fa;
+  color: var(--color-primary);
   font-size: 18px;
 }
 
@@ -1114,7 +1114,7 @@ onMounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #f7f8fa;
+  background: var(--bg-color);
 }
 
 .popup-header {
@@ -1122,12 +1122,12 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background: #fff;
-  border-bottom: 1px solid #eee;
+  background: var(--fill-color-blank);
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .cancel-btn {
-  color: #666;
+  color: var(--text-color-regular);
   padding: 4px 8px;
 }
 
@@ -1143,7 +1143,7 @@ onMounted(() => {
 }
 
 .form-section {
-  background: #fff;
+  background: var(--fill-color-blank);
   margin-top: 10px;
 }
 
@@ -1162,7 +1162,7 @@ onMounted(() => {
   flex: 1;
   overflow-y: auto;
   padding: 16px;
-  background: #f7f8fa;
+  background: var(--bg-color);
 }
 
 .detail-actions {
@@ -1177,7 +1177,7 @@ onMounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #f7f8fa;
+  background: var(--bg-color);
 }
 
 .import-content {
@@ -1187,7 +1187,7 @@ onMounted(() => {
 }
 
 .import-desc {
-  background: #fff;
+  background: var(--fill-color-blank);
   padding: 16px;
   border-radius: 8px;
   margin-bottom: 16px;
@@ -1195,7 +1195,7 @@ onMounted(() => {
 
 .import-desc p {
   font-size: 14px;
-  color: #666;
+  color: var(--text-color-regular);
   margin: 4px 0;
 }
 
@@ -1227,12 +1227,12 @@ onMounted(() => {
 }
 
 .result-details {
-  background: #fff;
+  background: var(--fill-color-blank);
   padding: 12px;
   border-radius: 8px;
   margin-top: 12px;
   font-size: 13px;
-  color: #666;
+  color: var(--text-color-regular);
   max-height: 150px;
   overflow-y: auto;
 }
@@ -1257,7 +1257,7 @@ onMounted(() => {
   font-size: 22px;
   font-weight: 600;
   margin: 0;
-  color: #303133;
+  color: var(--text-color-primary);
 }
 
 .pc-header-actions {
@@ -1279,7 +1279,7 @@ onMounted(() => {
 }
 
 .pc-form-tip {
-  color: #e6a23c;
+  color: var(--color-warning);
   font-size: 13px;
   margin-top: -8px;
   margin-bottom: 12px;
@@ -1287,7 +1287,7 @@ onMounted(() => {
 }
 
 .pc-import-content .import-desc {
-  background: #f5f7fa;
+  background: var(--bg-color);
   padding: 16px;
   border-radius: 8px;
   margin-bottom: 16px;
@@ -1295,7 +1295,7 @@ onMounted(() => {
 
 .pc-import-content .import-desc p {
   font-size: 14px;
-  color: #606266;
+  color: var(--text-color-regular);
   margin: 4px 0;
 }
 
@@ -1309,12 +1309,12 @@ onMounted(() => {
 }
 
 .pc-import-content .result-details {
-  background: #f5f7fa;
+  background: var(--bg-color);
   padding: 12px;
   border-radius: 8px;
   margin-top: 8px;
   font-size: 13px;
-  color: #606266;
+  color: var(--text-color-regular);
   max-height: 150px;
   overflow-y: auto;
 }

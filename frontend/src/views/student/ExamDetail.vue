@@ -69,15 +69,15 @@
           </template>
           <ul class="pc-tips-list">
             <li>
-              <el-icon color="#409eff"><CircleCheck /></el-icon>
+              <el-icon :style="{ color: 'var(--color-primary)' }"><CircleCheck /></el-icon>
               <span>请确保网络稳定，答案将自动保存</span>
             </li>
             <li>
-              <el-icon color="#409eff"><CircleCheck /></el-icon>
+              <el-icon :style="{ color: 'var(--color-primary)' }"><CircleCheck /></el-icon>
               <span>答题过程中请勿切换页面</span>
             </li>
             <li>
-              <el-icon color="#409eff"><CircleCheck /></el-icon>
+              <el-icon :style="{ color: 'var(--color-primary)' }"><CircleCheck /></el-icon>
               <span>交卷前请检查所有题目是否已答</span>
             </li>
           </ul>
@@ -135,52 +135,88 @@
       <van-loading v-if="loading" class="loading-center" />
 
       <template v-else-if="exam.id">
-        <div class="card">
-          <h2 class="title">{{ exam.title }}</h2>
+        <!-- 作业信息卡片 -->
+        <div class="exam-card card">
+          <div class="exam-header">
+            <h2 class="exam-title">{{ exam.title }}</h2>
+            <span class="subject-badge" :class="getSubjectClass(exam.subject)">
+              {{ exam.subject }}
+            </span>
+          </div>
+          
           <div class="info-grid">
             <div class="info-item">
-              <span class="label">科目</span>
-              <span class="value">{{ exam.subject }}</span>
+              <span class="info-label">题数</span>
+              <span class="info-value">{{ exam.questionCount }}题</span>
             </div>
             <div class="info-item">
-              <span class="label">题数</span>
-              <span class="value">{{ exam.questionCount }}题</span>
+              <span class="info-label">总分</span>
+              <span class="info-value highlight">{{ exam.totalScore }}分</span>
             </div>
             <div class="info-item">
-              <span class="label">总分</span>
-              <span class="value">{{ exam.totalScore }}分</span>
+              <span class="info-label">限时</span>
+              <span class="info-value">{{ exam.duration > 0 ? exam.duration + '分钟' : '不限时' }}</span>
             </div>
             <div class="info-item">
-              <span class="label">限时</span>
-              <span class="value">{{ exam.duration > 0 ? exam.duration + '分钟' : '不限时' }}</span>
+              <span class="info-label">出题人</span>
+              <span class="info-value">{{ exam.creatorName }}</span>
             </div>
           </div>
-          <div class="detail-row">
-            <span class="label">出题人</span>
-            <span class="value">{{ exam.creatorName }}</span>
-          </div>
-          <div class="detail-row" v-if="exam.startTime">
-            <span class="label">开始时间</span>
-            <span class="value">{{ formatTime(exam.startTime) }}</span>
-          </div>
-          <div class="detail-row" v-if="exam.endTime">
-            <span class="label">截止时间</span>
-            <span class="value">{{ formatTime(exam.endTime) }}</span>
+
+          <div class="time-info" v-if="exam.startTime || exam.endTime">
+            <div class="time-row" v-if="exam.startTime">
+              <span class="time-label">开始时间</span>
+              <span class="time-value">{{ formatTime(exam.startTime) }}</span>
+            </div>
+            <div class="time-row" v-if="exam.endTime">
+              <span class="time-label">截止时间</span>
+              <span class="time-value">{{ formatTime(exam.endTime) }}</span>
+            </div>
           </div>
         </div>
 
-        <div class="tips card">
-          <h4>答题须知</h4>
-          <ul>
-            <li>请确保网络稳定，答案将自动保存</li>
-            <li>答题过程中请勿切换页面</li>
-            <li>交卷前请检查所有题目是否已答</li>
+        <!-- 答题须知卡片 -->
+        <div class="tips-card card">
+          <h4 class="tips-title">
+            <svg viewBox="0 0 24 24" fill="none" class="tips-icon">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+              <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            答题须知
+          </h4>
+          <ul class="tips-list">
+            <li>
+              <span class="tip-dot"></span>
+              请确保网络稳定，答案将自动保存
+            </li>
+            <li>
+              <span class="tip-dot"></span>
+              答题过程中请勿切换页面
+            </li>
+            <li>
+              <span class="tip-dot"></span>
+              交卷前请检查所有题目是否已答
+            </li>
           </ul>
         </div>
 
-        <div class="actions">
-          <van-button type="primary" block round @click="startExam" :loading="starting">
-            开始答题
+        <!-- 开始答题按钮 -->
+        <div class="action-section">
+          <van-button 
+            type="primary" 
+            block 
+            round 
+            size="large"
+            :loading="starting" 
+            @click="startExam"
+            class="start-btn"
+          >
+            <template #icon v-if="!starting">
+              <svg viewBox="0 0 24 24" fill="none" class="btn-icon">
+                <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </template>
+            {{ starting ? '正在进入...' : '开始答题' }}
           </van-button>
         </div>
       </template>
@@ -263,6 +299,16 @@ function getSubjectTagType(subject) {
   return types[subject] || 'info';
 }
 
+function getSubjectClass(subject) {
+  const classes = {
+    '语文': 'subject-chinese',
+    '数学': 'subject-math',
+    '英语': 'subject-english',
+    '科学': 'subject-science'
+  };
+  return classes[subject] || 'subject-default';
+}
+
 function getQuestionTypeTag(type) {
   const types = {
     'single': 'primary',
@@ -288,86 +334,239 @@ function getQuestionTypeText(type) {
 
 <style scoped>
 /* ==================== 移动端样式 ==================== */
+.page {
+  min-height: 100%;
+  background-color: var(--bg-color);
+}
+
+.page-content {
+  padding: var(--spacing-md);
+}
+
 .loading-center {
   display: flex;
   justify-content: center;
-  padding: 40px;
+  padding: 48px;
 }
 
-.title {
-  font-size: 18px;
-  margin-bottom: 16px;
+/* 作业信息卡片 */
+.exam-card {
+  margin-bottom: var(--spacing-md);
 }
 
+.exam-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-md);
+}
+
+.exam-title {
+  font-size: var(--font-size-large);
+  font-weight: 600;
+  color: var(--text-color-primary);
+  margin: 0;
+  flex: 1;
+  margin-right: var(--spacing-sm);
+  line-height: 1.4;
+}
+
+.subject-badge {
+  padding: 4px 12px;
+  border-radius: var(--border-radius-round);
+  font-size: var(--font-size-extra-small);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.subject-badge.subject-chinese {
+  background-color: var(--color-primary-light-9);
+  color: var(--color-primary);
+}
+
+.subject-badge.subject-math {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.subject-badge.subject-english {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.subject-badge.subject-science {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.subject-badge.subject-default {
+  background-color: var(--color-info-light);
+  color: var(--color-info);
+}
+
+/* 信息网格 */
 .info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
 }
 
 .info-item {
-  background: #f9f9f9;
-  padding: 12px;
-  border-radius: 8px;
+  background-color: var(--fill-color);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-large);
 }
 
-.info-item .label {
+.info-label {
   display: block;
-  font-size: 12px;
-  color: #999;
+  font-size: var(--font-size-extra-small);
+  color: var(--text-color-secondary);
   margin-bottom: 4px;
 }
 
-.info-item .value {
-  font-size: 16px;
+.info-value {
+  font-size: var(--font-size-medium);
   font-weight: 500;
+  color: var(--text-color-primary);
 }
 
-.detail-row {
+.info-value.highlight {
+  color: var(--color-warning);
+  font-weight: 600;
+}
+
+/* 时间信息 */
+.time-info {
+  border-top: 1px solid var(--border-color-lighter);
+  padding-top: var(--spacing-sm);
+}
+
+.time-row {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
+  padding: var(--spacing-xs) 0;
 }
 
-.detail-row .label {
-  color: #666;
+.time-label {
+  color: var(--text-color-secondary);
+  font-size: var(--font-size-small);
 }
 
-.tips h4 {
-  margin-bottom: 12px;
+.time-value {
+  color: var(--text-color-regular);
+  font-size: var(--font-size-small);
 }
 
-.tips ul {
-  padding-left: 20px;
+/* 答题须知卡片 */
+.tips-card {
+  margin-bottom: var(--spacing-md);
 }
 
-.tips li {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 8px;
+.tips-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-color-primary);
+  margin: 0 0 var(--spacing-md);
 }
 
-.actions {
-  margin-top: 24px;
+.tips-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--color-primary);
+}
+
+.tips-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tips-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0;
+  font-size: var(--font-size-small);
+  color: var(--text-color-regular);
+  border-bottom: 1px solid var(--border-color-lighter);
+}
+
+.tips-list li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.tip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+/* 开始答题按钮 */
+.action-section {
+  margin-top: var(--spacing-lg);
+}
+
+.start-btn {
+  font-weight: 600;
+  font-size: var(--font-size-medium);
+}
+
+.btn-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: var(--spacing-xs);
+}
+
+/* 移动端响应式优化 */
+@media (max-width: 375px) {
+  .page-content {
+    padding: var(--spacing-sm);
+  }
+
+  .exam-title {
+    font-size: var(--font-size-medium);
+  }
+
+  .info-grid {
+    gap: var(--spacing-xs);
+  }
+
+  .info-item {
+    padding: 10px var(--spacing-sm);
+  }
+
+  .info-value {
+    font-size: var(--font-size-base);
+  }
+
+  .tips-list li {
+    font-size: var(--font-size-extra-small);
+  }
 }
 
 /* ==================== PC 端样式 ==================== */
 .exam-detail-pc {
   min-height: 100%;
-  background: #f5f7fa;
+  background-color: var(--bg-color);
 }
 
 .pc-header {
-  background: white;
-  border-bottom: 1px solid #e4e7ed;
+  background-color: var(--fill-color-blank);
+  border-bottom: 1px solid var(--border-color-light);
 }
 
 .pc-header-inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px 40px;
+  padding: var(--spacing-lg) 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -376,18 +575,18 @@ function getQuestionTypeText(type) {
 .pc-page-title {
   font-size: 22px;
   font-weight: 600;
-  color: #303133;
+  color: var(--text-color-primary);
   margin: 0;
 }
 
 .pc-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px 40px 40px;
+  padding: var(--spacing-lg) 40px 40px;
 }
 
 .pc-loading-card {
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-md);
 }
 
 .pc-loading {
@@ -396,27 +595,27 @@ function getQuestionTypeText(type) {
   align-items: center;
   justify-content: center;
   padding: 60px 0;
-  gap: 16px;
-  color: #909399;
+  gap: var(--spacing-md);
+  color: var(--text-color-secondary);
 }
 
 .pc-info-card,
 .pc-tips-card,
 .pc-preview-card {
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-md);
   border-radius: 12px;
 }
 
 .pc-info-card :deep(.el-card__header),
 .pc-tips-card :deep(.el-card__header),
 .pc-preview-card :deep(.el-card__header) {
-  padding: 16px 20px;
-  border-bottom: 1px solid #f0f0f0;
+  padding: var(--spacing-md) 20px;
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .pc-info-card :deep(.el-card__body),
 .pc-tips-card :deep(.el-card__body) {
-  padding: 20px;
+  padding: var(--spacing-md);
 }
 
 .pc-card-header {
@@ -430,19 +629,19 @@ function getQuestionTypeText(type) {
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-xs);
 }
 
 .pc-title {
-  font-size: 20px;
+  font-size: var(--font-size-extra-large);
   font-weight: 600;
-  color: #303133;
+  color: var(--text-color-primary);
 }
 
 .pc-card-header h3 {
-  font-size: 16px;
+  font-size: var(--font-size-base);
   font-weight: 600;
-  color: #303133;
+  color: var(--text-color-primary);
 }
 
 .pc-descriptions {
@@ -451,16 +650,16 @@ function getQuestionTypeText(type) {
 
 .pc-descriptions :deep(.el-descriptions__label) {
   width: 100px;
-  color: #606266;
+  color: var(--text-color-regular);
   font-weight: 500;
 }
 
 .pc-info-value {
-  color: #303133;
+  color: var(--text-color-primary);
 }
 
 .pc-info-value.highlight {
-  color: #ff9800;
+  color: var(--color-warning);
   font-weight: 600;
 }
 
@@ -473,10 +672,10 @@ function getQuestionTypeText(type) {
 .pc-tips-list li {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
-  color: #606266;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--border-color-lighter);
+  color: var(--text-color-regular);
 }
 
 .pc-tips-list li:last-child {
@@ -484,19 +683,19 @@ function getQuestionTypeText(type) {
 }
 
 .pc-preview-count {
-  font-size: 14px;
-  color: #909399;
+  font-size: var(--font-size-small);
+  color: var(--text-color-secondary);
 }
 
 .pc-score-value {
   font-weight: 600;
-  color: #ff9800;
+  color: var(--color-warning);
 }
 
 .pc-actions {
   display: flex;
   justify-content: center;
-  padding: 20px 0;
+  padding: var(--spacing-md) 0;
 }
 
 .pc-actions .el-button {

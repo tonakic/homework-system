@@ -578,132 +578,135 @@ function getStatusText(status) {
 </script>
 
 <style scoped>
-/* PC端样式 */
+/* ==================== CSS变量定义 ==================== */
 .profile-page-pc {
-  padding: 20px;
+  --teacher-primary: #2196f3;
+  --teacher-primary-light: #64b5f6;
+  --teacher-primary-dark: #1976d2;
+  --card-radius: 12px;
+  --avatar-size-pc: 80px;
+  --avatar-size-mobile: 60px;
+}
+
+/* ==================== PC端样式 ==================== */
+.profile-page-pc {
+  padding: var(--spacing-lg, 20px);
+  min-height: 100%;
+  background-color: var(--bg-color);
 }
 
 .pc-header {
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-lg, 20px);
 }
 
 .pc-header h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: var(--font-size-xl, 20px);
+  color: var(--text-color-primary);
 }
 
 .profile-content-pc {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--spacing-lg, 20px);
+  max-width: 800px;
 }
 
+/* PC卡片通用样式 */
+.profile-page-pc :deep(.el-card) {
+  border-radius: var(--card-radius);
+  border: none;
+  box-shadow: var(--shadow, 0 2px 8px rgba(0, 0, 0, 0.1));
+}
+
+.profile-page-pc :deep(.el-card__header) {
+  padding: var(--spacing-md, 16px) var(--spacing-lg, 20px);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.profile-page-pc :deep(.el-card__body) {
+  padding: var(--spacing-lg, 20px);
+}
+
+.card-header {
+  font-weight: 600;
+  font-size: var(--font-size-md, 16px);
+  color: var(--text-color-primary);
+}
+
+/* 用户卡片 */
 .user-card-pc {
   text-align: center;
 }
 
-.card-header {
-  font-weight: 500;
-}
-
 .user-avatar {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #2196f3, #64b5f6);
+  width: var(--avatar-size-pc);
+  height: var(--avatar-size-pc);
+  background: linear-gradient(135deg, var(--teacher-primary), var(--teacher-primary-light));
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 36px;
+  color: var(--fill-color-blank);
+  font-size: calc(var(--avatar-size-pc) * 0.45);
   font-weight: bold;
-  margin: 0 auto 16px;
+  margin: 0 auto var(--spacing-md, 16px);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
 }
 
 .user-detail h3 {
-  margin: 0 0 8px;
-  font-size: 18px;
+  margin: 0 0 var(--spacing-xs, 8px);
+  font-size: var(--font-size-lg, 18px);
+  color: var(--text-color-primary);
 }
 
 .user-detail p {
-  margin: 0 0 16px;
-  color: #666;
+  margin: 0 0 var(--spacing-md, 16px);
+  color: var(--text-color-regular);
+  font-size: var(--font-size-sm, 14px);
 }
 
 .user-desc {
-  margin-top: 16px;
+  margin-top: var(--spacing-md, 16px);
   text-align: left;
 }
 
-.password-card-pc {
-  /* 纵向布局，无需特殊margin */
+/* 密码卡片 */
+.password-card-pc :deep(.el-form-item) {
+  margin-bottom: var(--spacing-md, 16px);
 }
 
-.logout-card-pc {
-  text-align: center;
+.password-card-pc :deep(.el-button--primary) {
+  background: linear-gradient(135deg, var(--teacher-primary), var(--teacher-primary-light));
+  border: none;
 }
 
-/* 移动端样式 */
-.user-card {
-  display: flex;
-  align-items: center;
-  padding: 20px;
-  margin-bottom: 16px;
-}
-
-.avatar {
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #2196f3, #64b5f6);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 28px;
-  font-weight: bold;
-  margin-right: 16px;
-}
-
-.user-info h2 {
-  font-size: 18px;
-  margin-bottom: 4px;
-}
-
-.user-info p {
-  font-size: 14px;
-  color: #666;
-}
-
-.logout {
-  margin-top: 32px;
-  padding: 0 16px;
-}
-
-.password-popup {
-  padding: 20px;
-}
-
-.password-popup h3 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.form-actions {
-  margin-top: 20px;
-}
-
-/* PC端帮助中心样式 */
+/* 帮助卡片 */
 .help-card-pc {
   text-align: center;
 }
 
 .help-desc {
-  color: #666;
-  font-size: 14px;
-  margin-bottom: 16px;
+  color: var(--text-color-regular);
+  font-size: var(--font-size-sm, 14px);
+  margin-bottom: var(--spacing-md, 16px);
 }
 
+.help-card-pc :deep(.el-button--primary) {
+  background: linear-gradient(135deg, var(--teacher-primary), var(--teacher-primary-light));
+  border: none;
+}
+
+/* 退出登录卡片 */
+.logout-card-pc {
+  text-align: center;
+}
+
+.logout-card-pc :deep(.el-card__body) {
+  padding: var(--spacing-lg, 20px);
+}
+
+/* ==================== PC端反馈列表样式 ==================== */
 .feedback-list {
   max-height: 400px;
   overflow-y: auto;
@@ -711,13 +714,14 @@ function getStatusText(status) {
 
 .empty-feedback {
   text-align: center;
-  color: #999;
-  padding: 40px 0;
+  color: var(--text-color-secondary);
+  padding: var(--spacing-xxl, 40px) 0;
+  font-size: var(--font-size-sm, 14px);
 }
 
 .feedback-item {
-  padding: 16px;
-  border-bottom: 1px solid #ebeef5;
+  padding: var(--spacing-md, 16px);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .feedback-item:last-child {
@@ -728,41 +732,97 @@ function getStatusText(status) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: var(--spacing-xs, 8px);
 }
 
 .feedback-title {
   font-weight: 500;
-  font-size: 15px;
-  color: #303133;
+  font-size: var(--font-size-md, 15px);
+  color: var(--text-color-primary);
 }
 
 .feedback-content {
-  font-size: 14px;
-  color: #606266;
+  font-size: var(--font-size-sm, 14px);
+  color: var(--text-color-regular);
   line-height: 1.6;
-  margin-bottom: 8px;
+  margin-bottom: var(--spacing-xs, 8px);
 }
 
 .feedback-reply {
-  background: #f5f7fa;
-  padding: 10px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  color: #409eff;
-  margin-bottom: 8px;
+  background-color: var(--bg-color);
+  padding: var(--spacing-sm, 10px) var(--spacing-md, 12px);
+  border-radius: var(--radius-sm, 6px);
+  font-size: var(--font-size-xs, 13px);
+  color: var(--info-color, #2196f3);
+  margin-bottom: var(--spacing-xs, 8px);
 }
 
 .reply-label {
-  color: #909399;
+  color: var(--text-color-secondary);
 }
 
 .feedback-time {
-  font-size: 12px;
-  color: #909399;
+  font-size: var(--font-size-xs, 12px);
+  color: var(--text-color-secondary);
 }
 
-/* 移动端帮助中心样式 */
+/* ==================== 移动端样式 ==================== */
+.user-card {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-lg, 20px);
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+.avatar {
+  width: var(--avatar-size-mobile);
+  height: var(--avatar-size-mobile);
+  background: linear-gradient(135deg, var(--teacher-primary, #2196f3), var(--teacher-primary-light, #64b5f6));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fill-color-blank);
+  font-size: calc(var(--avatar-size-mobile) * 0.47);
+  font-weight: bold;
+  margin-right: var(--spacing-md, 16px);
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.user-info h2 {
+  font-size: var(--font-size-lg, 18px);
+  margin-bottom: var(--spacing-xs, 4px);
+  color: var(--text-color-primary);
+}
+
+.user-info p {
+  font-size: var(--font-size-sm, 14px);
+  color: var(--text-color-regular);
+}
+
+.logout {
+  margin-top: var(--spacing-xl, 32px);
+  padding: 0 var(--spacing-md, 16px);
+}
+
+/* 密码弹窗 */
+.password-popup {
+  padding: var(--spacing-lg, 20px);
+}
+
+.password-popup h3 {
+  text-align: center;
+  margin-bottom: var(--spacing-lg, 20px);
+  font-size: var(--font-size-lg, 18px);
+  color: var(--text-color-primary);
+}
+
+.form-actions {
+  margin-top: var(--spacing-lg, 20px);
+}
+
+/* 帮助中心弹窗 */
 .help-popup {
   height: 100%;
   display: flex;
@@ -772,16 +832,17 @@ function getStatusText(status) {
 .loading-container {
   display: flex;
   justify-content: center;
-  padding: 40px 0;
+  padding: var(--spacing-xxl, 40px) 0;
 }
 
+/* 移动端反馈列表 */
 .feedback-list-mobile {
-  padding: 0 16px;
+  padding: 0 var(--spacing-md, 16px);
 }
 
 .feedback-item-mobile {
-  padding: 16px 0;
-  border-bottom: 1px solid #ebedf0;
+  padding: var(--spacing-md, 16px) 0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .feedback-item-mobile:last-child {
@@ -792,42 +853,53 @@ function getStatusText(status) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: var(--spacing-xs, 8px);
 }
 
 .feedback-title-mobile {
   font-weight: 500;
-  font-size: 15px;
-  color: #323233;
+  font-size: var(--font-size-md, 15px);
+  color: var(--text-color-primary);
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  margin-right: 8px;
+  margin-right: var(--spacing-xs, 8px);
 }
 
 .feedback-content-mobile {
-  font-size: 14px;
-  color: #646566;
+  font-size: var(--font-size-sm, 14px);
+  color: var(--text-color-regular);
   line-height: 1.6;
-  margin-bottom: 8px;
+  margin-bottom: var(--spacing-xs, 8px);
 }
 
 .feedback-reply-mobile {
-  background: #f7f8fa;
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  color: #1989fa;
-  margin-bottom: 8px;
+  background-color: var(--bg-color);
+  padding: var(--spacing-sm, 10px) var(--spacing-md, 12px);
+  border-radius: var(--radius-md, 8px);
+  font-size: var(--font-size-xs, 13px);
+  color: var(--info-color, #2196f3);
+  margin-bottom: var(--spacing-xs, 8px);
 }
 
 .reply-label-mobile {
-  color: #969799;
+  color: var(--text-color-secondary);
 }
 
 .feedback-time-mobile {
-  font-size: 12px;
-  color: #969799;
+  font-size: var(--font-size-xs, 12px);
+  color: var(--text-color-secondary);
+}
+
+/* ==================== 响应式适配 ==================== */
+@media (max-width: 767px) {
+  .profile-page-pc {
+    padding: var(--spacing-md, 16px);
+  }
+
+  .profile-content-pc {
+    gap: var(--spacing-md, 16px);
+  }
 }
 </style>

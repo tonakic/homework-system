@@ -1,29 +1,40 @@
 <template>
-  <el-menu
-    :default-active="activeMenu"
-    class="pc-sidebar"
-    :collapse="isCollapse"
-    router
-  >
-    <el-menu-item
-      v-for="item in menuItems"
-      :key="item.path"
-      :index="item.path"
+  <aside class="pc-sidebar-component" :class="{ 'is-collapsed': isCollapsed }">
+    <el-menu
+      :default-active="activeMenu"
+      class="sidebar-menu"
+      :collapse="isCollapsed"
+      router
     >
-      <el-icon><component :is="item.icon" /></el-icon>
-      <template #title>{{ item.title }}</template>
-    </el-menu-item>
-  </el-menu>
+      <el-menu-item
+        v-for="item in menuItems"
+        :key="item.path"
+        :index="item.path"
+      >
+        <el-icon><component :is="item.icon" /></el-icon>
+        <template #title>{{ item.title }}</template>
+      </el-menu-item>
+    </el-menu>
+    
+    <!-- 折叠按钮 -->
+    <div class="sidebar-footer">
+      <div class="collapse-btn" @click="toggleCollapse">
+        <el-icon>
+          <component :is="isCollapsed ? 'Expand' : 'Fold'" />
+        </el-icon>
+      </div>
+    </div>
+  </aside>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '@/store/user';
 
 const route = useRoute();
 const userStore = useUserStore();
-const isCollapse = ref(false);
+const isCollapsed = ref(false);
 
 const activeMenu = computed(() => route.path);
 const userType = computed(() => userStore.userType);
@@ -63,36 +74,84 @@ const menuItems = computed(() => {
   return menus[userType.value] || [];
 });
 
+const toggleCollapse = () => {
+  isCollapsed.value = !isCollapsed.value;
+};
+
 defineExpose({
-  toggleCollapse: () => {
-    isCollapse.value = !isCollapse.value;
-  }
+  toggleCollapse
 });
 </script>
 
 <style scoped>
-.pc-sidebar {
-  height: 100%;
-  border-right: 1px solid #e4e7ed;
-  background: #fff;
-}
-
-.pc-sidebar:not(.el-menu--collapse) {
+.pc-sidebar-component {
   width: 220px;
+  background-color: #fff;
+  border-right: 1px solid var(--border-color-lighter);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width var(--transition-duration) var(--transition-timing-function);
 }
 
-.pc-sidebar :deep(.el-menu-item) {
-  height: 50px;
-  line-height: 50px;
+.pc-sidebar-component.is-collapsed {
+  width: 64px;
 }
 
-.pc-sidebar :deep(.el-menu-item.is-active) {
-  background-color: rgba(255, 152, 0, 0.1);
-  color: #ff9800;
-  border-right: 3px solid #ff9800;
+.sidebar-menu {
+  flex: 1;
+  border-right: none;
+  background-color: #fff;
+  overflow-y: auto;
+  
+  :deep(.el-menu-item) {
+    height: 50px;
+    line-height: 50px;
+    margin: 4px 8px;
+    border-radius: 8px;
+    transition: all var(--transition-duration);
+    
+    &:hover {
+      background-color: var(--color-primary-light-9);
+    }
+    
+    &.is-active {
+      background-color: var(--color-primary-light-9);
+      color: var(--color-primary);
+      font-weight: 500;
+    }
+  }
+  
+  :deep(.el-menu--collapse) {
+    .el-menu-item {
+      margin: 4px;
+      border-radius: 8px;
+    }
+  }
 }
 
-.pc-sidebar :deep(.el-menu-item:hover) {
-  background-color: #f5f7fa;
+.sidebar-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-color-lighter);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.collapse-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background-color: var(--fill-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-duration);
+  
+  &:hover {
+    background-color: var(--color-primary-light-9);
+    color: var(--color-primary);
+  }
 }
 </style>

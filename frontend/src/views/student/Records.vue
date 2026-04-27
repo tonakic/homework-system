@@ -449,7 +449,7 @@ function getSubjectTagType(subject) {
 /* ==================== PC端样式 ==================== */
 .records-pc {
   min-height: 100%;
-  background: #f5f7fa;
+  background: var(--bg-color);
   padding: 24px;
 }
 
@@ -461,17 +461,17 @@ function getSubjectTagType(subject) {
 .pc-header h1 {
   font-size: 24px;
   font-weight: 600;
-  color: #303133;
+  color: var(--text-color-primary);
   margin: 0;
 }
 
 .pc-content {
   max-width: 1200px;
   margin: 0 auto;
-  background: #fff;
+  background: var(--fill-color-blank);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--box-shadow-light);
 }
 
 .filter-section {
@@ -484,12 +484,12 @@ function getSubjectTagType(subject) {
 
 .record-title-pc {
   cursor: pointer;
-  color: #303133;
+  color: var(--text-color-primary);
   transition: color 0.2s;
 }
 
 .record-title-pc:hover {
-  color: #409eff;
+  color: var(--color-primary);
 }
 
 .pc-score {
@@ -498,19 +498,19 @@ function getSubjectTagType(subject) {
 }
 
 .pc-score.good {
-  color: #4caf50;
+  color: var(--color-success);
 }
 
 .pc-score.medium {
-  color: #ff9800;
+  color: var(--color-warning);
 }
 
 .pc-score.poor {
-  color: #f44336;
+  color: var(--color-danger);
 }
 
 .pc-time {
-  color: #909399;
+  color: var(--text-color-secondary);
   font-size: 13px;
 }
 
@@ -523,7 +523,7 @@ function getSubjectTagType(subject) {
 /* ==================== 移动端样式 ==================== */
 .records-page {
   min-height: 100%;
-  background: #f5f5f5;
+  background: var(--bg-color);
 }
 
 .page-content {
@@ -541,8 +541,8 @@ function getSubjectTagType(subject) {
 }
 
 .subject-tag {
-  background: #fff3e0;
-  color: #ff9800;
+  background: var(--color-warning-light-9);
+  color: var(--color-warning);
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 12px;
@@ -550,7 +550,7 @@ function getSubjectTagType(subject) {
 
 .record-time {
   font-size: 12px;
-  color: #999;
+  color: var(--text-color-secondary);
 }
 
 .record-title {
@@ -570,15 +570,15 @@ function getSubjectTagType(subject) {
 }
 
 .score.good {
-  color: #4caf50;
+  color: var(--color-success);
 }
 
 .score.medium {
-  color: #ff9800;
+  color: var(--color-warning);
 }
 
 .score.poor {
-  color: #f44336;
+  color: var(--color-danger);
 }
 
 .status {
@@ -588,13 +588,13 @@ function getSubjectTagType(subject) {
 }
 
 .status.graded {
-  background: #e8f5e9;
-  color: #4caf50;
+  background: var(--color-success-light-9);
+  color: var(--color-success);
 }
 
 .status.pending-grade {
-  background: #fff3e0;
-  color: #ff9800;
+  background: var(--color-warning-light-9);
+  color: var(--color-warning);
 }
 
 /* 筛选弹窗 */
@@ -617,7 +617,7 @@ function getSubjectTagType(subject) {
 .section-label {
   font-size: 14px;
   font-weight: 500;
-  color: #323233;
+  color: var(--text-color-primary);
   margin-bottom: 10px;
 }
 
@@ -629,27 +629,27 @@ function getSubjectTagType(subject) {
 
 .btn-item {
   padding: 8px 16px;
-  border: 1px solid #dcdee0;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 14px;
-  color: #646566;
-  background: #fff;
+  color: var(--text-color-regular);
+  background: var(--fill-color-blank);
   min-width: 60px;
   text-align: center;
 }
 
 .btn-item.active {
-  background: #1989fa;
-  border-color: #1989fa;
-  color: #fff;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--fill-color-blank);
 }
 
 .filter-footer {
   display: flex;
   gap: 12px;
   padding: 12px 16px;
-  background: #fff;
-  border-top: 1px solid #ebedf0;
+  background: var(--fill-color-blank);
+  border-top: 1px solid var(--border-color-lighter);
 }
 
 .filter-footer .van-button {

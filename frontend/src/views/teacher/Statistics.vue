@@ -467,11 +467,11 @@ const distributionData = computed(() => {
   const s = statistics.value;
   const total = s.totalScores || 1;
   return [
-    { label: '优秀 (90-100)', count: s.excellentCount || 0, percentage: ((s.excellentCount || 0) / total * 100), color: '#07c160' },
-    { label: '良好 (80-89)', count: s.goodCount || 0, percentage: ((s.goodCount || 0) / total * 100), color: '#1989fa' },
-    { label: '中等 (70-79)', count: s.mediumCount || 0, percentage: ((s.mediumCount || 0) / total * 100), color: '#ff976a' },
+    { label: '优秀 (90-100)', count: s.excellentCount || 0, percentage: ((s.excellentCount || 0) / total * 100), color: 'var(--color-success)' },
+    { label: '良好 (80-89)', count: s.goodCount || 0, percentage: ((s.goodCount || 0) / total * 100), color: 'var(--color-primary)' },
+    { label: '中等 (70-79)', count: s.mediumCount || 0, percentage: ((s.mediumCount || 0) / total * 100), color: 'var(--color-warning)' },
     { label: '及格 (60-69)', count: s.passCount || 0, percentage: ((s.passCount || 0) / total * 100), color: '#ffd21e' },
-    { label: '不及格 (<60)', count: s.failCount || 0, percentage: ((s.failCount || 0) / total * 100), color: '#ee0a24' }
+    { label: '不及格 (<60)', count: s.failCount || 0, percentage: ((s.failCount || 0) / total * 100), color: 'var(--color-danger)' }
   ];
 });
 
@@ -635,7 +635,7 @@ onMounted(() => {
 /* ========== PC Styles ========== */
 .statistics-pc {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--bg-color);
   padding: 20px;
 }
 
@@ -649,7 +649,7 @@ onMounted(() => {
 .pc-header h2 {
   margin: 0;
   font-size: 24px;
-  color: #303133;
+  color: var(--text-color-primary);
 }
 
 .filter-bar {
@@ -679,7 +679,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   font-size: 28px;
-  color: white;
+  color: var(--fill-color-blank);
   margin-right: 16px;
 }
 
@@ -706,13 +706,13 @@ onMounted(() => {
 .stat-card .stat-value {
   font-size: 32px;
   font-weight: bold;
-  color: #303133;
+  color: var(--text-color-primary);
   line-height: 1.2;
 }
 
 .stat-card .stat-label {
   font-size: 14px;
-  color: #909399;
+  color: var(--text-color-secondary);
   margin-top: 4px;
 }
 
@@ -723,7 +723,7 @@ onMounted(() => {
 
 .stat-card.highlight .stat-value,
 .stat-card.highlight .stat-label {
-  color: white;
+  color: var(--fill-color-blank);
 }
 
 .charts-row {
@@ -762,11 +762,11 @@ onMounted(() => {
 }
 
 .label-text {
-  color: #606266;
+  color: var(--text-color-regular);
 }
 
 .label-count {
-  color: #909399;
+  color: var(--text-color-secondary);
 }
 
 .score-overview {
@@ -779,28 +779,28 @@ onMounted(() => {
 .overview-item {
   text-align: center;
   padding: 20px;
-  background: #f5f7fa;
+  background: var(--bg-color);
   border-radius: 8px;
 }
 
 .overview-label {
   font-size: 14px;
-  color: #909399;
+  color: var(--text-color-secondary);
   margin-bottom: 8px;
 }
 
 .overview-value {
   font-size: 28px;
   font-weight: bold;
-  color: #303133;
+  color: var(--text-color-primary);
 }
 
 .overview-value.good {
-  color: #67c23a;
+  color: var(--color-success);
 }
 
 .overview-value.bad {
-  color: #f56c6c;
+  color: var(--color-danger);
 }
 
 .table-card {
@@ -808,7 +808,7 @@ onMounted(() => {
 }
 
 .exam-title-link {
-  color: #409eff;
+  color: var(--color-primary);
   cursor: pointer;
 }
 
@@ -817,25 +817,25 @@ onMounted(() => {
 }
 
 .score-excellent {
-  color: #67c23a;
+  color: var(--color-success);
   font-weight: bold;
 }
 
 .score-good {
-  color: #409eff;
+  color: var(--color-primary);
   font-weight: bold;
 }
 
 .score-medium {
-  color: #e6a23c;
+  color: var(--color-warning);
 }
 
 .score-pass {
-  color: #909399;
+  color: var(--text-color-secondary);
 }
 
 .score-fail {
-  color: #f56c6c;
+  color: var(--color-danger);
 }
 
 /* Dialog Styles */
@@ -844,7 +844,7 @@ onMounted(() => {
 }
 
 .highlight-text {
-  color: #409eff;
+  color: var(--color-primary);
   font-weight: bold;
 }
 
@@ -854,7 +854,7 @@ onMounted(() => {
 
 .student-ranking-section h4 {
   margin: 0 0 16px 0;
-  color: #303133;
+  color: var(--text-color-primary);
   font-size: 16px;
 }
 
@@ -867,23 +867,23 @@ onMounted(() => {
   border-radius: 50%;
   font-size: 12px;
   font-weight: bold;
-  background: #f5f7fa;
-  color: #909399;
+  background: var(--bg-color);
+  color: var(--text-color-secondary);
 }
 
 .rank-badge.first {
   background: linear-gradient(135deg, #ffd700, #ffb347);
-  color: white;
+  color: var(--fill-color-blank);
 }
 
 .rank-badge.second {
   background: linear-gradient(135deg, #c0c0c0, #a8a8a8);
-  color: white;
+  color: var(--fill-color-blank);
 }
 
 .rank-badge.third {
   background: linear-gradient(135deg, #cd7f32, #b8860b);
-  color: white;
+  color: var(--fill-color-blank);
 }
 
 /* ========== Mobile Styles ========== */
@@ -896,7 +896,7 @@ onMounted(() => {
   display: flex;
   gap: 8px;
   padding: 12px;
-  background: #fff;
+  background: var(--fill-color-blank);
   margin-bottom: 12px;
   border-radius: 8px;
 }
@@ -908,7 +908,7 @@ onMounted(() => {
 }
 
 .card {
-  background: white;
+  background: var(--fill-color-blank);
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 12px;
@@ -917,10 +917,10 @@ onMounted(() => {
 .card-title {
   font-size: 16px;
   font-weight: 500;
-  color: #323233;
+  color: var(--text-color-primary);
   margin-bottom: 16px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #ebedf0;
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .stats-grid {
@@ -936,24 +936,24 @@ onMounted(() => {
 .stat-value {
   font-size: 24px;
   font-weight: bold;
-  color: #323233;
+  color: var(--text-color-primary);
 }
 
 .stat-value.highlight {
-  color: #1989fa;
+  color: var(--color-primary);
 }
 
 .stat-value.good {
-  color: #07c160;
+  color: var(--color-success);
 }
 
 .stat-value.bad {
-  color: #ee0a24;
+  color: var(--color-danger);
 }
 
 .stat-label {
   font-size: 12px;
-  color: #969799;
+  color: var(--text-color-secondary);
   margin-top: 4px;
 }
 
@@ -973,13 +973,13 @@ onMounted(() => {
 .dist-label {
   width: 80px;
   font-size: 13px;
-  color: #646566;
+  color: var(--text-color-regular);
 }
 
 .dist-bar-wrapper {
   flex: 1;
   height: 8px;
-  background: #f7f8fa;
+  background: var(--bg-color);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -991,15 +991,15 @@ onMounted(() => {
 }
 
 .dist-bar.excellent {
-  background: #07c160;
+  background: var(--color-success);
 }
 
 .dist-bar.good {
-  background: #1989fa;
+  background: var(--color-primary);
 }
 
 .dist-bar.medium {
-  background: #ff976a;
+  background: var(--color-warning);
 }
 
 .dist-bar.pass {
@@ -1007,13 +1007,13 @@ onMounted(() => {
 }
 
 .dist-bar.fail {
-  background: #ee0a24;
+  background: var(--color-danger);
 }
 
 .dist-count {
   width: 40px;
   font-size: 12px;
-  color: #969799;
+  color: var(--text-color-secondary);
   text-align: right;
 }
 
@@ -1028,7 +1028,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   padding: 12px;
-  background: #f7f8fa;
+  background: var(--bg-color);
   border-radius: 8px;
 }
 
@@ -1040,13 +1040,13 @@ onMounted(() => {
   display: block;
   font-size: 14px;
   font-weight: 500;
-  color: #323233;
+  color: var(--text-color-primary);
   margin-bottom: 4px;
 }
 
 .exam-subject {
   font-size: 12px;
-  color: #969799;
+  color: var(--text-color-secondary);
 }
 
 .exam-stats {
@@ -1054,18 +1054,18 @@ onMounted(() => {
   flex-direction: column;
   gap: 2px;
   font-size: 12px;
-  color: #646566;
+  color: var(--text-color-regular);
   margin-right: 8px;
   text-align: right;
 }
 
 .arrow-icon {
-  color: #969799;
+  color: var(--text-color-secondary);
 }
 
 .empty-tip {
   text-align: center;
-  color: #969799;
+  color: var(--text-color-secondary);
   padding: 20px;
   font-size: 14px;
 }
@@ -1082,11 +1082,11 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  border-bottom: 1px solid #ebedf0;
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .close-btn {
-  color: #969799;
+  color: var(--text-color-secondary);
 }
 
 .popup-title {
@@ -1101,7 +1101,7 @@ onMounted(() => {
 }
 
 .detail-stats {
-  background: #f7f8fa;
+  background: var(--bg-color);
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 16px;
@@ -1111,7 +1111,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   padding: 8px 0;
-  border-bottom: 1px solid #ebedf0;
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .detail-row:last-child {
@@ -1119,7 +1119,7 @@ onMounted(() => {
 }
 
 .detail-row .label {
-  color: #646566;
+  color: var(--text-color-regular);
 }
 
 .detail-row .value {
@@ -1127,15 +1127,15 @@ onMounted(() => {
 }
 
 .detail-row .value.highlight {
-  color: #1989fa;
+  color: var(--color-primary);
 }
 
 .detail-row .value.good {
-  color: #07c160;
+  color: var(--color-success);
 }
 
 .detail-row .value.bad {
-  color: #ee0a24;
+  color: var(--color-danger);
 }
 
 .ranking-title {
@@ -1153,7 +1153,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   padding: 10px 0;
-  border-bottom: 1px solid #ebedf0;
+  border-bottom: 1px solid var(--border-color-lighter);
 }
 
 .ranking-item:last-child {
@@ -1168,25 +1168,25 @@ onMounted(() => {
   justify-content: center;
   font-size: 12px;
   font-weight: bold;
-  color: #969799;
+  color: var(--text-color-secondary);
   margin-right: 12px;
 }
 
 .rank.first {
   background: #ffd21e;
-  color: white;
+  color: var(--fill-color-blank);
   border-radius: 50%;
 }
 
 .rank.second {
   background: #c0c0c0;
-  color: white;
+  color: var(--fill-color-blank);
   border-radius: 50%;
 }
 
 .rank.third {
   background: #cd7f32;
-  color: white;
+  color: var(--fill-color-blank);
   border-radius: 50%;
 }
 
@@ -1198,6 +1198,6 @@ onMounted(() => {
 .score {
   font-size: 14px;
   font-weight: 500;
-  color: #323233;
+  color: var(--text-color-primary);
 }
 </style>

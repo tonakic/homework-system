@@ -1,18 +1,34 @@
 <template>
-  <header class="pc-header">
-    <div class="header-left">
-      <span class="system-name">创新小学作业管理系统</span>
-      <span class="user-type-badge" :class="userType">{{ userTypeLabel }}</span>
+  <header class="pc-header-component">
+    <div class="header-brand">
+      <div class="brand-logo">
+        <el-icon><School /></el-icon>
+      </div>
+      <span class="brand-name">创新小学作业管理系统</span>
+      <span class="brand-badge" :class="userTypeClass">{{ userTypeLabel }}</span>
     </div>
-    <div class="header-right">
-      <span class="user-info">
-        <el-icon><User /></el-icon>
-        <span class="user-name">{{ userName }}</span>
-      </span>
-      <el-button type="danger" text @click="handleLogout">
-        <el-icon><SwitchButton /></el-icon>
-        退出
-      </el-button>
+    <div class="header-user">
+      <el-dropdown trigger="click" @command="handleCommand">
+        <div class="user-dropdown-link">
+          <div class="user-avatar">
+            <el-icon><User /></el-icon>
+          </div>
+          <span class="user-name">{{ userName }}</span>
+          <el-icon class="dropdown-icon"><ArrowDown /></el-icon>
+        </div>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item command="profile">
+              <el-icon><User /></el-icon>
+              个人中心
+            </el-dropdown-item>
+            <el-dropdown-item command="logout" divided>
+              <el-icon><SwitchButton /></el-icon>
+              退出登录
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
     </div>
   </header>
 </template>
@@ -38,85 +54,120 @@ const userTypeLabel = computed(() => {
   return labels[userType.value] || '';
 });
 
-const handleLogout = async () => {
-  try {
-    await ElMessageBox.confirm('确定要退出登录吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    });
-    const type = userStore.userType;
-    userStore.clearUserData();
-    router.push(`/${type}/login`);
-  } catch {
-    // 取消退出
+const userTypeClass = computed(() => `type-${userType.value}`);
+
+const handleCommand = async (command) => {
+  if (command === 'profile') {
+    const profilePath = {
+      student: '/student/profile',
+      teacher: '/teacher/profile',
+      admin: '/admin/settings'
+    };
+    router.push(profilePath[userType.value]);
+  } else if (command === 'logout') {
+    try {
+      await ElMessageBox.confirm('确定要退出登录吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      });
+      const type = userStore.userType;
+      userStore.clearUserData();
+      router.push(`/${type}/login`);
+    } catch {
+      // 取消退出
+    }
   }
 };
 </script>
 
 <style scoped>
-.pc-header {
-  height: 56px;
-  background: #fff;
-  border-bottom: 1px solid #e4e7ed;
+.pc-header-component {
+  height: var(--header-height);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light-3));
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.header-left {
+.header-brand {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.system-name {
+.brand-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+}
+
+.brand-name {
   font-size: 18px;
   font-weight: 600;
-  color: #303133;
+  color: #fff;
+  letter-spacing: 1px;
 }
 
-.user-type-badge {
-  padding: 2px 10px;
+.brand-badge {
+  padding: 2px 8px;
   border-radius: 4px;
   font-size: 12px;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
 }
 
-.user-type-badge.student {
-  background: #e8f5e9;
-  color: #4caf50;
-}
-
-.user-type-badge.teacher {
-  background: #e3f2fd;
-  color: #2196f3;
-}
-
-.user-type-badge.admin {
-  background: #fff3e0;
-  color: #ff9800;
-}
-
-.header-right {
+.header-user {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
-.user-info {
+.user-dropdown-link {
   display: flex;
   align-items: center;
-  gap: 6px;
-  color: #606266;
-  font-size: 14px;
+  gap: 8px;
+  cursor: pointer;
+  color: #fff;
+  transition: opacity var(--transition-duration);
+  
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
 }
 
 .user-name {
+  color: #fff;
+  font-size: 14px;
   max-width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.dropdown-icon {
+  font-size: 12px;
 }
 </style>

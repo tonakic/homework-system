@@ -3,15 +3,18 @@
     <!-- PC版本 -->
     <div v-if="isPC" class="grading-config-pc">
       <div class="pc-header">
-        <h2 class="page-title">批改管理</h2>
+        <h2 class="pc-title">批改管理</h2>
       </div>
 
       <el-tabs v-model="activeTab" class="pc-tabs">
         <el-tab-pane label="批改配置" name="config">
           <!-- 批改模式 -->
-          <el-card class="pc-card" shadow="never">
+          <el-card class="pc-section-card" shadow="hover">
             <template #header>
-              <span class="card-title">批改模式</span>
+              <div class="pc-section-header">
+                <el-icon :size="20"><Setting /></el-icon>
+                <span>批改模式</span>
+              </div>
             </template>
             <el-radio-group v-model="form.grading_mode" class="mode-radio-group">
               <el-radio-button value="ai">AI批改</el-radio-button>
@@ -20,25 +23,28 @@
           </el-card>
 
           <!-- AI批改设置 -->
-          <el-card class="pc-card" shadow="never">
+          <el-card class="pc-section-card" shadow="hover">
             <template #header>
-              <span class="card-title">AI批改设置</span>
+              <div class="pc-section-header">
+                <el-icon :size="20"><Cpu /></el-icon>
+                <span>AI批改设置</span>
+              </div>
             </template>
             <el-form :model="form" label-width="100px" class="pc-form">
               <el-form-item label="AI提供商">
-                <el-select v-model="form.ai_provider" placeholder="请选择">
+                <el-select v-model="form.ai_provider" placeholder="请选择" style="width: 240px">
                   <el-option label="DeepSeek" value="deepseek" />
                   <el-option label="Ollama (本地)" value="ollama" />
                 </el-select>
               </el-form-item>
               <el-form-item v-if="form.ai_provider === 'ollama'" label="API地址">
-                <el-input v-model="form.ai_endpoint" placeholder="http://localhost:11434" />
+                <el-input v-model="form.ai_endpoint" placeholder="http://localhost:11434" style="width: 360px" />
               </el-form-item>
               <el-form-item v-if="form.ai_provider === 'deepseek'" label="API密钥">
-                <el-input v-model="form.ai_api_key" type="password" placeholder="请输入密钥" show-password />
+                <el-input v-model="form.ai_api_key" type="password" placeholder="请输入密钥" show-password style="width: 360px" />
               </el-form-item>
               <el-form-item label="模型">
-                <el-input v-model="form.ai_model" :placeholder="modelPlaceholder" />
+                <el-input v-model="form.ai_model" :placeholder="modelPlaceholder" style="width: 360px" />
               </el-form-item>
               <el-form-item>
                 <el-button :loading="testing" @click="testConnection">测试连接</el-button>
@@ -50,37 +56,40 @@
           </el-card>
 
           <!-- 提示词参数 -->
-          <el-card class="pc-card" shadow="never">
+          <el-card class="pc-section-card" shadow="hover">
             <template #header>
-              <span class="card-title">提示词参数</span>
+              <div class="pc-section-header">
+                <el-icon :size="20"><EditPen /></el-icon>
+                <span>提示词参数</span>
+              </div>
             </template>
             <el-form :model="form" label-width="100px" class="pc-form">
               <el-form-item label="评分严格度">
-                <el-select v-model="form.prompt_strictness" placeholder="请选择">
+                <el-select v-model="form.prompt_strictness" placeholder="请选择" style="width: 200px">
                   <el-option label="严格" value="strict" />
                   <el-option label="中等" value="medium" />
                   <el-option label="宽松" value="loose" />
                 </el-select>
               </el-form-item>
               <el-form-item label="语言风格">
-                <el-select v-model="form.prompt_style" placeholder="请选择">
+                <el-select v-model="form.prompt_style" placeholder="请选择" style="width: 200px">
                   <el-option label="正式" value="formal" />
                   <el-option label="鼓励型" value="encouraging" />
                   <el-option label="轻松" value="casual" />
                 </el-select>
               </el-form-item>
               <el-form-item label="评语长度">
-                <el-select v-model="form.prompt_comment_length" placeholder="请选择">
+                <el-select v-model="form.prompt_comment_length" placeholder="请选择" style="width: 200px">
                   <el-option label="简短" value="short" />
                   <el-option label="中等" value="medium" />
                   <el-option label="详细" value="detailed" />
                 </el-select>
               </el-form-item>
               <el-form-item label="鼓励性语言">
-                <el-slider v-model="form.prompt_encourage_ratio" :min="0" :max="100" :format-tooltip="(val) => val + '%'" />
+                <el-slider v-model="form.prompt_encourage_ratio" :min="0" :max="100" :format-tooltip="(val) => val + '%'" style="width: 300px" />
               </el-form-item>
               <el-form-item label="错题分析">
-                <el-select v-model="form.prompt_analysis_detail" placeholder="请选择">
+                <el-select v-model="form.prompt_analysis_detail" placeholder="请选择" style="width: 200px">
                   <el-option label="简要" value="brief" />
                   <el-option label="中等" value="medium" />
                   <el-option label="详细" value="detailed" />
@@ -90,15 +99,18 @@
           </el-card>
 
           <!-- 混合模式配置 -->
-          <el-card v-if="form.grading_mode === 'mixed'" class="pc-card" shadow="never">
+          <el-card v-if="form.grading_mode === 'mixed'" class="pc-section-card" shadow="hover">
             <template #header>
-              <span class="card-title">混合模式配置</span>
+              <div class="pc-section-header">
+                <el-icon :size="20"><Grid /></el-icon>
+                <span>混合模式配置</span>
+              </div>
             </template>
             <el-table :data="mixedTableData" border stripe>
               <el-table-column prop="label" label="题型" width="150" />
               <el-table-column label="批改方式">
                 <template #default="{ row }">
-                  <el-select v-model="form.mixed_config[row.key]" placeholder="请选择">
+                  <el-select v-model="form.mixed_config[row.key]" placeholder="请选择" style="width: 160px">
                     <el-option label="自动判定" value="auto" />
                     <el-option label="AI批改" value="ai" />
                     <el-option label="手动批改" value="manual" />
@@ -109,54 +121,81 @@
           </el-card>
 
           <!-- 模式说明 -->
-          <el-alert
-            :title="form.grading_mode === 'ai' ? 'AI批改：客观题自动判定，主观题由AI智能批改' : '混合模式：按题型自定义批改方式，可选择自动判定、AI批改或手动批改'"
-            type="info"
-            :closable="false"
-            show-icon
-            class="mode-alert"
-          />
+          <div class="mode-info-card">
+            <el-icon :size="18"><InfoFilled /></el-icon>
+            <span v-if="form.grading_mode === 'ai'">AI批改：客观题自动判定，主观题由AI智能批改</span>
+            <span v-else>混合模式：按题型自定义批改方式，可选择自动判定、AI批改或手动批改</span>
+          </div>
 
           <!-- 保存按钮 -->
           <div class="save-section-pc">
-            <el-button type="primary" :loading="saving" @click="saveConfig">保存配置</el-button>
+            <el-button type="primary" size="large" :loading="saving" @click="saveConfig">
+              <el-icon><Check /></el-icon>
+              保存配置
+            </el-button>
           </div>
         </el-tab-pane>
 
         <el-tab-pane label="队列管理" name="queue">
           <!-- 队列状态统计 -->
-          <el-card class="pc-card" shadow="never">
+          <el-card class="pc-section-card" shadow="hover">
             <template #header>
-              <span class="card-title">队列状态</span>
+              <div class="pc-section-header">
+                <el-icon :size="20"><DataLine /></el-icon>
+                <span>队列状态</span>
+              </div>
             </template>
             <div class="stats-grid-pc">
               <div class="stat-card-pc pending">
-                <div class="stat-value">{{ queueStats.pending }}</div>
-                <div class="stat-label">待处理</div>
+                <div class="stat-icon">
+                  <el-icon :size="28"><Clock /></el-icon>
+                </div>
+                <div class="stat-body">
+                  <div class="stat-value">{{ queueStats.pending }}</div>
+                  <div class="stat-label">待处理</div>
+                </div>
               </div>
               <div class="stat-card-pc processing">
-                <div class="stat-value">{{ queueStats.processing }}</div>
-                <div class="stat-label">处理中</div>
+                <div class="stat-icon">
+                  <el-icon :size="28"><Loading /></el-icon>
+                </div>
+                <div class="stat-body">
+                  <div class="stat-value">{{ queueStats.processing }}</div>
+                  <div class="stat-label">处理中</div>
+                </div>
               </div>
               <div class="stat-card-pc completed">
-                <div class="stat-value">{{ queueStats.completed }}</div>
-                <div class="stat-label">已完成</div>
+                <div class="stat-icon">
+                  <el-icon :size="28"><CircleCheck /></el-icon>
+                </div>
+                <div class="stat-body">
+                  <div class="stat-value">{{ queueStats.completed }}</div>
+                  <div class="stat-label">已完成</div>
+                </div>
               </div>
               <div class="stat-card-pc failed">
-                <div class="stat-value">{{ queueStats.failed }}</div>
-                <div class="stat-label">失败</div>
+                <div class="stat-icon">
+                  <el-icon :size="28"><CircleClose /></el-icon>
+                </div>
+                <div class="stat-body">
+                  <div class="stat-value">{{ queueStats.failed }}</div>
+                  <div class="stat-label">失败</div>
+                </div>
               </div>
             </div>
           </el-card>
 
           <!-- 筛选条件 -->
-          <el-card class="pc-card" shadow="never">
+          <el-card class="pc-section-card" shadow="hover">
             <template #header>
-              <span class="card-title">任务筛选</span>
+              <div class="pc-section-header">
+                <el-icon :size="20"><Filter /></el-icon>
+                <span>任务筛选</span>
+              </div>
             </template>
             <el-form :inline="true" class="filter-form-pc">
               <el-form-item label="状态">
-                <el-select v-model="taskFilter" placeholder="全部" clearable @change="changeTaskFilter">
+                <el-select v-model="taskFilter" placeholder="全部" clearable @change="changeTaskFilter" style="width: 160px">
                   <el-option label="全部" value="" />
                   <el-option label="待处理" value="pending" />
                   <el-option label="处理中" value="processing" />
@@ -168,16 +207,21 @@
           </el-card>
 
           <!-- 任务列表 -->
-          <el-card class="pc-card" shadow="never">
+          <el-card class="pc-section-card" shadow="hover">
             <template #header>
-              <span class="card-title">任务列表</span>
+              <div class="pc-section-header">
+                <el-icon :size="20"><List /></el-icon>
+                <span>任务列表</span>
+              </div>
             </template>
             <el-table :data="tasks" border stripe v-loading="taskLoading">
               <el-table-column prop="student_name" label="学生" width="120" />
               <el-table-column prop="exam_title" label="考试任务" min-width="200" />
               <el-table-column prop="status" label="状态" width="100">
                 <template #default="{ row }">
-                  <el-tag :type="getTaskStatusType(row.status)">{{ getTaskStatusText(row.status) }}</el-tag>
+                  <el-tag :type="getTaskStatusType(row.status)" size="small">
+                    {{ getTaskStatusText(row.status) }}
+                  </el-tag>
                 </template>
               </el-table-column>
               <el-table-column prop="created_at" label="创建时间" width="180">
@@ -191,8 +235,8 @@
               </el-table-column>
               <el-table-column label="操作" width="150" fixed="right">
                 <template #default="{ row }">
-                  <el-button v-if="row.status === 'failed'" type="primary" size="small" :loading="row.retrying" @click="retryTask(row)">重试</el-button>
-                  <el-button v-if="row.status === 'pending' || row.status === 'processing'" type="danger" size="small" :loading="row.cancelling" @click="cancelTask(row)">取消</el-button>
+                  <el-button v-if="row.status === 'failed'" type="primary" link size="small" :loading="row.retrying" @click="retryTask(row)">重试</el-button>
+                  <el-button v-if="row.status === 'pending' || row.status === 'processing'" type="danger" link size="small" :loading="row.cancelling" @click="cancelTask(row)">取消</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -207,9 +251,12 @@
           </el-card>
 
           <!-- 队列配置 -->
-          <el-card class="pc-card" shadow="never">
+          <el-card class="pc-section-card" shadow="hover">
             <template #header>
-              <span class="card-title">队列配置</span>
+              <div class="pc-section-header">
+                <el-icon :size="20"><Tools /></el-icon>
+                <span>队列配置</span>
+              </div>
             </template>
             <el-form :model="queueConfig" label-width="120px" class="pc-form">
               <el-form-item label="最大并发数">
@@ -222,7 +269,10 @@
                 <el-input-number v-model="queueConfig.task_timeout" :min="60" :max="3600" />
               </el-form-item>
               <el-form-item>
-                <el-button type="primary" :loading="savingQueueConfig" @click="saveQueueConfig">保存队列配置</el-button>
+                <el-button type="primary" :loading="savingQueueConfig" @click="saveQueueConfig">
+                  <el-icon><Check /></el-icon>
+                  保存队列配置
+                </el-button>
               </el-form-item>
             </el-form>
           </el-card>
@@ -298,7 +348,7 @@
                 <van-cell title="鼓励性语言">
                   <template #value>
                     <div class="slider-cell">
-                      <van-slider v-model="form.prompt_encourage_ratio" :min="0" :max="100" active-color="#1989fa" />
+                      <van-slider v-model="form.prompt_encourage_ratio" :min="0" :max="100" active-color="var(--primary-color, #ff9800)" />
                       <span class="slider-value">{{ form.prompt_encourage_ratio }}%</span>
                     </div>
                   </template>
@@ -342,20 +392,40 @@
             <div class="stats-section">
               <div class="stats-grid">
                 <div class="stat-card pending">
-                  <div class="stat-value">{{ queueStats.pending }}</div>
-                  <div class="stat-label">待处理</div>
+                  <div class="stat-icon">
+                    <van-icon name="clock-o" />
+                  </div>
+                  <div class="stat-body">
+                    <div class="stat-value">{{ queueStats.pending }}</div>
+                    <div class="stat-label">待处理</div>
+                  </div>
                 </div>
                 <div class="stat-card processing">
-                  <div class="stat-value">{{ queueStats.processing }}</div>
-                  <div class="stat-label">处理中</div>
+                  <div class="stat-icon">
+                    <van-icon name="replay" />
+                  </div>
+                  <div class="stat-body">
+                    <div class="stat-value">{{ queueStats.processing }}</div>
+                    <div class="stat-label">处理中</div>
+                  </div>
                 </div>
                 <div class="stat-card completed">
-                  <div class="stat-value">{{ queueStats.completed }}</div>
-                  <div class="stat-label">已完成</div>
+                  <div class="stat-icon">
+                    <van-icon name="passed" />
+                  </div>
+                  <div class="stat-body">
+                    <div class="stat-value">{{ queueStats.completed }}</div>
+                    <div class="stat-label">已完成</div>
+                  </div>
                 </div>
                 <div class="stat-card failed">
-                  <div class="stat-value">{{ queueStats.failed }}</div>
-                  <div class="stat-label">失败</div>
+                  <div class="stat-icon">
+                    <van-icon name="close" />
+                  </div>
+                  <div class="stat-body">
+                    <div class="stat-value">{{ queueStats.failed }}</div>
+                    <div class="stat-label">失败</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -518,6 +588,7 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { showSuccessToast, showFailToast, showConfirmDialog } from 'vant';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { Setting, Cpu, EditPen, Grid, InfoFilled, Check, DataLine, Clock, Loading, CircleCheck, CircleClose, Filter, List, Tools } from '@element-plus/icons-vue';
 import api from '@/api/index';
 import { useDevice } from '@/composables/useDevice';
 
@@ -1132,159 +1203,233 @@ onMounted(() => {
 <style scoped>
 /* ========== PC端样式 ========== */
 .grading-config-pc {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: var(--spacing-lg, 24px);
+  min-height: 100vh;
+  background: var(--bg-color, #f5f7fa);
 }
 
 .pc-header {
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-lg, 24px);
 }
 
-.page-title {
+.pc-title {
   font-size: 24px;
   font-weight: 600;
-  color: #303133;
+  color: var(--text-color-primary, #303133);
   margin: 0;
 }
 
 .pc-tabs {
-  background: #fff;
-  border-radius: 8px;
+  background: var(--fill-color-blank, #ffffff);
+  border-radius: var(--border-radius-large, 12px);
 }
 
-.pc-card {
-  margin-bottom: 20px;
+.pc-section-card {
+  margin-bottom: var(--spacing-md, 16px);
+  border-radius: var(--border-radius-large, 12px);
 }
 
-.card-title {
-  font-size: 16px;
+.pc-section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs, 8px);
+  font-size: var(--font-size-medium, 16px);
   font-weight: 500;
-  color: #303133;
+  color: var(--text-color-primary, #303133);
 }
 
 .pc-form {
   max-width: 600px;
+  padding: var(--spacing-sm, 8px) 0;
 }
 
 .mode-radio-group {
   display: flex;
-  gap: 12px;
+  gap: var(--spacing-sm, 12px);
 }
 
 .test-result {
-  margin-left: 12px;
-  font-size: 14px;
+  margin-left: var(--spacing-sm, 12px);
+  font-size: var(--font-size-base, 14px);
 }
 
 .test-result.success {
-  color: #67c23a;
+  color: var(--color-success, #67c23a);
 }
 
 .test-result.fail {
-  color: #f56c6c;
+  color: var(--color-danger, #f56c6c);
 }
 
-.mode-alert {
-  margin-bottom: 20px;
+/* 模式说明卡片 */
+.mode-info-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 10px);
+  padding: var(--spacing-md, 16px) var(--spacing-lg, 20px);
+  background: linear-gradient(135deg, var(--color-primary-light-9, #ecf5ff), var(--color-primary-light-8, #d9ecff));
+  border-radius: var(--border-radius-large, 12px);
+  margin-bottom: var(--spacing-md, 16px);
+  color: var(--color-primary, #409eff);
+  font-size: var(--font-size-base, 14px);
 }
 
+/* 保存区域 */
 .save-section-pc {
-  margin-top: 20px;
-  padding: 20px 0;
-  border-top: 1px solid #ebeef5;
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-lg, 24px) 0;
+  border-top: 1px solid var(--border-color-lighter, #ebeef5);
+  margin-top: var(--spacing-md, 16px);
 }
 
 /* PC端统计卡片 */
 .stats-grid-pc {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: var(--spacing-md, 16px);
 }
 
 .stat-card-pc {
-  background: #f5f7fa;
-  border-radius: 8px;
-  padding: 24px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md, 16px);
+  padding: var(--spacing-lg, 20px);
+  background: var(--fill-color-blank, #ffffff);
+  border-radius: var(--border-radius-large, 12px);
+  box-shadow: var(--box-shadow-light, 0 2px 8px rgba(0, 0, 0, 0.06));
+  transition: all var(--transition-duration, 0.3s) var(--transition-timing-function, cubic-bezier(0.4, 0, 0.2, 1));
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card-pc::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+}
+
+.stat-card-pc.pending::before {
+  background: linear-gradient(180deg, var(--color-warning, #e6a23c), #f3d19e);
+}
+
+.stat-card-pc.processing::before {
+  background: linear-gradient(180deg, var(--color-primary, #409eff), var(--color-primary-light-3, #79bbff));
+}
+
+.stat-card-pc.completed::before {
+  background: linear-gradient(180deg, var(--color-success, #67c23a), #85ce61);
+}
+
+.stat-card-pc.failed::before {
+  background: linear-gradient(180deg, var(--color-danger, #f56c6c), #f89898);
+}
+
+.stat-card-pc:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow, 0 4px 12px rgba(0, 0, 0, 0.1));
+}
+
+.stat-card-pc .stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--border-radius-large, 12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-card-pc.pending .stat-icon {
+  background: linear-gradient(135deg, var(--color-warning-light-9, #fff7e6), var(--color-warning-light-7, #ffe7ba));
+  color: var(--color-warning, #e6a23c);
+}
+
+.stat-card-pc.processing .stat-icon {
+  background: linear-gradient(135deg, var(--color-primary-light-9, #ecf5ff), var(--color-primary-light-7, #c6e2ff));
+  color: var(--color-primary, #409eff);
+}
+
+.stat-card-pc.completed .stat-icon {
+  background: linear-gradient(135deg, var(--color-success-light-9, #e8f5e9), var(--color-success-light-7, #c8e6c9));
+  color: var(--color-success, #67c23a);
+}
+
+.stat-card-pc.failed .stat-icon {
+  background: linear-gradient(135deg, var(--color-danger-light-9, #ffebee), var(--color-danger-light-7, #ffcdd2));
+  color: var(--color-danger, #f56c6c);
+}
+
+.stat-card-pc .stat-body {
+  flex: 1;
 }
 
 .stat-card-pc .stat-value {
-  font-size: 32px;
-  font-weight: 600;
-  margin-bottom: 8px;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-color-primary, #303133);
+  line-height: 1.2;
 }
 
 .stat-card-pc .stat-label {
-  font-size: 14px;
-  color: #909399;
-}
-
-.stat-card-pc.pending .stat-value {
-  color: #e6a23c;
-}
-
-.stat-card-pc.processing .stat-value {
-  color: #409eff;
-}
-
-.stat-card-pc.completed .stat-value {
-  color: #67c23a;
-}
-
-.stat-card-pc.failed .stat-value {
-  color: #f56c6c;
+  font-size: var(--font-size-extra-small, 12px);
+  color: var(--text-color-secondary, #909399);
+  margin-top: 4px;
 }
 
 /* PC端筛选表单 */
 .filter-form-pc {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: var(--spacing-md, 16px);
 }
 
 /* PC端分页 */
 .pagination-pc {
-  margin-top: 20px;
+  margin-top: var(--spacing-md, 16px);
   display: flex;
   justify-content: flex-end;
 }
 
 .error-text {
-  color: #f56c6c;
+  color: var(--color-danger, #f56c6c);
 }
 
 .no-data {
-  color: #c0c4cc;
+  color: var(--text-color-placeholder, #c0c4cc);
 }
 
 /* ========== 移动端样式 ========== */
 .page-content {
   padding: 0;
-  padding-bottom: 20px;
+  padding-bottom: var(--spacing-lg, 20px);
 }
 
 .config-section {
-  background: #fff;
-  border-radius: 12px;
-  margin: 12px;
+  background: var(--fill-color-blank, #ffffff);
+  border-radius: var(--border-radius-large, 12px);
+  margin: var(--spacing-sm, 12px);
   overflow: hidden;
+  box-shadow: var(--box-shadow-lighter, 0 1px 4px rgba(0, 0, 0, 0.04));
 }
 
 .section-header {
-  font-size: 14px;
+  font-size: var(--font-size-base, 14px);
   font-weight: 500;
-  color: #323233;
-  padding: 12px 16px;
-  background: #f7f8fa;
-  border-bottom: 1px solid #ebedf0;
+  color: var(--text-color-primary, #323233);
+  padding: var(--spacing-sm, 12px) var(--spacing-md, 16px);
+  background: var(--fill-color, #f7f8fa);
+  border-bottom: 1px solid var(--border-color, #ebedf0);
 }
 
 /* 批改模式选择 */
 .mode-options {
   display: flex;
-  padding: 16px;
-  gap: 12px;
+  padding: var(--spacing-md, 16px);
+  gap: var(--spacing-sm, 12px);
 }
 
 .mode-option {
@@ -1293,19 +1438,19 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 12px 8px;
-  border: 2px solid #ebedf0;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #646566;
+  padding: var(--spacing-sm, 12px) var(--spacing-xs, 8px);
+  border: 2px solid var(--border-color, #ebedf0);
+  border-radius: var(--border-radius-large, 8px);
+  font-size: var(--font-size-base, 14px);
+  color: var(--text-color-secondary, #646566);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-duration, 0.2s) var(--transition-timing-function, ease);
 }
 
 .mode-option.active {
-  border-color: #1989fa;
-  color: #1989fa;
-  background: #ecf5ff;
+  border-color: var(--primary-color, #ff9800);
+  color: var(--primary-color, #ff9800);
+  background: linear-gradient(135deg, #fff8e1, #ffecb3);
 }
 
 .mode-option .van-icon {
@@ -1317,42 +1462,42 @@ onMounted(() => {
   border: none;
   outline: none;
   text-align: right;
-  font-size: 14px;
-  color: #323233;
+  font-size: var(--font-size-base, 14px);
+  color: var(--text-color-primary, #323233);
   background: transparent;
   width: 150px;
 }
 
 .cell-input::placeholder {
-  color: #c8c9cc;
+  color: var(--text-color-placeholder, #c8c9cc);
 }
 
 /* 测试连接 */
 .test-section {
-  padding: 12px 16px;
+  padding: var(--spacing-sm, 12px) var(--spacing-md, 16px);
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: #fff;
+  gap: var(--spacing-sm, 12px);
+  background: var(--fill-color-blank, #ffffff);
 }
 
 .test-result {
-  font-size: 13px;
+  font-size: var(--font-size-small, 13px);
 }
 
 .test-result.success {
-  color: #07c160;
+  color: var(--success-color, #07c160);
 }
 
 .test-result.fail {
-  color: #ee0a24;
+  color: var(--danger-color, #ee0a24);
 }
 
 /* 滑块 */
 .slider-cell {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--spacing-sm, 12px);
 }
 
 .slider-cell .van-slider {
@@ -1360,8 +1505,8 @@ onMounted(() => {
 }
 
 .slider-value {
-  font-size: 14px;
-  color: #323233;
+  font-size: var(--font-size-base, 14px);
+  color: var(--text-color-primary, #323233);
   min-width: 40px;
   text-align: right;
 }
@@ -1369,88 +1514,129 @@ onMounted(() => {
 /* 模式说明 */
 .mode-desc {
   background: transparent;
+  box-shadow: none;
 }
 
 .desc-item {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 12px 16px;
-  background: #fffbe8;
-  border-radius: 8px;
-  font-size: 13px;
-  color: #ed6a0c;
+  gap: var(--spacing-xs, 8px);
+  padding: var(--spacing-sm, 12px) var(--spacing-md, 16px);
+  background: linear-gradient(135deg, #fffbe8, #fff8e1);
+  border-radius: var(--border-radius-large, 8px);
+  font-size: var(--font-size-small, 13px);
+  color: var(--color-warning, #ed6a0c);
   line-height: 1.5;
 }
 
 .desc-item .van-icon {
   margin-top: 2px;
+  flex-shrink: 0;
 }
 
 /* 保存按钮 */
 .save-section {
-  margin-top: 24px;
-  padding: 0 16px;
+  margin-top: var(--spacing-lg, 24px);
+  padding: 0 var(--spacing-md, 16px);
 }
 
 /* ========== 队列管理样式 ========== */
 
 /* 统计卡片 */
 .stats-section {
-  padding: 12px;
+  padding: var(--spacing-sm, 12px);
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: var(--spacing-xs, 10px);
 }
 
 .stat-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px 8px;
+  background: var(--fill-color-blank, #ffffff);
+  border-radius: var(--border-radius-large, 12px);
+  padding: var(--spacing-md, 16px) var(--spacing-xs, 8px);
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--box-shadow-lighter, 0 2px 8px rgba(0, 0, 0, 0.04));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs, 8px);
+}
+
+.stat-card .stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.stat-card.pending .stat-icon {
+  background: linear-gradient(135deg, var(--color-warning-light-9, #fff7e6), var(--color-warning-light-7, #ffe7ba));
+  color: var(--color-warning, #ff976a);
+}
+
+.stat-card.processing .stat-icon {
+  background: linear-gradient(135deg, var(--color-primary-light-9, #ecf5ff), var(--color-primary-light-7, #c6e2ff));
+  color: var(--color-primary, #1989fa);
+}
+
+.stat-card.completed .stat-icon {
+  background: linear-gradient(135deg, var(--color-success-light-9, #e8f5e9), var(--color-success-light-7, #c8e6c9));
+  color: var(--color-success, #07c160);
+}
+
+.stat-card.failed .stat-icon {
+  background: linear-gradient(135deg, var(--color-danger-light-9, #ffebee), var(--color-danger-light-7, #ffcdd2));
+  color: var(--color-danger, #ee0a24);
+}
+
+.stat-card .stat-body {
+  flex: 1;
 }
 
 .stat-value {
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.stat-label {
-  font-size: 12px;
-  color: #969799;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .stat-card.pending .stat-value {
-  color: #ff976a;
+  color: var(--color-warning, #ff976a);
 }
 
 .stat-card.processing .stat-value {
-  color: #1989fa;
+  color: var(--color-primary, #1989fa);
 }
 
 .stat-card.completed .stat-value {
-  color: #07c160;
+  color: var(--color-success, #07c160);
 }
 
 .stat-card.failed .stat-value {
-  color: #ee0a24;
+  color: var(--color-danger, #ee0a24);
+}
+
+.stat-label {
+  font-size: var(--font-size-extra-small, 12px);
+  color: var(--text-color-secondary, #969799);
+  margin-top: 4px;
 }
 
 /* 筛选条件 */
 .filter-section {
-  background: #fff;
-  padding: 10px 12px;
-  margin-bottom: 10px;
+  background: var(--fill-color-blank, #ffffff);
+  padding: var(--spacing-sm, 10px) var(--spacing-sm, 12px);
+  margin-bottom: var(--spacing-xs, 10px);
 }
 
 .filter-row {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-xs, 8px);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -1461,59 +1647,65 @@ onMounted(() => {
 
 .filter-row :deep(.van-button) {
   flex-shrink: 0;
-  padding: 0 12px;
+  padding: 0 var(--spacing-sm, 12px);
 }
 
 /* 任务列表 */
 .task-list {
-  padding: 0 12px;
+  padding: 0 var(--spacing-sm, 12px);
 }
 
 .task-item {
-  background: #fff;
-  border-radius: 12px;
-  padding: 14px 16px;
-  margin-bottom: 10px;
+  background: var(--fill-color-blank, #ffffff);
+  border-radius: var(--border-radius-large, 12px);
+  padding: var(--spacing-sm, 14px) var(--spacing-md, 16px);
+  margin-bottom: var(--spacing-xs, 10px);
+  box-shadow: var(--box-shadow-lighter, 0 1px 4px rgba(0, 0, 0, 0.04));
+  transition: all var(--transition-duration, 0.2s) var(--transition-timing-function, ease);
+}
+
+.task-item:active {
+  transform: scale(0.98);
 }
 
 .task-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: var(--spacing-xs, 8px);
 }
 
 .task-student {
-  font-size: 15px;
+  font-size: var(--font-size-medium, 15px);
   font-weight: 500;
-  color: #323233;
+  color: var(--text-color-primary, #323233);
 }
 
 .task-info {
-  margin-bottom: 8px;
+  margin-bottom: var(--spacing-xs, 8px);
 }
 
 .task-exam {
-  font-size: 14px;
-  color: #646566;
+  font-size: var(--font-size-base, 14px);
+  color: var(--text-color-secondary, #646566);
   margin-bottom: 4px;
 }
 
 .task-time {
-  font-size: 12px;
-  color: #969799;
+  font-size: var(--font-size-extra-small, 12px);
+  color: var(--text-color-placeholder, #969799);
 }
 
 .task-error {
   display: flex;
   align-items: flex-start;
   gap: 6px;
-  font-size: 12px;
-  color: #ee0a24;
-  background: #fff5f5;
-  padding: 8px 10px;
-  border-radius: 6px;
-  margin-bottom: 10px;
+  font-size: var(--font-size-extra-small, 12px);
+  color: var(--color-danger, #ee0a24);
+  background: linear-gradient(135deg, var(--color-danger-light-9, #fff5f5), var(--color-danger-light-7, #ffebee));
+  padding: var(--spacing-xs, 8px) var(--spacing-sm, 10px);
+  border-radius: var(--border-radius-base, 6px);
+  margin-bottom: var(--spacing-sm, 10px);
 }
 
 .task-error .van-icon {
@@ -1524,11 +1716,11 @@ onMounted(() => {
 .task-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: var(--spacing-sm, 10px);
 }
 
 /* 队列配置 */
 .config-actions {
-  padding: 16px;
+  padding: var(--spacing-md, 16px);
 }
 </style>
