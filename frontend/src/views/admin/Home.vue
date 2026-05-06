@@ -1,24 +1,6 @@
 <template>
   <!-- PC Version -->
   <div v-if="isPC" class="home-pc">
-    <div class="pc-header">
-      <div class="pc-header-inner">
-        <div class="pc-user-info">
-          <div class="pc-avatar">
-            {{ userStore.userName.charAt(0) }}
-          </div>
-          <div class="pc-welcome">
-            <h2>{{ userStore.userName }}，欢迎回来</h2>
-            <p>系统运行正常，一切准备就绪</p>
-          </div>
-        </div>
-        <el-button type="danger" plain @click="handleLogout">
-          <el-icon><SwitchButton /></el-icon>
-          <span>退出登录</span>
-        </el-button>
-      </div>
-    </div>
-
     <div class="pc-content">
       <!-- 统计数据 -->
       <el-row :gutter="20" class="pc-stats-row">

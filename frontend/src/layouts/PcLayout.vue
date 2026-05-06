@@ -28,9 +28,9 @@
                 <el-icon><User /></el-icon>
                 个人中心
               </el-dropdown-item>
-              <el-dropdown-item command="logout" divided>
+              <el-dropdown-item command="logout" divided class="logout-item">
                 <el-icon><SwitchButton /></el-icon>
-                退出登录
+                <span class="logout-text">退出登录</span>
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -304,6 +304,23 @@ const handleCommand = async (command) => {
 
 .dropdown-icon {
   font-size: 12px;
+}
+
+/* 退出登录按钮样式 - 醒目的红色 */
+:deep(.logout-item) {
+  color: var(--el-color-danger) !important;
+  
+  .el-icon {
+    color: var(--el-color-danger) !important;
+  }
+  
+  .logout-text {
+    color: var(--el-color-danger) !important;
+  }
+  
+  &:hover {
+    background-color: var(--el-color-danger-light-9) !important;
+  }
 }
 
 .pc-body {

@@ -1,20 +1,6 @@
 <template>
   <!-- PC Version -->
   <div v-if="isPC" class="home-pc">
-    <div class="pc-header">
-      <div class="pc-header-inner">
-        <div class="pc-user-info">
-          <div class="pc-avatar">
-            {{ userStore.userName.charAt(0) }}
-          </div>
-          <div class="pc-welcome">
-            <h2>{{ userStore.userName }}老师，欢迎回来</h2>
-            <p>今天也要加油工作哦！</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div class="pc-content">
       <!-- 统计数据 -->
       <el-row :gutter="20" class="pc-stats-row">

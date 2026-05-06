@@ -1,25 +1,6 @@
 <template>
   <!-- PC 版本 -->
   <div v-if="isPC" class="home-pc">
-    <div class="pc-header">
-      <div class="pc-header-inner">
-        <div class="pc-user-info">
-          <div class="pc-avatar">
-            {{ userStore.userName.charAt(0) }}
-          </div>
-          <div class="pc-welcome">
-            <h2>{{ userStore.userName }}同学，欢迎回来</h2>
-            <p>今天也要加油哦！</p>
-          </div>
-        </div>
-        <div class="pc-pending-banner" @click="goToPending">
-          <el-icon :size="20"><EditPen /></el-icon>
-          <span>{{ pendingCount }} 项作业等待完成</span>
-          <el-icon><ArrowRight /></el-icon>
-        </div>
-      </div>
-    </div>
-
     <div class="pc-content">
       <!-- 统计数据 -->
       <el-row :gutter="20" class="pc-stats-row">
